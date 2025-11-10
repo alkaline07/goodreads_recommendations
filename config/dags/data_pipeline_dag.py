@@ -13,6 +13,7 @@ Pipeline Flow:
 5. Data Normalization - Normalize features for ML algorithms
 6. Staging Table Promotion - Move staging tables to production
 7. Data Versioning - Track data changes with DVC
+8. Train/Test/Val Split - Split data for model training
 
 Author: Goodreads Recommendation Team
 Date: 2025
