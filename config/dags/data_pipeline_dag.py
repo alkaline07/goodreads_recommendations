@@ -174,7 +174,7 @@ def data_versioning_run():
         result = subprocess.run(cmd, capture_output=True, text=True)
         logging.info(result.stdout)
         if result.returncode != 0:
-            raise Exception(f"Command failed: {' '.join(cmd)}")
+            raise Exception(f"Command failed: {' '.join(cmd)}\nError: {result.stderr}")
     
     logging.info("Data Versioning completed successfully")
 
