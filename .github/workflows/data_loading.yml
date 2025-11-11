@@ -1,0 +1,36 @@
+name: 1. Load Data
+run-name: Load Data
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Load the data
+      run: python -m src.load_data
+
+    - name: Upload data artifact
+      if: success() 
+      uses: actions/upload-artifact@v4
+      with:
+        name: goodreads-train-data
+        path: data/train_data.parquet 
+        retention-days: 1
+
+    - name: Notify on success
+      if: success()
+      run: echo "Data Loaded successfully"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Data Loading failed"
