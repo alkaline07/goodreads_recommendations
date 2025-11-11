@@ -73,14 +73,9 @@ def data_cleaning_instance(mock_bq_client):
 # TESTS
 # ---------------------------------------------------------------------
 
-def test_clean_table_basic(data_cleaning_instance, mock_bq_client):
+def test_clean_books_table_basic(data_cleaning_instance, mock_bq_client):
     """
-    Test basic clean_table functionality and query generation.
-    
-    This test verifies that the clean_table method:
-    - Executes successfully with mocked data
-    - Generates appropriate SQL queries
-    - Includes expected cleaning logic for different column types
+    Test basic clean_books_table functionality and query generation.
     """
     # Mock column information for the test
     mock_df = MagicMock()
@@ -89,89 +84,137 @@ def test_clean_table_basic(data_cleaning_instance, mock_bq_client):
         (1, {'column_name': 'title', 'data_type': 'STRING'})
     ])
     mock_df.__len__.return_value = 2
+    # The first query call is to INFORMATION_SCHEMA, make it return the mock_df
     mock_bq_client.query.return_value.to_dataframe.return_value = mock_df
 
-    # Execute clean_table with global median imputation
-    data_cleaning_instance.clean_table(
-        dataset_id="books",
-        table_name="goodreads_books",
-        destination_table="test_project.books.cleaned_books",
-        apply_global_median=True
+    data_cleaning_instance.clean_books_table(
+        books_table_name="goodreads_books",
+        books_destination="test_project.books.cleaned_books"
     )
 
-    # Verify the generated query contains expected elements
-    query_call = mock_bq_client.query.call_args[0][0]
+    # The second query call (index 1) is the actual cleaning query
+    query_call = mock_bq_client.query.call_args_list[1][0][0]
     assert "goodreads_books" in query_call
-    assert "APPROX_QUANTILES(NULLIF(num_pages, 0)" in query_call
+    assert "WHERE (num_pages >= 10 AND num_pages <= 2000)" in query_call
+    assert "publication_year >= 1900" in query_call
 
 
 def test_clean_table_error(data_cleaning_instance, mock_bq_client):
     """
-    Test error handling in clean_table method.
-    
-    This test verifies that exceptions during query execution are properly
-    caught and logged, ensuring robust error handling.
+    Test error handling in the underlying generic clean method.
     """
-    # Simulate a query failure
+    # Simulate a query failure on the *first* query (INFORMATION_SCHEMA)
     mock_bq_client.query.side_effect = Exception("Query failed")
 
-    # Execute clean_table and expect it to handle the error gracefully
-    data_cleaning_instance.clean_table(
-        dataset_id="books",
-        table_name="goodreads_books",
-        destination_table="test_project.books.cleaned_books"
-    )
+    # We expect the method to catch the exception, log it, and re-raise it
+    with pytest.raises(Exception, match="Query failed"):
+        data_cleaning_instance.clean_books_table(
+            books_table_name="goodreads_books",
+            books_destination="test_project.books.cleaned_books"
+        )
 
     # Verify that the error was logged
-    data_cleaning_instance.logger.error.assert_called()
+    data_cleaning_instance.logger.error.assert_called_with(
+        "Error cleaning table books.goodreads_books: Query failed", exc_info=True
+    )
 
 
-def test_clean_table_creates_expected_sql(data_cleaning_instance, mock_bq_client):
-    """Validate generated SQL contains expected patterns for medians and cleaning."""
+def test_clean_books_table_creates_expected_sql(data_cleaning_instance, mock_bq_client):
+    """Validate generated SQL for books table contains cleaning and filtering."""
     mock_df = MagicMock()
     mock_df.iterrows.return_value = iter([
         (0, {'column_name': 'num_pages', 'data_type': 'INT64'}),
-        (1, {'column_name': 'title', 'data_type': 'STRING'}),
-        (2, {'column_name': 'tags', 'data_type': 'ARRAY<STRING>'}),
-        (3, {'column_name': 'is_available', 'data_type': 'BOOL'})
+        (1, {'column_name': 'publication_year', 'data_type': 'INT64'}),
+        (2, {'column_name': 'title', 'data_type': 'STRING'}),
+        (3, {'column_name': 'tags', 'data_type': 'ARRAY<STRING>'}),
+        (4, {'column_name': 'is_available', 'data_type': 'BOOL'})
     ])
-    mock_df.__len__.return_value = 4
+    mock_df.__len__.return_value = 5
     mock_bq_client.query.return_value.to_dataframe.return_value = mock_df
 
     with patch("datapipeline.scripts.data_cleaning.bigquery.QueryJobConfig"):
-        data_cleaning_instance.clean_table(
-            dataset_id="books",
-            table_name="goodreads_books",
-            destination_table="test_project.books.cleaned_books",
-            apply_global_median=True
+        data_cleaning_instance.clean_books_table(
+            books_table_name="goodreads_books",
+            books_destination="test_project.books.cleaned_books"
         )
 
-        query_call = mock_bq_client.query.call_args[0][0]
+        # The clean query is the SECOND call (index 1)
+        query_call = mock_bq_client.query.call_args_list[1][0][0]
 
-        # Core checks (structure and medians)
-        assert "APPROX_QUANTILES(NULLIF(num_pages, 0)" in query_call
-        assert "WITH main AS" in query_call
+        # Core checks
+        assert "WHERE (num_pages >= 10" in query_call
+        assert "publication_year <= 2025" in query_call
         assert "SELECT DISTINCT" in query_call
+        assert "WITH" not in query_call 
 
-        # Flexible validation for string handling logic
-        if "COALESCE(NULLIF(TRIM(title)" in query_call:
-            assert "COALESCE(NULLIF(TRIM(title)" in query_call
-        else:
-            # Allow flexible behavior if cleaning pattern changed
-            pytest.skip("No TRIM cleaning pattern found — skipping strict string assertion.")
+
+def test_clean_interactions_table_filters_against_books(data_cleaning_instance, mock_bq_client):
+    """
+    Test that clean_interactions_table first cleans and then filters against the books table.
+    """
+    mock_df = MagicMock()
+    mock_df.iterrows.return_value = iter([
+        (0, {'column_name': 'book_id', 'data_type': 'INT64'}),
+        (1, {'column_name': 'user_id', 'data_type': 'STRING'})
+    ])
+    mock_df.__len__.return_value = 2
+    mock_bq_client.query.return_value.to_dataframe.return_value = mock_df
+
+    with patch("datapipeline.scripts.data_cleaning.bigquery.QueryJobConfig"):
+        data_cleaning_instance.clean_interactions_table(
+            interactions_table_name="goodreads_interactions",
+            interactions_destination="test_project.books.cleaned_interactions",
+            books_destination="test_project.books.cleaned_books"
+        )
+
+    # Verify it was called three times
+    # 1. INFORMATION_SCHEMA
+    # 2. Generic Clean Query
+    # 3. Filtering JOIN Query
+    assert mock_bq_client.query.call_count == 3
+    
+    # Check the second query (generic clean)
+    query_call_1 = mock_bq_client.query.call_args_list[1][0][0]
+    assert "goodreads_interactions" in query_call_1
+    assert "WHERE" not in query_call_1 
+
+    # Check the third query (filtering join)
+    query_call_2 = mock_bq_client.query.call_args_list[2][0][0]
+    assert "test_project.books.cleaned_interactions" in query_call_2
+    assert "test_project.books.cleaned_books" in query_call_2
+    assert "INNER JOIN" in query_call_2
+    assert "t1.book_id = t2.book_id" in query_call_2
 
 
 def test_run_pipeline(data_cleaning_instance, mock_bq_client):
-    """Ensure run executes cleaning pipeline correctly."""
-    with patch.object(data_cleaning_instance, "clean_table") as mock_clean:
+    """Ensure run executes all cleaning steps correctly."""
+    # Patch the methods called by run()
+    with patch.object(data_cleaning_instance, "clean_books_table") as mock_clean_books, \
+         patch.object(data_cleaning_instance, "clean_interactions_table") as mock_clean_interactions:
+        
+        mock_sample_df = MagicMock()
+        # Mock the return value for the sample queries
+        mock_bq_client.query.return_value.to_dataframe.return_value = mock_sample_df
+
         data_cleaning_instance.run()
-        assert mock_clean.call_count >= 1
+        
+        # Verify the main cleaning steps were called
+        mock_clean_books.assert_called_once()
+        mock_clean_interactions.assert_called_once()
+        
+        # Check that the sample queries were called
+        # These queries are *not* patched, so they hit the mock_bq_client
+        sample_query_calls = [
+            call for call in mock_bq_client.query.call_args_list 
+            if "LIMIT 5" in call[0][0]
+        ]
+        assert len(sample_query_calls) == 2
+
 
 def test_main_executes(monkeypatch):
     """Test that main() runs without crashing."""
     from datapipeline.scripts import data_cleaning
 
-    # Stub BigQuery client to avoid real credential lookup
     fake_client = MagicMock()
     fake_client.project = "test_project"
     monkeypatch.setattr(data_cleaning.bigquery, "Client", lambda: fake_client)
@@ -181,10 +224,24 @@ def test_main_executes(monkeypatch):
     data_cleaning.main()
     mock_run.assert_called_once()
 
-def test_run_handles_exceptions_gracefully(data_cleaning_instance):
-    """Ensure run() can handle exceptions without crashing."""
-    with patch.object(data_cleaning_instance, "clean_table", side_effect=Exception("Query failed")):
-        try:
+
+def test_run_handles_exceptions(data_cleaning_instance):
+    """Ensure run() propagates exceptions from cleaning methods."""
+    # Patch clean_books_table to raise an exception
+    with patch.object(data_cleaning_instance, "clean_books_table", side_effect=Exception("Query failed")):
+        
+        # We don't need to patch the other methods
+        
+        # Run the method and assert it raises the exception
+        with pytest.raises(Exception, match="Query failed"):
             data_cleaning_instance.run()
-        except Exception:
-            pytest.skip("Exception raised as expected; skipping to avoid failure")
+        
+        # Verify the logger was *not* called by the run() method's
+        # (now non-existent) try/except block
+        # The logger *inside* clean_books_table would be called, but since
+        # we patched the *whole method*, no logger calls are made by default.
+        data_cleaning_instance.logger.error.assert_not_called()
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-q"])
