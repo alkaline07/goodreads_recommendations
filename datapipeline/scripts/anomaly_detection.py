@@ -179,7 +179,7 @@ class AnomalyDetection:
                         "query": f"""
                         SELECT COUNT(*) as invalid_count
                         FROM `{self.project_id}.{self.dataset}.{table_name}`
-                        WHERE publication_year IS NULL OR publication_year <= 0
+                        WHERE publication_year IS NULL OR publication_year < 1900 OR publication_year > 2025
                         """,
                         "max_allowed": 0
                     },
@@ -188,7 +188,7 @@ class AnomalyDetection:
                         "query": f"""
                         SELECT COUNT(*) as invalid_count
                         FROM `{self.project_id}.{self.dataset}.{table_name}`
-                        WHERE num_pages IS NULL OR num_pages <= 0
+                        WHERE num_pages IS NULL OR num_pages < 10 OR num_pages > 2000
                         """,
                         "max_allowed": 0
                     }
