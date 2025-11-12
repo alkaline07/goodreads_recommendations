@@ -6,7 +6,12 @@ import bigframes.pandas as bpd
 
 class DataLoader:
     def __init__(self):
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("AIRFLOW_HOME")+"/gcp_credentials.json"
+        if not os.environ.get("AIRFLOW_HOME"):
+            # Running in Github Actions
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcp_credentials.json"
+        else:
+            # Running locally
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("AIRFLOW_HOME")+"/gcp_credentials.json"
 
         # Initialize BigQuery client and get project information
         self.client = bigquery.Client()
