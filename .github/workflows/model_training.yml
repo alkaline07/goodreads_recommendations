@@ -1,0 +1,39 @@
+name: 2. Model Training
+run-name: Model Retraining
+
+on:
+  workflow_run:
+    workflows: ["1. Load Data"]
+    types: [completed]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Download data artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: goodreads-train-data
+        run-id: ${{ github.event.workflow_run.id }}
+
+    - name: Train the model
+      run: python -m src.df_model_training
+    
+    - name: Notify on success
+      if: success()
+      run: echo "Model trained successfully"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Model training failed"
