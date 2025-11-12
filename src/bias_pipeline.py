@@ -15,8 +15,11 @@ import os
 from datetime import datetime
 from typing import List, Dict, Optional
 import json
+import argparse
 from bias_detection import BiasDetector, BiasReport
 from bias_mitigation import BiasMitigator, MitigationResult
+from bias_visualization import BiasVisualizer
+from model_selector import ModelSelector
 
 
 class BiasAuditPipeline:
@@ -33,6 +36,8 @@ class BiasAuditPipeline:
         """
         self.detector = BiasDetector(project_id=project_id)
         self.mitigator = BiasMitigator(project_id=project_id)
+        self.visualizer = BiasVisualizer()
+        self.model_selector = ModelSelector()
         self.project_id = self.detector.project_id
         self.dataset_id = "books"
         
@@ -43,7 +48,9 @@ class BiasAuditPipeline:
         model_name: str,
         predictions_table: str,
         apply_mitigation: bool = True,
-        mitigation_techniques: List[str] = None
+        mitigation_techniques: List[str] = None,
+        generate_visualizations: bool = True,
+        enable_model_selection: bool = False
     ) -> Dict:
         """
         Run a complete bias audit on a model.
@@ -54,6 +61,8 @@ class BiasAuditPipeline:
             apply_mitigation: Whether to apply mitigation
             mitigation_techniques: List of techniques to apply
                 ['shrinkage', 'threshold_adjustment', 'reweighting']
+            generate_visualizations: Whether to generate visual reports (default: True)
+            enable_model_selection: Whether to compare with other models (default: False)
         
         Returns:
             Dictionary with audit results
@@ -67,8 +76,10 @@ class BiasAuditPipeline:
             'timestamp': datetime.now().isoformat(),
             'predictions_table': predictions_table,
             'detection_report': None,
+            'visualizations_generated': False,
             'mitigation_results': [],
-            'final_validation': None
+            'final_validation': None,
+            'model_selection': None
         }
         
         # Step 1: Detect Bias
@@ -88,9 +99,19 @@ class BiasAuditPipeline:
         metrics_table = f"{self.project_id}.{self.dataset_id}.bias_metrics_{model_name}"
         self.detector.create_bias_metrics_table(detection_report, metrics_table)
         
+        # Step 1.5: Generate Visualizations (if requested)
+        if generate_visualizations:
+            print("\n[STEP 1.5/5] Generating Visualizations...")
+            try:
+                self.visualizer.generate_all_visualizations(detection_report)
+                audit_results['visualizations_generated'] = True
+            except Exception as e:
+                print(f"⚠️ Warning: Could not generate visualizations: {e}")
+                audit_results['visualizations_generated'] = False
+        
         # Step 2: Apply Mitigation (if requested and bias detected)
         if apply_mitigation and detection_report.disparity_analysis['detailed_disparities']:
-            print("\n[STEP 2/4] Applying Bias Mitigation...")
+            print("\n[STEP 2/5] Applying Bias Mitigation...")
             
             if mitigation_techniques is None:
                 mitigation_techniques = ['threshold_adjustment']
@@ -112,28 +133,38 @@ class BiasAuditPipeline:
                     )
                     audit_results['mitigation_results'].append(mitigation_result)
         else:
-            print("\n[STEP 2/4] Skipping mitigation (no significant bias detected or not requested)")
+            print("\n[STEP 2/5] Skipping mitigation (no significant bias detected or not requested)")
         
         # Step 3: Validate Mitigation
         if audit_results['mitigation_results']:
-            print("\n[STEP 3/4] Validating Mitigation Effectiveness...")
+            print("\n[STEP 3/5] Validating Mitigation Effectiveness...")
             validation = self._validate_mitigation(
                 audit_results['mitigation_results'],
                 model_name
             )
             audit_results['final_validation'] = validation
         else:
-            print("\n[STEP 3/4] Skipping validation (no mitigation applied)")
+            print("\n[STEP 3/5] Skipping validation (no mitigation applied)")
         
         # Step 4: Generate Comprehensive Report
-        print("\n[STEP 4/4] Generating Comprehensive Audit Report...")
+        print("\n[STEP 4/5] Generating Comprehensive Audit Report...")
         report_path = self._generate_comprehensive_report(audit_results, model_name)
         audit_results['report_path'] = report_path
+        
+        # Step 5: Model Selection (if enabled and not already in selection mode)
+        if enable_model_selection and not audit_results.get('skip_selection'):
+            print("\n[STEP 5/5] Model Selection Across All Candidates...")
+            print("Note: This step is handled by run_model_selection() instead.")
+            print("      Call run_model_selection() to compare multiple models.")
+        else:
+            print("\n[STEP 5/5] Skipping model selection (disabled or handled separately)")
         
         print("\n" + "="*80)
         print("BIAS AUDIT COMPLETE")
         print("="*80)
         print(f"\nFull audit report: {report_path}")
+        if audit_results['visualizations_generated']:
+            print("Visualizations: data/bias_reports/visualizations/")
         
         return audit_results
     
@@ -313,68 +344,293 @@ class BiasAuditPipeline:
         return summary
 
 
-def run_bias_audit_for_all_models():
-    """Run bias audit for all trained models."""
+    def run_model_selection(
+        self,
+        model_candidates: List[Dict[str, str]],
+        performance_weight: float = 0.6,
+        fairness_weight: float = 0.4,
+        min_fairness_threshold: float = 60.0,
+        generate_visualizations: bool = True
+    ) -> Dict:
+        """
+        Compare multiple models and select the best one based on performance + fairness.
+        
+        Args:
+            model_candidates: List of dicts with 'model_name' and 'predictions_table'
+            performance_weight: Weight for performance metrics (0-1)
+            fairness_weight: Weight for fairness metrics (0-1)
+            min_fairness_threshold: Minimum acceptable fairness score
+            generate_visualizations: Whether to generate visualizations for each model
+            
+        Returns:
+            Dictionary with selection results
+        """
+        print("\n" + "="*80)
+        print("MODEL SELECTION PIPELINE (PERFORMANCE + FAIRNESS)")
+        print("="*80)
+        print(f"\nComparing {len(model_candidates)} models...")
+        print(f"Weights: {performance_weight*100:.0f}% Performance + {fairness_weight*100:.0f}% Fairness")
+        print(f"Minimum Fairness Threshold: {min_fairness_threshold}")
+        
+        # Run full audit for each model (without individual selection)
+        all_audits = []
+        for i, candidate in enumerate(model_candidates, 1):
+            print(f"\n\n{'#'*80}")
+            print(f"# AUDITING MODEL {i}/{len(model_candidates)}: {candidate['model_name']}")
+            print(f"{'#'*80}\n")
+            
+            try:
+                audit_result = self.run_full_audit(
+                    model_name=candidate['model_name'],
+                    predictions_table=candidate['predictions_table'],
+                    apply_mitigation=False,  # Don't apply mitigation yet
+                    generate_visualizations=generate_visualizations,
+                    enable_model_selection=False  # Disable individual selection
+                )
+                audit_result['skip_selection'] = True  # Mark that we're in selection mode
+                all_audits.append(audit_result)
+            except Exception as e:
+                print(f"✗ Error auditing {candidate['model_name']}: {e}")
+                continue
+        
+        if not all_audits:
+            print("\n✗ No models could be audited successfully")
+            return {'error': 'No successful audits'}
+        
+        # Now run model selection
+        print(f"\n\n{'='*80}")
+        print("RUNNING MODEL SELECTION")
+        print(f"{'='*80}\n")
+        
+        # Update model selector with custom weights
+        self.model_selector = ModelSelector(
+            performance_weight=performance_weight,
+            fairness_weight=fairness_weight,
+            min_fairness_threshold=min_fairness_threshold
+        )
+        
+        selection_report = self.model_selector.compare_models(model_candidates)
+        
+        # Final summary
+        print(f"\n\n{'='*80}")
+        print("MODEL SELECTION COMPLETE")
+        print(f"{'='*80}\n")
+        print(f"🎯 SELECTED MODEL: {selection_report.selected_model.model_name}")
+        print(f"   Validation MAE: {selection_report.selected_model.validation_mae:.4f}")
+        print(f"   Fairness Score: {selection_report.selected_model.fairness_score:.1f}/100")
+        print(f"   Combined Score: {selection_report.selected_model.combined_score:.1f}/100")
+        print(f"\n📋 RATIONALE:")
+        print(f"   {selection_report.rationale}")
+        print(f"\n📊 Reports:")
+        print(f"   Model Selection: data/bias_reports/model_selection_report.json")
+        print(f"   Visualizations: data/bias_reports/model_selection/")
+        
+        return {
+            'selection_report': selection_report,
+            'all_audits': all_audits,
+            'selected_model': selection_report.selected_model.model_name,
+            'selected_table': selection_report.selected_model.predictions_table
+        }
+
+
+def run_bias_audit_for_all_models(with_model_selection: bool = True):
+    """
+    Run bias audit for all trained models.
+    
+    Args:
+        with_model_selection: If True, compare models and select best one (default: True)
+    """
     pipeline = BiasAuditPipeline()
     
     models_to_audit = [
         {
-            'name': 'boosted_tree_regressor',
+            'model_name': 'boosted_tree_regressor',
             'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.boosted_tree_rating_predictions"
         },
         {
-            'name': 'automl_regressor',
+            'model_name': 'automl_regressor',
             'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.automl_rating_predictions"
         }
     ]
     
-    all_results = {}
-    
-    for model in models_to_audit:
-        print(f"\n\n{'#'*80}")
-        print(f"# AUDITING MODEL: {model['name']}")
-        print(f"{'#'*80}\n")
+    if with_model_selection:
+        # Run integrated model selection pipeline
+        print("Running integrated pipeline with MODEL SELECTION...\n")
+        results = pipeline.run_model_selection(
+            model_candidates=models_to_audit,
+            performance_weight=0.6,
+            fairness_weight=0.4,
+            min_fairness_threshold=60.0,
+            generate_visualizations=True
+        )
         
-        try:
-            results = pipeline.run_full_audit(
-                model_name=model['name'],
-                predictions_table=model['predictions_table'],
-                apply_mitigation=True,
-                mitigation_techniques=['threshold_adjustment']
-            )
-            all_results[model['name']] = results
-        except Exception as e:
-            print(f"Error auditing {model['name']}: {e}")
-            all_results[model['name']] = {'error': str(e)}
+        print(f"\n\n{'='*80}")
+        print("COMPLETE PIPELINE FINISHED")
+        print(f"{'='*80}")
+        print(f"\n🎯 SELECTED MODEL: {results['selected_model']}")
+        print(f"   Use this for production: {results['selected_table']}")
+        
+        return results
     
-    # Save consolidated report
-    consolidated_path = "data/bias_reports/consolidated_audit_report.json"
-    os.makedirs(os.path.dirname(consolidated_path), exist_ok=True)
-    
-    with open(consolidated_path, 'w') as f:
-        json.dump({
-            'timestamp': datetime.now().isoformat(),
-            'models_audited': list(all_results.keys()),
-            'results': {
-                model: {
-                    'status': results.get('executive_summary', {}).get('overall_status', 'ERROR'),
-                    'report_path': results.get('report_path')
+    else:
+        # Run individual audits without selection
+        print("Running individual audits WITHOUT model selection...\n")
+        all_results = {}
+        
+        for model in models_to_audit:
+            print(f"\n\n{'#'*80}")
+            print(f"# AUDITING MODEL: {model['model_name']}")
+            print(f"{'#'*80}\n")
+            
+            try:
+                results = pipeline.run_full_audit(
+                    model_name=model['model_name'],
+                    predictions_table=model['predictions_table'],
+                    apply_mitigation=True,
+                    mitigation_techniques=['threshold_adjustment'],
+                    generate_visualizations=True
+                )
+                all_results[model['model_name']] = results
+            except Exception as e:
+                print(f"Error auditing {model['model_name']}: {e}")
+                all_results[model['model_name']] = {'error': str(e)}
+        
+        # Save consolidated report
+        consolidated_path = "data/bias_reports/consolidated_audit_report.json"
+        os.makedirs(os.path.dirname(consolidated_path), exist_ok=True)
+        
+        with open(consolidated_path, 'w') as f:
+            json.dump({
+                'timestamp': datetime.now().isoformat(),
+                'models_audited': list(all_results.keys()),
+                'results': {
+                    model: {
+                        'status': 'SUCCESS' if 'detection_report' in results else 'ERROR',
+                        'report_path': results.get('report_path'),
+                        'visualizations_generated': results.get('visualizations_generated', False)
+                    }
+                    for model, results in all_results.items()
                 }
-                for model, results in all_results.items()
-            }
-        }, f, indent=2)
-    
-    print(f"\n\n{'='*80}")
-    print("ALL AUDITS COMPLETE")
-    print(f"{'='*80}")
-    print(f"\nConsolidated report: {consolidated_path}")
-    
-    return all_results
+            }, f, indent=2)
+        
+        print(f"\n\n{'='*80}")
+        print("ALL AUDITS COMPLETE")
+        print(f"{'='*80}")
+        print(f"\nConsolidated report: {consolidated_path}")
+        
+        return all_results
 
 
 def main():
-    """Run bias audit pipeline."""
-    run_bias_audit_for_all_models()
+    """Run bias audit pipeline with command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description='Bias Detection and Mitigation Pipeline',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Run complete pipeline with model selection (RECOMMENDED)
+  python bias_pipeline.py
+  
+  # Run without model selection
+  python bias_pipeline.py --no-model-selection
+  
+  # Run with custom weights (70% performance, 30% fairness)
+  python bias_pipeline.py --performance-weight 0.7 --fairness-weight 0.3
+  
+  # Run without visualizations (faster)
+  python bias_pipeline.py --no-visualizations
+        """
+    )
+    
+    parser.add_argument(
+        '--no-model-selection',
+        action='store_true',
+        help='Run individual audits without model selection'
+    )
+    
+    parser.add_argument(
+        '--no-visualizations',
+        action='store_true',
+        help='Skip visualization generation (faster execution)'
+    )
+    
+    parser.add_argument(
+        '--performance-weight',
+        type=float,
+        default=0.6,
+        help='Weight for performance metrics (default: 0.6)'
+    )
+    
+    parser.add_argument(
+        '--fairness-weight',
+        type=float,
+        default=0.4,
+        help='Weight for fairness metrics (default: 0.4)'
+    )
+    
+    parser.add_argument(
+        '--min-fairness',
+        type=float,
+        default=60.0,
+        help='Minimum fairness threshold (default: 60.0)'
+    )
+    
+    args = parser.parse_args()
+    
+    # Validate weights
+    if abs(args.performance_weight + args.fairness_weight - 1.0) > 0.01:
+        print("Error: Performance weight + Fairness weight must equal 1.0")
+        return
+    
+    print("\n" + "="*80)
+    print("BIAS DETECTION AND MITIGATION PIPELINE")
+    print("="*80)
+    print(f"\nConfiguration:")
+    print(f"  Model Selection: {'ENABLED' if not args.no_model_selection else 'DISABLED'}")
+    print(f"  Visualizations: {'ENABLED' if not args.no_visualizations else 'DISABLED'}")
+    if not args.no_model_selection:
+        print(f"  Performance Weight: {args.performance_weight}")
+        print(f"  Fairness Weight: {args.fairness_weight}")
+        print(f"  Min Fairness Threshold: {args.min_fairness}")
+    print()
+    
+    if not args.no_model_selection:
+        # Run with model selection
+        pipeline = BiasAuditPipeline()
+        
+        models_to_audit = [
+            {
+                'model_name': 'boosted_tree_regressor',
+                'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.boosted_tree_rating_predictions"
+            },
+            {
+                'model_name': 'automl_regressor',
+                'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.automl_rating_predictions"
+            }
+        ]
+        
+        results = pipeline.run_model_selection(
+            model_candidates=models_to_audit,
+            performance_weight=args.performance_weight,
+            fairness_weight=args.fairness_weight,
+            min_fairness_threshold=args.min_fairness,
+            generate_visualizations=not args.no_visualizations
+        )
+        
+        print(f"\n\n{'='*80}")
+        print("🎉 PIPELINE COMPLETE")
+        print(f"{'='*80}")
+        print(f"\n🎯 SELECTED MODEL: {results['selected_model']}")
+        print(f"   Production Table: {results['selected_table']}")
+        print(f"\n📊 Generated Files:")
+        print(f"   - Model Selection Report: data/bias_reports/model_selection_report.json")
+        print(f"   - Model Comparison Chart: data/bias_reports/model_selection/model_comparison.png")
+        if not args.no_visualizations:
+            print(f"   - Fairness Visualizations: data/bias_reports/visualizations/")
+        print()
+    else:
+        # Run without model selection
+        run_bias_audit_for_all_models(with_model_selection=False)
 
 
 if __name__ == "__main__":
