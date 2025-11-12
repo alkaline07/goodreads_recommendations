@@ -227,7 +227,6 @@ class BigQueryMLModelTraining:
                 num_parallel_tree=10,
                 max_tree_depth=6,
                 min_split_loss=0.1,
-                learning_rate=0.1,
                 l1_reg=0.1,
                 l2_reg=0.1,
                 early_stop=True
