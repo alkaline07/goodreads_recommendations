@@ -123,15 +123,18 @@ class BiasAuditPipeline:
                         model_name,
                         detection_report
                     )
-                    audit_results['mitigation_results'].append(mitigation_result)
+                    if mitigation_result:
+                        audit_results['mitigation_results'].append(mitigation_result)
                     
                 elif technique == 'shrinkage':
+                    features_table = f"{self.project_id}.{self.dataset_id}.goodreads_features"
                     mitigation_result = self._apply_shrinkage_mitigation(
-                        predictions_table,
+                        features_table,
                         model_name,
                         detection_report
                     )
-                    audit_results['mitigation_results'].append(mitigation_result)
+                    if mitigation_result:
+                        audit_results['mitigation_results'].append(mitigation_result)
         else:
             print("\n[STEP 2/5] Skipping mitigation (no significant bias detected or not requested)")
         
@@ -265,6 +268,8 @@ class BiasAuditPipeline:
         }
         
         for result in mitigation_results:
+            if not result:
+                continue
             if result.improvement_pct:
                 validation['effectiveness'][result.technique] = {
                     'improvements': result.improvement_pct,

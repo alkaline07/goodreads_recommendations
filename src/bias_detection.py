@@ -113,8 +113,8 @@ class BiasDetector:
             # Book Rating Range (actual rating)
             ("Rating Range", """
                 CASE
-                    WHEN rating >= 4.0 THEN 'High (4-5)'
-                    WHEN rating >= 3.0 THEN 'Medium (3-4)'
+                    WHEN actual_rating  >= 4.0 THEN 'High (4-5)'
+                    WHEN actual_rating  >= 3.0 THEN 'Medium (3-4)'
                     ELSE 'Low (1-3)'
                 END
             """, "rating_group"),
