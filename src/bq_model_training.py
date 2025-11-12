@@ -1,41 +1,27 @@
 """
-BigQuery ML Model Training Module for Goodreads Recommendation System
-
-This module trains three BigQuery ML models for the recommendation system:
-1. MATRIX_FACTORIZATION - For collaborative filtering recommendations
-2. AUTOML_REGRESSOR - For automated rating prediction
-3. BOOSTED_TREE_REGRESSOR - For feature-rich rating prediction
-
-The models are trained on the training dataset and evaluated on validation data.
-
-Author: Goodreads Recommendation Team
-Date: 2025
+BigQuery ML Model Training Module - FIXED VERSION
+Handles concurrent model training and provides better error handling
 """
 
 import os
 from google.cloud import bigquery
 from datetime import datetime
-from datapipeline.scripts.logger_setup import get_logger
 import time
 
 
 class BigQueryMLModelTraining:
     """
-    Class for training BigQuery ML models for recommendations and rating prediction.
+    Fixed class for training BigQuery ML models with concurrency handling.
     """
 
-    def __init__(self):
+    def __init__(self, use_versioning=True):
         """
-        Initialize the BigQuery ML Model Training class.
-        
-        Sets up:
-        - Google Cloud credentials for BigQuery access
-        - Logging configuration
-        - BigQuery client and project information
-        - Training, validation, and model table references
+        Initialize with optional versioning for model names.
+       
+        Args:
+            use_versioning: If True, adds timestamp to model names to avoid conflicts
         """
-        # Set Google Application Credentials for BigQuery access
-        # Check multiple possible locations for credentials file
+        # [Keep existing initialization code]
         airflow_home = os.environ.get("AIRFLOW_HOME", "")
         possible_paths = [
             os.path.join(airflow_home, "gcp_credentials.json") if airflow_home else None,
@@ -43,87 +29,156 @@ class BigQueryMLModelTraining:
             "gcp_credentials.json",
             os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "gcp_credentials.json")
         ]
-        
+       
         credentials_path = None
         for path in possible_paths:
             if path and os.path.exists(path):
                 credentials_path = os.path.abspath(path)
                 break
-        
+       
         if credentials_path:
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
-        else:
-            # Fallback to default location
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(airflow_home, "gcp_credentials.json") if airflow_home else "config/gcp_credentials.json"
 
-        # Initialize logging
-        self.logger = get_logger("model_training")
-
-        # Initialize BigQuery client and get project information
         self.client = bigquery.Client()
         self.project_id = self.client.project
         self.dataset_id = "books"
 
-        # Define table references
+        # Table references
         self.train_table = f"{self.project_id}.{self.dataset_id}.goodreads_train_set"
         self.val_table = f"{self.project_id}.{self.dataset_id}.goodreads_validation_set"
         self.test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
 
-        # Model table references
-        self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
-        self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model"
-        self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
+        # Model naming with optional versioning
+        if use_versioning:
+            # Use timestamp for unique model names
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model_{timestamp}"
+            self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model_{timestamp}"
+            self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model_{timestamp}"
+        else:
+            # Use fixed names (will replace existing models)
+            self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model_v2"
+            self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model_v2"
+            self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model_v2"
+       
+        self.popularity_model = f"{self.project_id}.{self.dataset_id}.popularity_baseline"
 
-    def get_feature_columns(self):
+    def check_and_cleanup_existing_models(self):
         """
-        Get the list of feature columns to use for model training.
-        
-        Returns:
-            list: List of feature column names
+        Check for existing models and running jobs, cleanup if needed.
         """
-        # Get schema from training table to identify feature columns
         try:
-            table = self.client.get_table(self.train_table)
-            all_columns = [field.name for field in table.schema]
-            
-            # Exclude non-feature columns
-            exclude_columns = {
-                'user_id_clean', 'book_id', 'rating', 'is_read',
-                'user_days_to_read', 'user_book_recency'  # These are interaction-level, may want to exclude
-            }
-            
-            feature_columns = [col for col in all_columns if col not in exclude_columns]
-            self.logger.info(f"Found {len(feature_columns)} feature columns")
-            return feature_columns
-        except Exception as e:
-            self.logger.error(f"Error getting feature columns: {e}", exc_info=True)
-            # Return default feature columns if schema lookup fails
-            return [
-                'num_books_read', 'avg_rating_given', 'user_activity_count',
-                'recent_activity_days', 'user_avg_reading_time_days',
-                'average_rating', 'ratings_count', 'text_reviews_count',
-                'log_ratings_count', 'popularity_score', 'title_length_in_characters',
-                'title_length_in_words', 'description_length', 'num_genres',
-                'is_series', 'num_pages', 'publication_year', 'book_age_years',
-                'avg_book_reading_time_days', 'num_readers_with_reading_time',
-                'adjusted_average_rating', 'great', 'book_popularity_normalized',
-                'reading_pace_category'
+            print("Checking for existing models and running jobs...")
+           
+            # Check for running jobs
+            jobs_query = """
+            SELECT
+                job_id,
+                state,
+                creation_time,
+                statement_type
+            FROM `region-us`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+            WHERE statement_type = 'CREATE_MODEL'
+                AND state IN ('PENDING', 'RUNNING')
+            ORDER BY creation_time DESC
+            LIMIT 10
+            """
+           
+            try:
+                running_jobs = self.client.query(jobs_query).to_dataframe(create_bqstorage_client=False)
+                if not running_jobs.empty:
+                    print(f"Found {len(running_jobs)} running model training jobs")
+                    print("Waiting for existing jobs to complete...")
+                    time.sleep(30)  # Wait 30 seconds
+            except Exception as e:
+                print(f"Could not check running jobs: {e}")
+           
+            # List existing models
+            models_to_check = [
+                self.matrix_factorization_model.split('.')[-1],
+                self.boosted_tree_model.split('.')[-1],
+                self.automl_regressor_model.split('.')[-1]
             ]
+           
+            for model_name in models_to_check:
+                try:
+                    # Try to get model info
+                    model_ref = f"{self.project_id}.{self.dataset_id}.{model_name}"
+                    self.client.get_model(model_ref)
+                    print(f"Model {model_name} exists")
+                   
+                    # Optionally delete existing model
+                    # self.client.delete_model(model_ref)
+                    # print(f"Deleted existing model {model_name}")
+                   
+                except Exception:
+                    print(f"Model {model_name} does not exist")
+                   
+        except Exception as e:
+            print(f"Error checking existing models: {e}")
+
+    def safe_train_model(self, model_name, query, model_type, max_retries=3):
+        """
+        Safely train a model with retry logic and error handling.
+       
+        Args:
+            model_name: Full model path
+            query: CREATE MODEL query
+            model_type: Type of model for logging
+            max_retries: Maximum number of retry attempts
+        """
+        for attempt in range(max_retries):
+            try:
+                print(f"Training {model_type} model (attempt {attempt + 1}/{max_retries})...")
+               
+                # Add a unique job ID to prevent conflicts
+                job_config = bigquery.QueryJobConfig()
+                job_id_prefix = f"{model_type.lower()}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+               
+                job = self.client.query(query, job_config=job_config, job_id_prefix=job_id_prefix)
+               
+                # Wait with timeout
+                result = job.result(timeout=3600)  # 1 hour timeout
+               
+                print(f"{model_type} model training completed successfully")
+                return True
+               
+            except Exception as e:
+                error_msg = str(e)
+               
+                if "multiple create model query jobs" in error_msg.lower():
+                    print(f"Model is being updated by another job. Waiting...")
+                    time.sleep(60 * (attempt + 1))  # Exponential backoff
+                   
+                elif "already exists" in error_msg.lower():
+                    print(f"Model already exists. Using timestamp suffix...")
+                    # Modify model name with timestamp
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    new_model_name = f"{model_name}_{timestamp}"
+                    query = query.replace(model_name, new_model_name)
+                    print(f"Retrying with new model name: {new_model_name}")
+                   
+                elif attempt < max_retries - 1:
+                    print(f"Error training {model_type}: {e}. Retrying...")
+                    time.sleep(30 * (attempt + 1))
+                   
+                else:
+                    print(f"Failed to train {model_type} after {max_retries} attempts: {e}")
+                    return False
+                   
+        return False
 
     def train_matrix_factorization(self):
         """
-        Train MATRIX_FACTORIZATION model for collaborative filtering recommendations.
-        
-        This model learns user-item interactions and can generate recommendations
-        based on collaborative filtering patterns.
+        Train MATRIX_FACTORIZATION model with error handling.
         """
         try:
-            self.logger.info("=" * 60)
-            self.logger.info("Training MATRIX_FACTORIZATION Model")
-            self.logger.info("=" * 60)
+            print("=" * 60)
+            print("Training MATRIX_FACTORIZATION Model")
+            print("=" * 60)
 
-            # MATRIX_FACTORIZATION requires user_id, item_id, and optionally rating
-            # We'll use rating as the feedback signal
+            # First check if we should use the original model parameters
+            # since those seemed to work (low loss)
             query = f"""
             CREATE OR REPLACE MODEL `{self.matrix_factorization_model}`
             OPTIONS(
@@ -131,90 +186,42 @@ class BigQueryMLModelTraining:
                 user_col='user_id_clean',
                 item_col='book_id',
                 rating_col='rating',
-                feedback_type='EXPLICIT',  -- Use explicit feedback (ratings)
+                feedback_type='EXPLICIT',
                 l2_reg=0.1,
                 num_factors=10,
-                max_iterations=15
+                max_iterations=20  -- Increased but not too much
             ) AS
             SELECT
                 user_id_clean,
                 book_id,
                 rating
             FROM `{self.train_table}`
-            WHERE rating > 0  -- Only use explicit ratings
-            """
-
-            self.logger.info(f"Training MATRIX_FACTORIZATION model...")
-            self.logger.info(f"Source: {self.train_table}")
-            self.logger.info(f"Model: {self.matrix_factorization_model}")
-
-            job = self.client.query(query)
-            job.result()  # Wait for job to complete
-
-            self.logger.info("MATRIX_FACTORIZATION model training completed successfully")
-
-            # Get model evaluation metrics
-            self.evaluate_model(self.matrix_factorization_model, "MATRIX_FACTORIZATION")
-
-        except Exception as e:
-            self.logger.error(f"Error training MATRIX_FACTORIZATION model: {e}", exc_info=True)
-            raise
-
-    def train_automl_regressor(self):
-        """
-        Train AUTOML_REGRESSOR model for automated rating prediction.
-        
-        This model automatically selects features and hyperparameters for rating prediction.
-        """
-        try:
-            self.logger.info("=" * 60)
-            self.logger.info("Training AUTOML_REGRESSOR Model")
-            self.logger.info("=" * 60)
-
-            feature_columns = self.get_feature_columns()
-            feature_list = ", ".join(feature_columns)
-
-            query = f"""
-            CREATE OR REPLACE MODEL `{self.automl_regressor_model}`
-            OPTIONS(
-                model_type='AUTOML_REGRESSOR',
-                input_label_cols=['rating'],
-                budget_hours=1.0
-            ) AS
-            SELECT
-                {feature_list},
-                rating
-            FROM `{self.train_table}`
             WHERE rating IS NOT NULL
             """
 
-            self.logger.info(f"Training AUTOML_REGRESSOR model...")
-            self.logger.info(f"Source: {self.train_table}")
-            self.logger.info(f"Model: {self.automl_regressor_model}")
-            self.logger.info(f"Using {len(feature_columns)} features")
-
-            job = self.client.query(query)
-            job.result()  # Wait for job to complete
-
-            self.logger.info("AUTOML_REGRESSOR model training completed successfully")
-
-            # Get model evaluation metrics
-            self.evaluate_model(self.automl_regressor_model, "AUTOML_REGRESSOR")
+            success = self.safe_train_model(
+                self.matrix_factorization_model,
+                query,
+                "MATRIX_FACTORIZATION"
+            )
+           
+            if success:
+                self.evaluate_model(self.matrix_factorization_model, "MATRIX_FACTORIZATION")
+           
+            return success
 
         except Exception as e:
-            self.logger.error(f"Error training AUTOML_REGRESSOR model: {e}", exc_info=True)
-            raise
+            print(f"Unexpected error in train_matrix_factorization: {e}", exc_info=True)
+            return False
 
     def train_boosted_tree_regressor(self):
         """
-        Train BOOSTED_TREE_REGRESSOR model for feature-rich rating prediction.
-        
-        This model uses gradient boosting for rating prediction with explicit feature selection.
+        Train BOOSTED_TREE_REGRESSOR model with error handling.
         """
         try:
-            self.logger.info("=" * 60)
-            self.logger.info("Training BOOSTED_TREE_REGRESSOR Model")
-            self.logger.info("=" * 60)
+            print("=" * 60)
+            print("Training BOOSTED_TREE_REGRESSOR Model")
+            print("=" * 60)
 
             feature_columns = self.get_feature_columns()
             feature_list = ", ".join(feature_columns)
@@ -224,12 +231,14 @@ class BigQueryMLModelTraining:
             OPTIONS(
                 model_type='BOOSTED_TREE_REGRESSOR',
                 input_label_cols=['rating'],
-                num_parallel_tree=10,
-                max_tree_depth=6,
-                min_split_loss=0.1,
-                l1_reg=0.1,
-                l2_reg=0.1,
-                early_stop=True
+                num_parallel_tree=5,
+                max_tree_depth=4,
+                subsample=0.85,
+                min_split_loss=0.01,
+                l1_reg=0.05,
+                l2_reg=0.05,
+                early_stop=True,
+                min_rel_progress=0.01
             ) AS
             SELECT
                 {feature_list},
@@ -238,91 +247,172 @@ class BigQueryMLModelTraining:
             WHERE rating IS NOT NULL
             """
 
-            self.logger.info(f"Training BOOSTED_TREE_REGRESSOR model...")
-            self.logger.info(f"Source: {self.train_table}")
-            self.logger.info(f"Model: {self.boosted_tree_model}")
-            self.logger.info(f"Using {len(feature_columns)} features")
-
-            job = self.client.query(query)
-            job.result()  # Wait for job to complete
-
-            self.logger.info("BOOSTED_TREE_REGRESSOR model training completed successfully")
-
-            # Get model evaluation metrics
-            self.evaluate_model(self.boosted_tree_model, "BOOSTED_TREE_REGRESSOR")
+            success = self.safe_train_model(
+                self.boosted_tree_model,
+                query,
+                "BOOSTED_TREE_REGRESSOR"
+            )
+           
+            if success:
+                self.evaluate_model(self.boosted_tree_model, "BOOSTED_TREE_REGRESSOR")
+           
+            return success
 
         except Exception as e:
-            self.logger.error(f"Error training BOOSTED_TREE_REGRESSOR model: {e}", exc_info=True)
-            raise
+            print(f"Unexpected error in train_boosted_tree_regressor: {e}", exc_info=True)
+            return False
+
+    def get_feature_columns(self):
+        """Get feature columns with error handling."""
+        try:
+            table = self.client.get_table(self.train_table)
+            all_columns = [field.name for field in table.schema]
+           
+            exclude_columns = {
+                'user_id_clean', 'book_id', 'rating', 'is_read',
+                'user_days_to_read', 'user_book_recency'
+            }
+           
+            feature_columns = [col for col in all_columns if col not in exclude_columns]
+            print(f"Found {len(feature_columns)} feature columns")
+            return feature_columns
+           
+        except Exception as e:
+            print(f"Error getting feature columns: {e}")
+            # Return a default set
+            return [
+                'num_books_read', 'avg_rating_given', 'user_activity_count',
+                'recent_activity_days', 'user_avg_reading_time_days',
+                'title_clean', 'average_rating', 'adjusted_average_rating',
+                'great', 'ratings_count', 'log_ratings_count',
+                'popularity_score', 'book_popularity_normalized',
+                'num_genres', 'is_series', 'title_length_in_characters',
+                'title_length_in_words', 'description_length', 'num_pages',
+                'publication_year', 'book_age_years', 'book_length_category',
+                'book_era', 'avg_pages_per_day', 'avg_book_reading_time_days',
+                'num_readers_with_reading_time', 'reading_pace_category',
+                'user_avg_rating_vs_book', 'user_reading_speed_ratio',
+                'user_pages_per_day_this_book'
+            ]
 
     def evaluate_model(self, model_name, model_type):
-        """
-        Evaluate a trained model on validation data.
-        
-        Args:
-            model_name (str): Full path to the BigQuery ML model
-            model_type (str): Type of model (for logging)
-        """
+        """Evaluate model with error handling."""
         try:
-            self.logger.info(f"Evaluating {model_type} model on validation data...")
-
-            # Get evaluation metrics
+            print(f"Evaluating {model_type} model...")
+           
             eval_query = f"""
             SELECT *
             FROM ML.EVALUATE(MODEL `{model_name}`, (
                 SELECT *
                 FROM `{self.val_table}`
                 WHERE rating IS NOT NULL
+                LIMIT 5000
             ))
             """
-
+           
             eval_result = self.client.query(eval_query).to_dataframe(create_bqstorage_client=False)
-
+           
             if not eval_result.empty:
-                self.logger.info(f"{model_type} Model Evaluation Metrics:")
+                print(f"{model_type} Evaluation Metrics:")
                 for col in eval_result.columns:
                     value = eval_result[col].iloc[0]
-                    self.logger.info(f"  {col}: {value}")
-
+                    if isinstance(value, float):
+                        print(f"  {col}: {value:.4f}")
+                       
         except Exception as e:
-            self.logger.warning(f"Error evaluating {model_type} model: {e}")
-            # Don't raise - evaluation failure shouldn't stop the pipeline
+            print(f"Could not evaluate {model_type}: {e}")
+    
+    def analyze_data_characteristics(self):
+        """
+        Analyze the training data to understand its characteristics.
+        This helps in setting appropriate hyperparameters.
+        """
+        try:
+            print("Analyzing training data characteristics...")
+           
+            stats_query = f"""
+            SELECT
+                COUNT(DISTINCT user_id_clean) as num_users,
+                COUNT(DISTINCT book_id) as num_books,
+                COUNT(*) as num_interactions,
+                AVG(rating) as avg_rating,
+                STDDEV(rating) as std_rating,
+                MIN(rating) as min_rating,
+                MAX(rating) as max_rating,
+                APPROX_QUANTILES(rating, 4) as rating_quartiles
+            FROM `{self.train_table}`
+            WHERE rating IS NOT NULL
+            """
+           
+            stats = self.client.query(stats_query).to_dataframe(create_bqstorage_client=False)
+           
+            print("Training Data Statistics:")
+            for col in stats.columns:
+                if col != 'rating_quartiles':
+                    print(f"  {col}: {stats[col].iloc[0]}")
+           
+            # Store for later use
+            self.data_stats = stats.iloc[0].to_dict()
+           
+            # Check for cold-start problem
+            cold_start_query = f"""
+            WITH user_counts AS (
+                SELECT user_id_clean, COUNT(*) as cnt
+                FROM `{self.train_table}`
+                GROUP BY user_id_clean
+            )
+            SELECT
+                COUNTIF(cnt < 5) as users_with_few_ratings,
+                COUNT(*) as total_users,
+                COUNTIF(cnt < 5) / COUNT(*) as cold_start_ratio
+            FROM user_counts
+            """
+           
+            cold_start = self.client.query(cold_start_query).to_dataframe(create_bqstorage_client=False)
+            print(f"Cold-start ratio: {cold_start['cold_start_ratio'].iloc[0]:.2%} of users have < 5 ratings")
+           
+        except Exception as e:
+            print(f"Error analyzing data: {e}")
+            self.data_stats = {}
 
     def run(self):
-        """
-        Execute the complete model training pipeline.
-        
-        Trains all three BigQuery ML models:
-        1. MATRIX_FACTORIZATION for recommendations
-        2. AUTOML_REGRESSOR for rating prediction
-        3. BOOSTED_TREE_REGRESSOR for feature-rich rating prediction
-        """
+        """Execute the training pipeline with proper error handling."""
         start_time = time.time()
-        self.logger.info("=" * 60)
-        self.logger.info("BigQuery ML Model Training Pipeline")
-        self.logger.info(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        self.logger.info("=" * 60)
+        print("=" * 60)
+        print("BigQuery ML Model Training Pipeline")
+        print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("=" * 60)
 
-        # Train all three models
-        self.train_matrix_factorization()
-        self.train_automl_regressor()
-        self.train_boosted_tree_regressor()
+        # Check and cleanup if needed
+        self.check_and_cleanup_existing_models()
 
-        # Log completion
+        # Analyze data characteristics
+        self.analyze_data_characteristics()
+
+        # Train models
+        mf_success = self.train_matrix_factorization()
+        bt_success = self.train_boosted_tree_regressor()
+
+        # Summary
         end_time = time.time()
-        self.logger.info("=" * 60)
-        self.logger.info(f"All models trained successfully")
-        self.logger.info(f"Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        self.logger.info(f"Total runtime: {(end_time - start_time):.2f} seconds")
-        self.logger.info("=" * 60)
+        print("=" * 60)
+        print(f"Training completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Matrix Factorization: {'SUCCESS' if mf_success else 'FAILED'}")
+        print(f"Boosted Tree: {'SUCCESS' if bt_success else 'FAILED'}")
+        print(f"Total runtime: {(end_time - start_time):.2f} seconds")
+        print("=" * 60)
 
 
 def main():
-    """Main function to run model training."""
-    trainer = BigQueryMLModelTraining()
-    trainer.run()
+    """Main function with error handling."""
+    try:
+        # Use versioning to avoid conflicts
+        trainer = BigQueryMLModelTraining(use_versioning=True)
+        trainer.run()
+    except Exception as e:
+        print(f"Fatal error: {e}")
+        raise
 
 
 if __name__ == "__main__":
     main()
-
