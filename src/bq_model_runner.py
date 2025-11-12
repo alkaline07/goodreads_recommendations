@@ -42,59 +42,54 @@ class BookRecommender:
         self.mf_model = self.find_latest_model('matrix_factorization_model')
         self.bt_model = self.find_latest_model('boosted_tree_regressor_model')
        
+        # Verify models exist
+        self.verify_model_exists(self.mf_model, 'Matrix Factorization')
+        self.verify_model_exists(self.bt_model, 'Boosted Tree')
+       
         logger.info(f"Initialized recommender for project: {self.project_id}")
+        logger.info(f"MF Model: {self.mf_model}")
+        logger.info(f"BT Model: {self.bt_model}")
    
     def find_latest_model(self, model_prefix: str) -> str:
-
         """Find the latest version of a model by prefix."""
-
+        
         try:
-
-            query = f"""
-
-            SELECT 
-
-                model_name,
-
-                creation_time
-
-            FROM `{self.project_id}.{self.dataset_id}.INFORMATION_SCHEMA.MODELS`
-
-            WHERE model_name LIKE '{model_prefix}%'
-
-            ORDER BY creation_time DESC
-
-            LIMIT 1
-
-            """
-
-            result = self.client.query(query).to_dataframe()
-
-            if not result.empty:
-
-                model_name = result['model_name'].iloc[0]
-
-                full_path = f"{self.project_id}.{self.dataset_id}.{model_name}"
-
-                logger.info(f"Found model: {full_path}")
-
+            # Use BigQuery client's list_models method instead of INFORMATION_SCHEMA
+            dataset_ref = self.client.dataset(self.dataset_id)
+            models = list(self.client.list_models(dataset_ref))
+            
+            # Filter models by prefix and sort by creation time
+            matching_models = [
+                model for model in models 
+                if model.model_id.startswith(model_prefix)
+            ]
+            
+            if matching_models:
+                # Sort by creation time (newest first)
+                matching_models.sort(key=lambda m: m.created, reverse=True)
+                latest_model = matching_models[0]
+                full_path = f"{self.project_id}.{self.dataset_id}.{latest_model.model_id}"
+                logger.info(f"Found model: {full_path} (created: {latest_model.created})")
                 return full_path
-
             else:
-
                 # Fallback to base name
-
                 logger.warning(f"No model found with prefix {model_prefix}, trying base name")
-
                 return f"{self.project_id}.{self.dataset_id}.{model_prefix}"
-
+                
         except Exception as e:
-
             logger.error(f"Error finding model: {e}")
-
             # Fallback to base name
-
             return f"{self.project_id}.{self.dataset_id}.{model_prefix}"
+    
+    def verify_model_exists(self, model_path: str, model_name: str):
+        """Verify that a model exists in BigQuery."""
+        try:
+            model = self.client.get_model(model_path)
+            logger.info(f"✓ {model_name} model verified: {model_path}")
+        except Exception as e:
+            logger.error(f"✗ {model_name} model NOT FOUND: {model_path}")
+            logger.error(f"  Error: {e}")
+            logger.warning(f"  Recommendations using {model_name} will fail!")
  
     def get_all_users(self, limit=None) -> List[str]:
         """Get all unique users from the dataset."""
@@ -190,6 +185,17 @@ class BookRecommender:
         """Get recommendations using Boosted Tree model."""
        
         try:
+            # First check if user has features
+            user_check_query = f"""
+            SELECT COUNT(*) as count
+            FROM `{self.features_table}`
+            WHERE user_id_clean = '{user_id}'
+            """
+            user_check = self.client.query(user_check_query).to_dataframe(create_bqstorage_client=False)
+            if user_check['count'].iloc[0] == 0:
+                logger.warning(f"User {user_id} has no features - BT cannot make predictions")
+                return pd.DataFrame()
+            
             query = f"""
             WITH user_features AS (
                 SELECT
@@ -255,7 +261,7 @@ class BookRecommender:
                         FROM `{self.features_table}` f
                         CROSS JOIN user_features u
                         WHERE f.book_id NOT IN (SELECT book_id FROM user_read_books)
-                        AND f.ratings_count > 50
+                        AND COALESCE(f.ratings_count, 0) >= 1
                         LIMIT 100  -- Limit candidates for efficiency
                     )
                 )
@@ -272,21 +278,40 @@ class BookRecommender:
             LIMIT {top_k}
             """
            
+            logger.debug(f"Executing BT query for user {user_id} with model {self.bt_model}")
             result = self.client.query(query).to_dataframe(create_bqstorage_client=False)
+            
+            if result.empty:
+                logger.warning(f"BT model returned no recommendations for user {user_id}")
+            else:
+                logger.debug(f"BT model returned {len(result)} recommendations for user {user_id}")
+            
             return result
            
         except Exception as e:
-            logger.error(f"Error getting BT recommendations for user {user_id}: {e}")
+            logger.error(f"Error getting BT recommendations for user {user_id}: {e}", exc_info=True)
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return pd.DataFrame()
    
     def get_combined_recommendations(self, user_id: str, top_k: int = 5) -> Dict:
         """Get recommendations from both models for a user."""
        
-        logger.info(f"Getting recommendations for user: {user_id}")
+        logger.debug(f"Getting recommendations for user: {user_id}")
        
         # Get recommendations from both models
         mf_recs = self.get_mf_recommendations(user_id, top_k)
         bt_recs = self.get_bt_recommendations(user_id, top_k)
+       
+        # Log results
+        if mf_recs.empty and bt_recs.empty:
+            logger.warning(f"User {user_id}: No recommendations from either model")
+        elif mf_recs.empty:
+            logger.warning(f"User {user_id}: MF returned no recommendations, BT returned {len(bt_recs)}")
+        elif bt_recs.empty:
+            logger.warning(f"User {user_id}: BT returned no recommendations, MF returned {len(mf_recs)}")
+        else:
+            logger.debug(f"User {user_id}: MF={len(mf_recs)}, BT={len(bt_recs)}")
        
         # Combine results
         result = {
@@ -323,6 +348,13 @@ class BookRecommender:
         logger.info(f"Generating recommendations for {len(users)} users...")
        
         all_recommendations = []
+        stats = {
+            'mf_success': 0,
+            'bt_success': 0,
+            'both_success': 0,
+            'neither_success': 0,
+            'total_users': len(users)
+        }
        
         for i, user_id in enumerate(users, 1):
             if i % 10 == 0:
@@ -331,6 +363,19 @@ class BookRecommender:
             try:
                 # Get recommendations
                 recs = self.get_combined_recommendations(user_id)
+               
+                mf_count = len(recs.get('matrix_factorization', []))
+                bt_count = len(recs.get('boosted_tree', []))
+               
+                # Update statistics
+                if mf_count > 0:
+                    stats['mf_success'] += 1
+                if bt_count > 0:
+                    stats['bt_success'] += 1
+                if mf_count > 0 and bt_count > 0:
+                    stats['both_success'] += 1
+                if mf_count == 0 and bt_count == 0:
+                    stats['neither_success'] += 1
                
                 # Format for DataFrame
                 for rec in recs.get('matrix_factorization', []):
@@ -361,8 +406,19 @@ class BookRecommender:
                     time.sleep(1)
                    
             except Exception as e:
-                logger.error(f"Error processing user {user_id}: {e}")
+                logger.error(f"Error processing user {user_id}: {e}", exc_info=True)
                 continue
+       
+        # Log statistics
+        logger.info("\n" + "="*60)
+        logger.info("PROCESSING STATISTICS")
+        logger.info("="*60)
+        logger.info(f"Total users processed: {stats['total_users']}")
+        logger.info(f"Users with MF recommendations: {stats['mf_success']} ({100*stats['mf_success']/stats['total_users']:.1f}%)")
+        logger.info(f"Users with BT recommendations: {stats['bt_success']} ({100*stats['bt_success']/stats['total_users']:.1f}%)")
+        logger.info(f"Users with both: {stats['both_success']} ({100*stats['both_success']/stats['total_users']:.1f}%)")
+        logger.info(f"Users with neither: {stats['neither_success']} ({100*stats['neither_success']/stats['total_users']:.1f}%)")
+        logger.info("="*60 + "\n")
        
         # Create DataFrame
         df_results = pd.DataFrame(all_recommendations)
