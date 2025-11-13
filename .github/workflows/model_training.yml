@@ -36,19 +36,9 @@ jobs:
       run: |
         gh run download $RUN_ID -R $REPO -n goodreads-train-data
 
-    - name: List downloaded files
-      run: |
-        echo "Listing contents of the downloaded artifact directory:"
-        ls -R
-    
     - name: Move data to correct location
       run: |
         mv train_data.parquet data/.
-
-    - name: List downloaded files 2
-      run: |
-        echo "Listing contents of the downloaded artifact directory:"
-        ls -R
 
     - name: Train the model
       run: python -m src.df_model_training
