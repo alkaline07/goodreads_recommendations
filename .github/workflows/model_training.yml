@@ -27,47 +27,6 @@ jobs:
 
     - name: Install dependencies
       run: pip install -r model_requirements.txt
-    
-    - name: Wait for artifact to be processed
-      env:
-        GH_TOKEN: ${{ github.token }}
-        REPO: ${{ github.repository }}
-        RUN_ID: ${{ github.event.workflow_run.id }}
-        ARTIFACT_NAME: "goodreads-train-data"
-      run: |
-        echo "Waiting for artifact '$ARTIFACT_NAME' from run $RUN_ID to be fully processed..."
-        
-        timeout=300  # 5 minutes total timeout
-        start_time=$(date +%s)
-        
-        while true; do
-          current_time=$(date +%s)
-          elapsed=$((current_time - start_time))
-          
-          if [ $elapsed -gt $timeout ]; then
-            echo "Error: Timeout after $timeout seconds waiting for artifact."
-            exit 1
-          fi
-          
-          # Get the size of the specific artifact by name
-          size=$(gh api "repos/$REPO/actions/runs/$RUN_ID/artifacts" \
-                   --jq ".artifacts[] | select(.name == \"$ARTIFACT_NAME\") | .size_in_bytes" 2>/dev/null)
-          
-          # Check if size is a non-empty string AND greater than 0
-          if [ -n "$size" ] && [ "$size" -gt 0 ]; then
-            echo "Success! Artifact '$ARTIFACT_NAME' found with size $size bytes."
-            break
-          else
-            echo "Artifact not yet ready (API size: ${size:-'not found or 0'}), retrying in 20s... (Elapsed: ${elapsed}s)"
-            sleep 20
-          fi
-        done
-
-    # - name: Download data artifact
-    #   uses: actions/download-artifact@v4
-    #   with:
-    #     name: goodreads-train-data
-    #     run-id: ${{ github.event.workflow_run.id }}
 
     - name: Download data artifact via GH CLI
       env:
@@ -84,12 +43,12 @@ jobs:
     
     - name: Move data to correct location
       run: |
-        # gh download creates a folder named 'goodreads-train-data'
-        # Inside is our 'data' folder (from the upload)
-        # We move 'data' to the root, where the script expects it.
-        mv goodreads-train-data/data .
-        # Clean up the empty directory
-        rm -rf goodreads-train-data
+        mv train_data.parquet data/.
+
+    - name: List downloaded files 2
+      run: |
+        echo "Listing contents of the downloaded artifact directory:"
+        ls -R
 
     - name: Train the model
       run: python -m src.df_model_training
