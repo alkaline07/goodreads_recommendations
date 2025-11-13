@@ -1,41 +1,41 @@
 {
-  "timestamp": "2025-11-12T22:09:00.829655",
+  "timestamp": "2025-11-13T17:44:27.591132",
   "selected_model": {
     "model_name": "boosted_tree_regressor",
     "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
-    "validation_mae": 1.3962777185009663,
-    "validation_rmse": 1.6382036142755807,
+    "validation_mae": 1.4062765938998087,
+    "validation_rmse": 1.6449578379466037,
     "performance_score": 100.0,
-    "fairness_score": 70,
+    "fairness_score": 60,
     "bias_disparities": 2,
-    "high_severity_disparities": 1,
-    "combined_score": 88.0,
+    "high_severity_disparities": 2,
+    "combined_score": 84.0,
     "recommendation": "SELECTED"
   },
   "all_candidates": [
     {
       "model_name": "boosted_tree_regressor",
       "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
-      "validation_mae": 1.3962777185009663,
-      "validation_rmse": 1.6382036142755807,
+      "validation_mae": 1.4062765938998087,
+      "validation_rmse": 1.6449578379466037,
       "performance_score": 100.0,
-      "fairness_score": 70,
+      "fairness_score": 60,
       "bias_disparities": 2,
-      "high_severity_disparities": 1,
-      "combined_score": 88.0,
+      "high_severity_disparities": 2,
+      "combined_score": 84.0,
       "recommendation": "SELECTED"
     },
     {
       "model_name": "matrix_factorization",
       "predictions_table": "recommendation-system-475301.books.matrix_factorization_rating_predictions",
-      "validation_mae": 1.7277854403440782,
-      "validation_rmse": 1.9534134235517833,
-      "performance_score": 78.5082827409357,
+      "validation_mae": 1.7541528914255862,
+      "validation_rmse": 1.977766514372742,
+      "performance_score": 77.51527436510995,
       "fairness_score": 60,
       "bias_disparities": 3,
       "high_severity_disparities": 1,
-      "combined_score": 71.10496964456141,
-      "recommendation": "NOT SELECTED - Lower combined score (71.1 vs 88.0)"
+      "combined_score": 70.50916461906596,
+      "recommendation": "NOT SELECTED - Lower combined score (70.5 vs 84.0)"
     }
   ],
   "selection_criteria": {
@@ -46,13 +46,13 @@
   },
   "trade_offs": {
     "best_performance_model": "boosted_tree_regressor",
-    "best_performance_mae": 1.3962777185009663,
+    "best_performance_mae": 1.4062765938998087,
     "best_fairness_model": "boosted_tree_regressor",
-    "best_fairness_score": 70,
+    "best_fairness_score": 60,
     "selected_model_is_best_performance": true,
     "selected_model_is_best_fairness": true,
     "performance_sacrifice": 0,
     "fairness_gain": 0
   },
-  "rationale": "Selected 'boosted_tree_regressor' with combined score of 88.0/100. This model has the best performance and is the least biased among candidates. NOTE: Model has 1 high-severity bias disparities. Consider mitigation before deployment."
+  "rationale": "Selected 'boosted_tree_regressor' with combined score of 84.0/100. This model outperforms alternatives in both accuracy and fairness, though fairness could be improved. CAUTION: Model has 2 high-severity bias disparities and low fairness (60/100). Mitigation strongly recommended before deployment."
 }
