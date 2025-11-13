@@ -28,16 +28,16 @@ jobs:
     - name: Install dependencies
       run: pip install -r model_requirements.txt
     
-    - name: Wait for artifact to be available
+    - name: Wait for artifact to be processed
       env:
         GH_TOKEN: ${{ github.token }}
         REPO: ${{ github.repository }}
         RUN_ID: ${{ github.event.workflow_run.id }}
         ARTIFACT_NAME: "goodreads-train-data"
       run: |
-        echo "Waiting for artifact '$ARTIFACT_NAME' from run $RUN_ID..."
+        echo "Waiting for artifact '$ARTIFACT_NAME' from run $RUN_ID to be fully processed..."
         
-        timeout=180  # 3 minutes total timeout
+        timeout=300  # 5 minutes total timeout
         start_time=$(date +%s)
         
         while true; do
@@ -49,15 +49,17 @@ jobs:
             exit 1
           fi
           
-          # Use gh api to list artifacts and grep for the exact name
-          artifact_names=$(gh api "repos/$REPO/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | .name' 2>/dev/null)
+          # Get the size of the specific artifact by name
+          size=$(gh api "repos/$REPO/actions/runs/$RUN_ID/artifacts" \
+                   --jq ".artifacts[] | select(.name == \"$ARTIFACT_NAME\") | .size_in_bytes" 2>/dev/null)
           
-          if echo "$artifact_names" | grep -q "^$ARTIFACT_NAME$"; then
-            echo "Success! Artifact '$ARTIFACT_NAME' found."
+          # Check if size is a non-empty string AND greater than 0
+          if [ -n "$size" ] && [ "$size" -gt 0 ]; then
+            echo "Success! Artifact '$ARTIFACT_NAME' found with size $size bytes."
             break
           else
-            echo "Artifact not yet found, retrying in 15s... (Elapsed: ${elapsed}s)"
-            sleep 15
+            echo "Artifact not yet ready (API size: ${size:-'not found or 0'}), retrying in 20s... (Elapsed: ${elapsed}s)"
+            sleep 20
           fi
         done
 
