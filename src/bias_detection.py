@@ -492,7 +492,7 @@ def main():
     )
     
     # Save report
-    detector.save_report(report, "data/bias_reports/boosted_tree_bias_report.json")
+    detector.save_report(report, "../docs/bias_reports/boosted_tree_bias_report.json")
     
     # Save to BigQuery
     output_table = f"{detector.project_id}.{detector.dataset_id}.bias_metrics_boosted_tree"

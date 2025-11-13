@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-11-12T21:14:12.901146",
-  "model_name": "boosted_tree_regressor",
+  "timestamp": "2025-11-12T22:09:07.706671",
+  "model_name": "boosted_tree_regressor_final",
   "dataset": "test",
   "slice_metrics": [
     {

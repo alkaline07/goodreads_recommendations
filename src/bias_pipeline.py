@@ -93,7 +93,7 @@ class BiasAuditPipeline:
         audit_results['detection_report'] = detection_report
         
         # Save detection report
-        detection_path = f"data/bias_reports/{model_name}_detection_report.json"
+        detection_path = f"../docs/bias_reports/{model_name}_detection_report.json"
         self.detector.save_report(detection_report, detection_path)
         
         # Save to BigQuery
@@ -180,7 +180,7 @@ class BiasAuditPipeline:
         print("="*80)
         print(f"\nFull audit report: {report_path}")
         if audit_results['visualizations_generated']:
-            print("Visualizations: data/bias_reports/visualizations/")
+            print("Visualizations: ../docs/bias_reports/visualizations/")
         
         # Show production-ready table if mitigation was applied
         if audit_results.get('debiased_table'):
@@ -228,7 +228,7 @@ class BiasAuditPipeline:
         )
         
         # Save mitigation report
-        report_path = f"data/bias_reports/{model_name}_threshold_mitigation.json"
+        report_path = f"../docs/bias_reports/{model_name}_threshold_mitigation.json"
         self.mitigator.save_mitigation_report(result, report_path)
         
         return result
@@ -376,7 +376,7 @@ class BiasAuditPipeline:
             lambda_shrinkage=0.5
         )
         
-        report_path = f"data/bias_reports/{model_name}_shrinkage_mitigation.json"
+        report_path = f"../docs/bias_reports/{model_name}_shrinkage_mitigation.json"
         self.mitigator.save_mitigation_report(result, report_path)
         
         return result
@@ -451,7 +451,7 @@ class BiasAuditPipeline:
             'executive_summary': self._generate_executive_summary(audit_results)
         }
         
-        output_path = f"data/bias_reports/{model_name}_comprehensive_audit.json"
+        output_path = f"../docs/bias_reports/{model_name}_comprehensive_audit.json"
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         with open(output_path, 'w') as f:
@@ -597,8 +597,8 @@ class BiasAuditPipeline:
             print(f"   {selection_report.selected_model.predictions_table}")
         
         print(f"\nReports:")
-        print(f"   Model Selection: data/bias_reports/model_selection_report.json")
-        print(f"   Visualizations: data/bias_reports/model_selection/")
+        print(f"   Model Selection: ../docs/bias_reports/model_selection_report.json")
+        print(f"   Visualizations: ../docs/bias_reports/model_selection/")
         
         return {
             'selection_report': selection_report,
@@ -624,10 +624,10 @@ def run_bias_audit_for_all_models(with_model_selection: bool = True):
             'model_name': 'boosted_tree_regressor',
             'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.boosted_tree_rating_predictions"
         },
-        {
-            'model_name': 'automl_regressor',
-            'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.automl_rating_predictions"
-        },
+        # {
+        #     'model_name': 'automl_regressor',
+        #     'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.automl_rating_predictions"
+        # },
         {
             'model_name': 'matrix_factorization',
             'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.matrix_factorization_rating_predictions"
@@ -677,7 +677,7 @@ def run_bias_audit_for_all_models(with_model_selection: bool = True):
                 all_results[model['model_name']] = {'error': str(e)}
         
         # Save consolidated report
-        consolidated_path = "data/bias_reports/consolidated_audit_report.json"
+        consolidated_path = "../docs/bias_reports/consolidated_audit_report.json"
         os.makedirs(os.path.dirname(consolidated_path), exist_ok=True)
         
         with open(consolidated_path, 'w') as f:
@@ -759,7 +759,7 @@ Examples:
     args = parser.parse_args()
     
     # Set up tee logging to save all console output
-    log_dir = "data/bias_reports/bias_pipeline_logs"
+    log_dir = "../docs/bias_reports/bias_pipeline_logs"
     os.makedirs(log_dir, exist_ok=True)
     log_path = os.path.join(log_dir, f"pipeline_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
     class _Tee:
@@ -801,10 +801,10 @@ Examples:
                 'model_name': 'boosted_tree_regressor',
                 'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.boosted_tree_rating_predictions"
             },
-            {
-                'model_name': 'automl_regressor',
-                'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.automl_rating_predictions"
-            },
+            # {
+            #     'model_name': 'automl_regressor',
+            #     'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.automl_rating_predictions"
+            # },
             {
                 'model_name': 'matrix_factorization',
                 'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.matrix_factorization_rating_predictions"
@@ -828,10 +828,10 @@ Examples:
         else:
             print(f"   Production Table: {results['selected_table']}")
         print(f"\nGenerated Files:")
-        print(f"   - Model Selection Report: data/bias_reports/model_selection_report.json")
-        print(f"   - Model Comparison Chart: data/bias_reports/model_selection/model_comparison.png")
+        print(f"   - Model Selection Report: ../docs/bias_reports/model_selection_report.json")
+        print(f"   - Model Comparison Chart: ../docs/bias_reports/model_selection/model_comparison.png")
         if not args.no_visualizations:
-            print(f"   - Fairness Visualizations: data/bias_reports/visualizations/")
+            print(f"   - Fairness Visualizations: ../docs/bias_reports/visualizations/")
         print()
     else:
         # Run without model selection

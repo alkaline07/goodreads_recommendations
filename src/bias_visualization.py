@@ -27,7 +27,7 @@ class BiasVisualizer:
     Generate visualizations for bias analysis reports.
     """
     
-    def __init__(self, output_dir: str = "data/bias_reports/visualizations"):
+    def __init__(self, output_dir: str = "../docs/bias_reports/visualizations"):
         """
         Initialize the visualizer.
         
@@ -446,7 +446,7 @@ def main():
     visualizer = BiasVisualizer()
     
     # Load most recent report
-    report_dir = "data/bias_reports"
+    report_dir = "../docs/bias_reports"
     report_files = [f for f in os.listdir(report_dir) if f.endswith('_detection_report.json')]
     
     if not report_files:

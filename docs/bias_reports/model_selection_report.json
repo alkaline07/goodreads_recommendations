@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-12T21:15:16.183148",
+  "timestamp": "2025-11-12T22:09:00.829655",
   "selected_model": {
     "model_name": "boosted_tree_regressor",
     "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
@@ -54,5 +54,5 @@
     "performance_sacrifice": 0,
     "fairness_gain": 0
   },
-  "rationale": "Selected 'boosted_tree_regressor' with combined score of 88.0/100. This model has the best performance and is the least biased among candidates. \u26a0\ufe0f NOTE: Model has 1 high-severity bias disparities. Consider mitigation before deployment."
+  "rationale": "Selected 'boosted_tree_regressor' with combined score of 88.0/100. This model has the best performance and is the least biased among candidates. NOTE: Model has 1 high-severity bias disparities. Consider mitigation before deployment."
 }

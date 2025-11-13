@@ -571,7 +571,7 @@ def main():
     
     mitigator.save_mitigation_report(
         result,
-        "data/bias_reports/shrinkage_mitigation_report.json"
+        "../docs/bias_reports/shrinkage_mitigation_report.json"
     )
 
 

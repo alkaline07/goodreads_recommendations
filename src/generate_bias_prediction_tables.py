@@ -187,78 +187,78 @@ class BiasReadyPredictionGenerator:
             print(f"\n✗ Error generating predictions: {e}")
             return False
     
-    def generate_automl_predictions(self, model_path: str) -> bool:
-        """
-        Generate predictions from AutoML model.
+    # def generate_automl_predictions(self, model_path: str) -> bool:
+    #     """
+    #     Generate predictions from AutoML model.
         
-        Args:
-            model_path: Full path to the model
+    #     Args:
+    #         model_path: Full path to the model
             
-        Returns:
-            True if successful
-        """
-        print("\n" + "="*80)
-        print("GENERATING AUTOML PREDICTIONS FOR BIAS DETECTION")
-        print("="*80 + "\n")
+    #     Returns:
+    #         True if successful
+    #     """
+    #     print("\n" + "="*80)
+    #     print("GENERATING AUTOML PREDICTIONS FOR BIAS DETECTION")
+    #     print("="*80 + "\n")
         
-        output_table = f"{self.project_id}.{self.dataset_id}.automl_rating_predictions"
-        test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
+    #     output_table = f"{self.project_id}.{self.dataset_id}.automl_rating_predictions"
+    #     test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
         
-        query = f"""
-        CREATE OR REPLACE TABLE `{output_table}` AS
-        SELECT
-          pred.user_id_clean,
-          pred.book_id,
-          pred.rating AS actual_rating,
-          pred.predicted_rating,
-          ABS(pred.rating - pred.predicted_rating) AS absolute_error,
-          (pred.rating - pred.predicted_rating) AS error,
-          -- Slicing features
-          pred.book_popularity_normalized,
-          pred.book_length_category,
-          pred.book_era,
-          pred.num_genres,
-          pred.user_activity_count,
-          pred.reading_pace_category
-        FROM ML.PREDICT(
-          MODEL `{model_path}`,
-          (
-            SELECT *
-            FROM `{test_table}`
-            WHERE rating IS NOT NULL
-          )
-        ) AS pred
-        """
+    #     query = f"""
+    #     CREATE OR REPLACE TABLE `{output_table}` AS
+    #     SELECT
+    #       pred.user_id_clean,
+    #       pred.book_id,
+    #       pred.rating AS actual_rating,
+    #       pred.predicted_rating,
+    #       ABS(pred.rating - pred.predicted_rating) AS absolute_error,
+    #       (pred.rating - pred.predicted_rating) AS error,
+    #       -- Slicing features
+    #       pred.book_popularity_normalized,
+    #       pred.book_length_category,
+    #       pred.book_era,
+    #       pred.num_genres,
+    #       pred.user_activity_count,
+    #       pred.reading_pace_category
+    #     FROM ML.PREDICT(
+    #       MODEL `{model_path}`,
+    #       (
+    #         SELECT *
+    #         FROM `{test_table}`
+    #         WHERE rating IS NOT NULL
+    #       )
+    #     ) AS pred
+    #     """
         
-        try:
-            print(f"Model: {model_path}")
-            print(f"Output: {output_table}")
-            print("\nExecuting query (this may take 2-5 minutes)...")
+    #     try:
+    #         print(f"Model: {model_path}")
+    #         print(f"Output: {output_table}")
+    #         print("\nExecuting query (this may take 2-5 minutes)...")
             
-            job = self.client.query(query)
-            job.result()
+    #         job = self.client.query(query)
+    #         job.result()
             
-            # Get statistics
-            stats_query = f"""
-            SELECT 
-                COUNT(*) as num_predictions,
-                AVG(absolute_error) as mean_absolute_error,
-                SQRT(AVG(POWER(error, 2))) as root_mean_squared_error
-            FROM `{output_table}`
-            """
-            stats = self.client.query(stats_query).to_dataframe(create_bqstorage_client=False)
+    #         # Get statistics
+    #         stats_query = f"""
+    #         SELECT 
+    #             COUNT(*) as num_predictions,
+    #             AVG(absolute_error) as mean_absolute_error,
+    #             SQRT(AVG(POWER(error, 2))) as root_mean_squared_error
+    #         FROM `{output_table}`
+    #         """
+    #         stats = self.client.query(stats_query).to_dataframe(create_bqstorage_client=False)
             
-            print("\nAutoML Predictions Generated Successfully!")
-            print("\nStatistics:")
-            print(f"  Predictions: {stats['num_predictions'].iloc[0]:,.0f}")
-            print(f"  MAE: {stats['mean_absolute_error'].iloc[0]:.4f}")
-            print(f"  RMSE: {stats['root_mean_squared_error'].iloc[0]:.4f}")
+    #         print("\nAutoML Predictions Generated Successfully!")
+    #         print("\nStatistics:")
+    #         print(f"  Predictions: {stats['num_predictions'].iloc[0]:,.0f}")
+    #         print(f"  MAE: {stats['mean_absolute_error'].iloc[0]:.4f}")
+    #         print(f"  RMSE: {stats['root_mean_squared_error'].iloc[0]:.4f}")
             
-            return True
+    #         return True
             
-        except Exception as e:
-            print(f"\n✗ Error generating predictions: {e}")
-            return False
+    #     except Exception as e:
+    #         print(f"\n✗ Error generating predictions: {e}")
+    #         return False
     
     def generate_matrix_factorization_predictions(self, model_path: str) -> bool:
         """
@@ -367,7 +367,7 @@ class BiasReadyPredictionGenerator:
             model_types = {
                 'boosted_tree': [],
                 'matrix_factorization': [],
-                'automl': []
+                # 'automl': []
             }
             
             for model in models:
@@ -376,8 +376,8 @@ class BiasReadyPredictionGenerator:
                     model_types['boosted_tree'].append(model_id)
                 elif 'matrix_factorization' in model_id.lower():
                     model_types['matrix_factorization'].append(model_id)
-                elif 'automl' in model_id.lower():
-                    model_types['automl'].append(model_id)
+                # elif 'automl' in model_id.lower():
+                #     model_types['automl'].append(model_id)
             
             print("Available Models:")
             for model_type, model_list in model_types.items():
@@ -416,12 +416,13 @@ class BiasReadyPredictionGenerator:
         
         # Step 2: Verify test table exists
         if not self.verify_test_table_exists():
-            print("✗ Cannot proceed without test table")
+            print("Cannot proceed without test table")
             return
         
         # Step 3: Determine which models to process
         if model_types is None:
-            model_types = ['boosted_tree', 'automl', 'matrix_factorization']
+            # model_types = ['boosted_tree', 'automl', 'matrix_factorization']
+            model_types = ['boosted_tree', 'matrix_factorization']
         
         results = {}
         
@@ -433,12 +434,12 @@ class BiasReadyPredictionGenerator:
             else:
                 results['boosted_tree'] = False
         
-        if 'automl' in model_types and available_models.get('automl'):
-            model_path = self.find_latest_model('automl_regressor_model')
-            if model_path:
-                results['automl'] = self.generate_automl_predictions(model_path)
-            else:
-                results['automl'] = False
+        # if 'automl' in model_types and available_models.get('automl'):
+        #     model_path = self.find_latest_model('automl_regressor_model')
+        #     if model_path:
+        #         results['automl'] = self.generate_automl_predictions(model_path)
+        #     else:
+        #         results['automl'] = False
         
         if 'matrix_factorization' in model_types and available_models.get('matrix_factorization'):
             model_path = self.find_latest_model('matrix_factorization_model')
@@ -469,7 +470,7 @@ class BiasReadyPredictionGenerator:
             print("\n  2. Or run full bias audit pipeline:")
             print("     cd src && python bias_pipeline.py")
         else:
-            print("  ✗ No predictions were generated successfully")
+            print("  No predictions were generated successfully")
             print("  Check errors above and ensure models are trained")
         
         print("\n" + "="*80 + "\n")
@@ -480,7 +481,9 @@ def main():
     generator = BiasReadyPredictionGenerator()
     
     # Generate predictions for all available models
-    generator.run(model_types=['boosted_tree', 'automl', 'matrix_factorization'])
+    #generator.run(model_types=['boosted_tree', 'automl', 'matrix_factorization'])
+    generator.run(model_types=['boosted_tree', 'matrix_factorization'])
+
 
 
 if __name__ == "__main__":

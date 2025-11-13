@@ -73,7 +73,7 @@ class ModelSelector:
         self.min_fairness_threshold = min_fairness_threshold
         
         self.detector = BiasDetector()
-        self.visualizer = BiasVisualizer(output_dir="data/bias_reports/model_selection")
+        self.visualizer = BiasVisualizer(output_dir="../docs/bias_reports/model_selection")
         
         print(f"ModelSelector initialized")
         print(f"  Performance weight: {performance_weight}")
@@ -498,7 +498,7 @@ class ModelSelector:
             'rationale': report.rationale
         }
         
-        output_path = "data/bias_reports/model_selection_report.json"
+        output_path = "../docs/bias_reports/model_selection_report.json"
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         with open(output_path, 'w') as f:
@@ -565,7 +565,7 @@ class ModelSelector:
         
         plt.tight_layout()
         
-        output_path = "data/bias_reports/model_selection/model_comparison.png"
+        output_path = "../docs/bias_reports/model_selection/model_comparison.png"
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         print(f"Saved: {output_path}")
         plt.close()
