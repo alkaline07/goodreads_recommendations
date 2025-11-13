@@ -542,6 +542,41 @@ class BiasAuditPipeline:
         
         selection_report = self.model_selector.compare_models(model_candidates)
         
+         # Apply mitigation to selected model
+        print(f"\n\n{'='*80}")
+        print("APPLYING MITIGATION TO SELECTED MODEL")
+        print(f"{'='*80}\n")
+        
+        selected_model = selection_report.selected_model
+        print(f"Model: {selected_model.model_name}")
+        print(f"Bias disparities detected: {selected_model.bias_disparities}")
+        
+        debiased_table = None
+        final_audit = None
+        
+        if selected_model.bias_disparities > 0:
+            print(f"\nApplying prediction shrinkage to reduce bias...")
+            try:
+                final_audit = self.run_full_audit(
+                    model_name=f"{selected_model.model_name}_final",
+                    predictions_table=selected_model.predictions_table,
+                    apply_mitigation=True,
+                    mitigation_techniques=['prediction_shrinkage'],
+                    generate_visualizations=False  # Already generated
+                )
+                debiased_table = final_audit.get('debiased_table')
+                
+                if debiased_table:
+                    print(f"\n✓ Mitigation complete!")
+                    print(f"  Debiased table: {debiased_table}")
+                else:
+                    print(f"\n⚠️  Mitigation did not generate debiased table")
+                    
+            except Exception as e:
+                print(f"\n✗ Error during mitigation: {e}")
+        else:
+            print(f"\n✓ No bias detected - mitigation not needed")
+        
         # Final summary
         print(f"\n\n{'='*80}")
         print("MODEL SELECTION COMPLETE")
@@ -552,6 +587,14 @@ class BiasAuditPipeline:
         print(f"   Combined Score: {selection_report.selected_model.combined_score:.1f}/100")
         print(f"\n📋 RATIONALE:")
         print(f"   {selection_report.rationale}")
+        if debiased_table:
+            print(f"\n🎉 PRODUCTION-READY TABLE (Debiased):")
+            print(f"   {debiased_table}")
+            print(f"   Use this table for production deployment")
+        else:
+            print(f"\n📊 PRODUCTION TABLE:")
+            print(f"   {selection_report.selected_model.predictions_table}")
+        
         print(f"\n📊 Reports:")
         print(f"   Model Selection: data/bias_reports/model_selection_report.json")
         print(f"   Visualizations: data/bias_reports/model_selection/")
@@ -560,7 +603,9 @@ class BiasAuditPipeline:
             'selection_report': selection_report,
             'all_audits': all_audits,
             'selected_model': selection_report.selected_model.model_name,
-            'selected_table': selection_report.selected_model.predictions_table
+            'selected_table': selection_report.selected_model.predictions_table,
+            'debiased_table': debiased_table,
+            'final_audit': final_audit
         }
 
 

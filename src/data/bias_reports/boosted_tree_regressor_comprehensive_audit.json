@@ -1,12 +1,12 @@
 {
   "audit_metadata": {
     "model_name": "boosted_tree_regressor",
-    "timestamp": "2025-11-12T20:40:55.064955",
+    "timestamp": "2025-11-12T20:48:50.801503",
     "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
     "debiased_table": null
   },
   "bias_detection": {
-    "timestamp": "2025-11-12T20:41:01.168652",
+    "timestamp": "2025-11-12T20:48:56.963354",
     "total_slices_analyzed": 20,
     "disparities_found": 2,
     "high_risk_slices": 2,
