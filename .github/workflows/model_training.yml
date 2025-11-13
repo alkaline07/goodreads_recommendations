@@ -63,11 +63,28 @@ jobs:
           fi
         done
 
-    - name: Download data artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: goodreads-train-data
-        run-id: ${{ github.event.workflow_run.id }}
+    # - name: Download data artifact
+    #   uses: actions/download-artifact@v4
+    #   with:
+    #     name: goodreads-train-data
+    #     run-id: ${{ github.event.workflow_run.id }}
+
+    - name: Download data artifact via GH CLI
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+      run: |
+        gh run download $RUN_ID -R $REPO -n goodreads-train-data
+
+    - name: Move data to correct location
+      run: |
+        # gh download creates a folder named 'goodreads-train-data'
+        # Inside is our 'data' folder (from the upload)
+        # We move 'data' to the root, where the script expects it.
+        mv goodreads-train-data/data .
+        # Clean up the empty directory
+        rm -rf goodreads-train-data
 
     - name: Train the model
       run: python -m src.df_model_training
