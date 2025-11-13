@@ -16,10 +16,10 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Create GCP Credentials File
-      run: |
-        echo "${{ secrets.GCP_CREDENTIALS }}" > gcp_credentials.json
-      shell: bash
+    - name: Authenticate to Google Cloud
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
     - name: Install dependencies
       run: pip install -r model_requirements.txt
