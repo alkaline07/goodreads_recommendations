@@ -7,6 +7,16 @@ import os
 from google.cloud import bigquery
 from datetime import datetime
 import time
+import mlflow
+
+
+def safe_mlflow_log(func, *args, **kwargs):
+    """Safely log to MLflow, continue if it fails."""
+    try:
+        return func(*args, **kwargs)
+    except Exception as e:
+        print(f"MLflow logging warning: {e}")
+        return None
 
 
 class BigQueryMLModelTraining:
@@ -177,6 +187,22 @@ class BigQueryMLModelTraining:
             print("Training MATRIX_FACTORIZATION Model")
             print("=" * 60)
 
+            # Model hyperparameters
+            hyperparams = {
+                "model_type": "MATRIX_FACTORIZATION",
+                "l2_reg": 0.1,
+                "num_factors": 10,
+                "max_iterations": 20,
+                "feedback_type": "EXPLICIT"
+            }
+
+            # Log hyperparameters to MLflow
+            safe_mlflow_log(mlflow.log_params, {
+                "mf_l2_reg": hyperparams["l2_reg"],
+                "mf_num_factors": hyperparams["num_factors"],
+                "mf_max_iterations": hyperparams["max_iterations"]
+            })
+
             # First check if we should use the original model parameters
             # since those seemed to work (low loss)
             query = f"""
@@ -199,19 +225,25 @@ class BigQueryMLModelTraining:
             WHERE rating IS NOT NULL
             """
 
+            start_time = time.time()
             success = self.safe_train_model(
                 self.matrix_factorization_model,
                 query,
                 "MATRIX_FACTORIZATION"
             )
+            training_time = time.time() - start_time
            
             if success:
+                safe_mlflow_log(mlflow.log_metric, "mf_training_time_seconds", training_time)
                 self.evaluate_model(self.matrix_factorization_model, "MATRIX_FACTORIZATION")
            
+            safe_mlflow_log(mlflow.log_param, "mf_model_name", self.matrix_factorization_model)
+            safe_mlflow_log(mlflow.log_metric, "mf_training_success", 1 if success else 0)
             return success
 
         except Exception as e:
             print(f"Unexpected error in train_matrix_factorization: {e}", exc_info=True)
+            safe_mlflow_log(mlflow.log_metric, "mf_training_success", 0)
             return False
 
     def train_boosted_tree_regressor(self):
@@ -225,6 +257,29 @@ class BigQueryMLModelTraining:
 
             feature_columns = self.get_feature_columns()
             feature_list = ", ".join(feature_columns)
+
+            # Model hyperparameters
+            hyperparams = {
+                "num_parallel_tree": 5,
+                "max_tree_depth": 4,
+                "subsample": 0.85,
+                "min_split_loss": 0.01,
+                "l1_reg": 0.05,
+                "l2_reg": 0.05,
+                "early_stop": True,
+                "min_rel_progress": 0.01
+            }
+
+            # Log hyperparameters to MLflow
+            safe_mlflow_log(mlflow.log_params, {
+                "bt_num_parallel_tree": hyperparams["num_parallel_tree"],
+                "bt_max_tree_depth": hyperparams["max_tree_depth"],
+                "bt_subsample": hyperparams["subsample"],
+                "bt_min_split_loss": hyperparams["min_split_loss"],
+                "bt_l1_reg": hyperparams["l1_reg"],
+                "bt_l2_reg": hyperparams["l2_reg"],
+                "bt_num_features": len(feature_columns)
+            })
 
             query = f"""
             CREATE OR REPLACE MODEL `{self.boosted_tree_model}`
@@ -247,19 +302,25 @@ class BigQueryMLModelTraining:
             WHERE rating IS NOT NULL
             """
 
+            start_time = time.time()
             success = self.safe_train_model(
                 self.boosted_tree_model,
                 query,
                 "BOOSTED_TREE_REGRESSOR"
             )
+            training_time = time.time() - start_time
            
             if success:
+                safe_mlflow_log(mlflow.log_metric, "bt_training_time_seconds", training_time)
                 self.evaluate_model(self.boosted_tree_model, "BOOSTED_TREE_REGRESSOR")
            
+            safe_mlflow_log(mlflow.log_param, "bt_model_name", self.boosted_tree_model)
+            safe_mlflow_log(mlflow.log_metric, "bt_training_success", 1 if success else 0)
             return success
 
         except Exception as e:
             print(f"Unexpected error in train_boosted_tree_regressor: {e}", exc_info=True)
+            safe_mlflow_log(mlflow.log_metric, "bt_training_success", 0)
             return False
 
     def get_feature_columns(self):
@@ -314,10 +375,14 @@ class BigQueryMLModelTraining:
            
             if not eval_result.empty:
                 print(f"{model_type} Evaluation Metrics:")
+                prefix = "mf_" if "MATRIX_FACTORIZATION" in model_type else "bt_"
+                
                 for col in eval_result.columns:
                     value = eval_result[col].iloc[0]
                     if isinstance(value, float):
                         print(f"  {col}: {value:.4f}")
+                        # Log metrics to MLflow
+                        safe_mlflow_log(mlflow.log_metric, f"{prefix}{col.lower()}", value)
                        
         except Exception as e:
             print(f"Could not evaluate {model_type}: {e}")
@@ -383,24 +448,82 @@ class BigQueryMLModelTraining:
         print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 60)
 
-        # Check and cleanup if needed
-        self.check_and_cleanup_existing_models()
+        # Start MLflow run
+        experiment_name = "bigquery_ml_training"
+        use_mlflow = True
+        try:
+            # Set MLflow tracking URI
+            mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+            mlflow.set_experiment(experiment_name)
+        except Exception as e:
+            print(f"MLflow initialization warning: {e}. Continuing without MLflow tracking.")
+            use_mlflow = False
 
-        # Analyze data characteristics
-        self.analyze_data_characteristics()
+        if use_mlflow:
+            with mlflow.start_run(run_name=f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
+                # Log run metadata
+                safe_mlflow_log(mlflow.log_param, "project_id", self.project_id)
+                safe_mlflow_log(mlflow.log_param, "dataset_id", self.dataset_id)
+                safe_mlflow_log(mlflow.log_param, "train_table", self.train_table)
+                safe_mlflow_log(mlflow.log_param, "val_table", self.val_table)
+                safe_mlflow_log(mlflow.log_param, "test_table", self.test_table)
 
-        # Train models
-        mf_success = self.train_matrix_factorization()
-        bt_success = self.train_boosted_tree_regressor()
+                # Check and cleanup if needed
+                self.check_and_cleanup_existing_models()
 
-        # Summary
-        end_time = time.time()
-        print("=" * 60)
-        print(f"Training completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"Matrix Factorization: {'SUCCESS' if mf_success else 'FAILED'}")
-        print(f"Boosted Tree: {'SUCCESS' if bt_success else 'FAILED'}")
-        print(f"Total runtime: {(end_time - start_time):.2f} seconds")
-        print("=" * 60)
+                # Analyze data characteristics
+                self.analyze_data_characteristics()
+                
+                # Log data statistics if available
+                if hasattr(self, 'data_stats') and self.data_stats:
+                    for key, value in self.data_stats.items():
+                        if isinstance(value, (int, float)) and key != 'rating_quartiles':
+                            safe_mlflow_log(mlflow.log_metric, f"data_{key}", value)
+
+                # Train models
+                mf_success = self.train_matrix_factorization()
+                bt_success = self.train_boosted_tree_regressor()
+
+                # Summary
+                end_time = time.time()
+                total_runtime = end_time - start_time
+                
+                # Log final metrics
+                safe_mlflow_log(mlflow.log_metric, "total_runtime_seconds", total_runtime)
+                safe_mlflow_log(mlflow.log_metric, "all_models_success", 1 if (mf_success and bt_success) else 0)
+                
+                print("=" * 60)
+                print(f"Training completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"Matrix Factorization: {'SUCCESS' if mf_success else 'FAILED'}")
+                print(f"Boosted Tree: {'SUCCESS' if bt_success else 'FAILED'}")
+                print(f"Total runtime: {total_runtime:.2f} seconds")
+                try:
+                    print(f"MLflow run ID: {mlflow.active_run().info.run_id}")
+                except Exception:
+                    pass
+                print("=" * 60)
+        else:
+            # Run without MLflow
+            # Check and cleanup if needed
+            self.check_and_cleanup_existing_models()
+
+            # Analyze data characteristics
+            self.analyze_data_characteristics()
+
+            # Train models
+            mf_success = self.train_matrix_factorization()
+            bt_success = self.train_boosted_tree_regressor()
+
+            # Summary
+            end_time = time.time()
+            total_runtime = end_time - start_time
+            
+            print("=" * 60)
+            print(f"Training completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"Matrix Factorization: {'SUCCESS' if mf_success else 'FAILED'}")
+            print(f"Boosted Tree: {'SUCCESS' if bt_success else 'FAILED'}")
+            print(f"Total runtime: {total_runtime:.2f} seconds")
+            print("=" * 60)
 
 
 def main():
