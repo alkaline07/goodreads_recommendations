@@ -58,7 +58,7 @@ class BiasReadyPredictionGenerator:
                 matching_models.sort(key=lambda m: m.created, reverse=True)
                 latest_model = matching_models[0]
                 full_path = f"{self.project_id}.{self.dataset_id}.{latest_model.model_id}"
-                print(f"✓ Found model: {latest_model.model_id}")
+                print(f"Found model: {latest_model.model_id}")
                 print(f"  Created: {latest_model.created}")
                 return full_path
             else:
@@ -80,7 +80,7 @@ class BiasReadyPredictionGenerator:
             count_query = f"SELECT COUNT(*) as cnt FROM `{test_table}` WHERE rating IS NOT NULL"
             count = self.client.query(count_query).to_dataframe(create_bqstorage_client=False)['cnt'].iloc[0]
             
-            print(f"✓ Test table exists: {test_table}")
+            print(f"Test table exists: {test_table}")
             print(f"  Rows with ratings: {count:,}\n")
             return True
             
@@ -173,7 +173,7 @@ class BiasReadyPredictionGenerator:
             """
             stats = self.client.query(stats_query).to_dataframe(create_bqstorage_client=False)
             
-            print("\n✓ Boosted Tree Predictions Generated Successfully!")
+            print("\nBoosted Tree Predictions Generated Successfully!")
             print("\nStatistics:")
             print(f"  Predictions: {stats['num_predictions'].iloc[0]:,.0f}")
             print(f"  MAE: {stats['mean_absolute_error'].iloc[0]:.4f}")
@@ -248,7 +248,7 @@ class BiasReadyPredictionGenerator:
             """
             stats = self.client.query(stats_query).to_dataframe(create_bqstorage_client=False)
             
-            print("\n✓ AutoML Predictions Generated Successfully!")
+            print("\nAutoML Predictions Generated Successfully!")
             print("\nStatistics:")
             print(f"  Predictions: {stats['num_predictions'].iloc[0]:,.0f}")
             print(f"  MAE: {stats['mean_absolute_error'].iloc[0]:.4f}")
@@ -340,7 +340,7 @@ class BiasReadyPredictionGenerator:
             """
             stats = self.client.query(stats_query).to_dataframe(create_bqstorage_client=False)
             
-            print("\n✓ Matrix Factorization Predictions Generated Successfully!")
+            print("\nMatrix Factorization Predictions Generated Successfully!")
             print("\nStatistics:")
             print(f"  Predictions: {stats['num_predictions'].iloc[0]:,.0f}")
             print(f"  MAE: {stats['mean_absolute_error'].iloc[0]:.4f}")
@@ -459,7 +459,7 @@ class BiasReadyPredictionGenerator:
         
         print("\n--- Results ---")
         for model_type, success in results.items():
-            status = "✓ SUCCESS" if success else "✗ FAILED"
+            status = "SUCCESS" if success else "✗ FAILED"
             print(f"  {model_type.upper()}: {status}")
         
         print("\n--- Next Steps ---")

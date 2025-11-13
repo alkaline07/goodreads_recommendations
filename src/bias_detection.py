@@ -305,7 +305,7 @@ class BiasDetector:
                 )
         
         if not recommendations:
-            recommendations.append("✅ No significant bias detected across analyzed dimensions.")
+            recommendations.append("No significant bias detected across analyzed dimensions.")
         
         return recommendations
     

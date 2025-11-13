@@ -12,6 +12,7 @@ Date: 2025
 """
 
 import os
+import sys
 from datetime import datetime
 from typing import List, Dict, Optional
 import json
@@ -106,7 +107,7 @@ class BiasAuditPipeline:
                 self.visualizer.generate_all_visualizations(detection_report)
                 audit_results['visualizations_generated'] = True
             except Exception as e:
-                print(f"⚠️ Warning: Could not generate visualizations: {e}")
+                print(f"Warning: Could not generate visualizations: {e}")
                 audit_results['visualizations_generated'] = False
         
         # Step 2: Apply Mitigation (if requested and bias detected)
@@ -183,7 +184,7 @@ class BiasAuditPipeline:
         
         # Show production-ready table if mitigation was applied
         if audit_results.get('debiased_table'):
-            print(f"\n✓ PRODUCTION-READY TABLE (Debiased):")
+            print(f"\nPRODUCTION-READY TABLE (Debiased):")
             print(f"  {audit_results['debiased_table']}")
             print(f"  Use this table for production deployment")
         
@@ -298,7 +299,7 @@ class BiasAuditPipeline:
             client = bigquery.Client(project=self.project_id)
             job = client.query(query)
             job.result()
-            print(f"  ✓ Debiased predictions saved to: {output_table}")
+            print(f"  Debiased predictions saved to: {output_table}")
             
             # Compute metrics
             orig_mae = self._get_table_mae(predictions_table)
@@ -319,7 +320,7 @@ class BiasAuditPipeline:
                 output_table=output_table
             )
             
-            print(f"  ✓ MAE change: {mae_change:+.2f}%")
+            print(f"  MAE change: {mae_change:+.2f}%")
             
             return result
             
@@ -456,7 +457,7 @@ class BiasAuditPipeline:
         with open(output_path, 'w') as f:
             json.dump(report, f, indent=2)
         
-        print(f"\n✓ Comprehensive audit report saved to: {output_path}")
+        print(f"\nComprehensive audit report saved to: {output_path}")
         
         return output_path
     
@@ -575,7 +576,7 @@ class BiasAuditPipeline:
             except Exception as e:
                 print(f"\n✗ Error during mitigation: {e}")
         else:
-            print(f"\n✓ No bias detected - mitigation not needed")
+            print(f"\nNo bias detected - mitigation not needed")
         
         # Final summary
         print(f"\n\n{'='*80}")
@@ -757,6 +758,23 @@ Examples:
     
     args = parser.parse_args()
     
+    # Set up tee logging to save all console output
+    log_dir = "data/bias_reports/bias_pipeline_logs"
+    os.makedirs(log_dir, exist_ok=True)
+    log_path = os.path.join(log_dir, f"pipeline_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+    class _Tee:
+        def __init__(self, path):
+            self.f = open(path, 'w', buffering=1)
+        def write(self, s):
+            sys.__stdout__.write(s)
+            self.f.write(s)
+        def flush(self):
+            sys.__stdout__.flush()
+            self.f.flush()
+    _tee = _Tee(log_path)
+    sys.stdout = _tee
+    sys.stderr = _tee
+
     # Validate weights
     if abs(args.performance_weight + args.fairness_weight - 1.0) > 0.01:
         print("Error: Performance weight + Fairness weight must equal 1.0")

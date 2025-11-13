@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-12T20:49:55.265186",
+  "timestamp": "2025-11-12T21:15:23.787678",
   "model_name": "boosted_tree_regressor_final",
   "dataset": "test",
   "slice_metrics": [
@@ -329,10 +329,10 @@
     ]
   },
   "recommendations": [
-    "\u26a0\ufe0f HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range",
-    "\u26a1 MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era",
-    "\ud83c\udfaf Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)",
-    "\ud83d\udcca Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups",
-    "\ud83d\udcca Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
+    "HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range",
+    "MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era",
+    "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)",
+    "Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups",
+    "Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
   ]
 }

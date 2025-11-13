@@ -117,7 +117,7 @@ class BiasVisualizer:
         
         filepath = os.path.join(self.output_dir, output_filename)
         plt.savefig(filepath, dpi=300, bbox_inches='tight')
-        print(f"✓ Saved: {filepath}")
+        print(f"Saved: {filepath}")
         plt.close()
     
     def generate_disparity_heatmap(
@@ -193,7 +193,7 @@ class BiasVisualizer:
         
         filepath = os.path.join(self.output_dir, output_filename)
         plt.savefig(filepath, dpi=300, bbox_inches='tight')
-        print(f"✓ Saved: {filepath}")
+        print(f"Saved: {filepath}")
         plt.close()
     
     def generate_before_after_comparison(
@@ -284,7 +284,7 @@ class BiasVisualizer:
         
         filepath = os.path.join(self.output_dir, output_filename)
         plt.savefig(filepath, dpi=300, bbox_inches='tight')
-        print(f"✓ Saved: {filepath}")
+        print(f"Saved: {filepath}")
         plt.close()
     
     def create_fairness_scorecard(
@@ -406,7 +406,7 @@ class BiasVisualizer:
         
         filepath = os.path.join(self.output_dir, output_filename)
         plt.savefig(filepath, dpi=300, bbox_inches='tight')
-        print(f"✓ Saved: {filepath}")
+        print(f"Saved: {filepath}")
         plt.close()
     
     def generate_all_visualizations(self, report: BiasReport):
@@ -435,7 +435,7 @@ class BiasVisualizer:
             print(f"   {i}/{len(dimensions)}: {dimension}")
             self.generate_slice_comparison_chart(report, dimension, metric='mae')
         
-        print(f"\n✓ All visualizations saved to: {self.output_dir}\n")
+        print(f"\nAll visualizations saved to: {self.output_dir}\n")
         print(f"{'='*80}\n")
 
 

@@ -433,9 +433,9 @@ class ModelSelector:
         # Enhanced warning with severity context
         if selected['high_severity_count'] > 0:
             if selected['fairness_score'] < 70:
-                rationale_parts.append(f"⚠️ CAUTION: Model has {selected['high_severity_count']} high-severity bias disparities and low fairness ({selected['fairness_score']}/100). Mitigation strongly recommended before deployment.")
+                rationale_parts.append(f"CAUTION: Model has {selected['high_severity_count']} high-severity bias disparities and low fairness ({selected['fairness_score']}/100). Mitigation strongly recommended before deployment.")
             else:
-                rationale_parts.append(f"⚠️ NOTE: Model has {selected['high_severity_count']} high-severity bias disparities. Consider mitigation before deployment.")
+                rationale_parts.append(f"NOTE: Model has {selected['high_severity_count']} high-severity bias disparities. Consider mitigation before deployment.")
         elif selected['disparities_count'] > 0:
             rationale_parts.append(f"Model has {selected['disparities_count']} moderate bias disparities. Monitor for fairness in production.")
         
@@ -478,7 +478,7 @@ class ModelSelector:
         print(f"\nRATIONALE:")
         print(f"   {report.rationale}")
         
-        print(f"\n⚖️  TRADE-OFFS:")
+        print(f"\nTRADE-OFFS:")
         if not report.trade_offs['selected_model_is_best_performance']:
             print(f"   Performance sacrifice: {report.trade_offs['performance_sacrifice']:.1f}% higher MAE")
             print(f"   Fairness gain: +{report.trade_offs['fairness_gain']:.1f} fairness points")

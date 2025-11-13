@@ -1,0 +1,731 @@
+
+================================================================================
+BIAS DETECTION AND MITIGATION PIPELINE
+================================================================================
+
+Configuration:
+  Model Selection: ENABLED
+  Visualizations: ENABLED
+  Performance Weight: 0.6
+  Fairness Weight: 0.4
+  Min Fairness Threshold: 60.0
+
+BiasDetector initialized for project: recommendation-system-475301
+BiasMitigator initialized for project: recommendation-system-475301
+BiasVisualizer initialized
+Output directory: data/bias_reports/visualizations
+
+BiasDetector initialized for project: recommendation-system-475301
+BiasVisualizer initialized
+Output directory: data/bias_reports/model_selection
+
+ModelSelector initialized
+  Performance weight: 0.6
+  Fairness weight: 0.4
+  Min fairness threshold: 50.0
+
+BiasAuditPipeline initialized for project: recommendation-system-475301
+
+================================================================================
+MODEL SELECTION PIPELINE (PERFORMANCE + FAIRNESS)
+================================================================================
+
+Comparing 3 models...
+Weights: 60% Performance + 40% Fairness
+Minimum Fairness Threshold: 60.0
+
+
+################################################################################
+# AUDITING MODEL 1/3: boosted_tree_regressor
+################################################################################
+
+
+================================================================================
+BIAS AUDIT PIPELINE: boosted_tree_regressor
+================================================================================
+
+
+[STEP 1/4] Running Bias Detection...
+================================================================================
+BIAS DETECTION: boosted_tree_regressor on test dataset
+================================================================================
+
+Analyzing 7 dimensions...
+  Processing: Popularity... (3 slices)
+  Processing: Book Length... (4 slices)
+  Processing: Book Era... (4 slices)
+  Processing: Genre Diversity... (2 slices)
+  Processing: User Activity... (1 slices)
+  Processing: Reading Pace... (4 slices)
+  Processing: Rating Range... (2 slices)
+
+Computed metrics for 20 total slices
+
+Analyzing disparities...
+
+Generating recommendations...
+
+================================================================================
+BIAS DETECTION SUMMARY
+================================================================================
+
+Model: boosted_tree_regressor
+Dataset: test
+Timestamp: 2025-11-12T21:14:12.901146
+Total Slices Analyzed: 20
+
+--- Performance Disparities ---
+  • Book Era [MEDIUM]:
+    MAE Range: 0.7607, CV: 0.2431
+  • Rating Range [HIGH]:
+    MAE Range: 2.3548, CV: 0.4575
+
+--- High-Risk Slices ---
+  • Book Era=classic: MAE=1.5214 (+25.2% above average)
+  • Rating Range=Medium (3-4): MAE=3.7511 (+45.7% above average)
+
+--- Recommendations ---
+  1. HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range
+  2. MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era
+  3. Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)
+  4. Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups
+  5. Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups
+
+================================================================================
+
+Bias report saved to: data/bias_reports/boosted_tree_regressor_detection_report.json
+Error converting Pandas column with name: "analysis_timestamp" and datatype: "object" to an appropriate pyarrow datatype: Array, ListArray, or StructArray
+Error creating bias metrics table: Error converting Pandas column with name: "analysis_timestamp" and datatype: "object" to an appropriate pyarrow datatype: Array, ListArray, or StructArray
+
+[STEP 1.5/5] Generating Visualizations...
+
+================================================================================
+GENERATING VISUALIZATIONS: boosted_tree_regressor
+================================================================================
+
+1. Creating fairness scorecard...
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_fairness_scorecard.png
+2. Creating disparity heatmap...
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_disparity_heatmap.png
+3. Creating slice comparison charts...
+   1/7: Rating Range
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_Rating_Range_mae_comparison.png
+   2/7: Book Era
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_Book_Era_mae_comparison.png
+   3/7: Genre Diversity
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_Genre_Diversity_mae_comparison.png
+   4/7: Reading Pace
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_Reading_Pace_mae_comparison.png
+   5/7: Popularity
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_Popularity_mae_comparison.png
+   6/7: User Activity
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_User_Activity_mae_comparison.png
+   7/7: Book Length
+Saved: data/bias_reports/visualizations/boosted_tree_regressor_Book_Length_mae_comparison.png
+
+All visualizations saved to: data/bias_reports/visualizations
+
+================================================================================
+
+
+[STEP 2/5] Skipping mitigation (no significant bias detected or not requested)
+
+[STEP 3/5] Skipping validation (no mitigation applied)
+
+[STEP 4/5] Generating Comprehensive Audit Report...
+
+Comprehensive audit report saved to: data/bias_reports/boosted_tree_regressor_comprehensive_audit.json
+
+[STEP 5/5] Skipping model selection (disabled or handled separately)
+
+================================================================================
+BIAS AUDIT COMPLETE
+================================================================================
+
+Full audit report: data/bias_reports/boosted_tree_regressor_comprehensive_audit.json
+Visualizations: data/bias_reports/visualizations/
+
+
+################################################################################
+# AUDITING MODEL 2/3: automl_regressor
+################################################################################
+
+
+================================================================================
+BIAS AUDIT PIPELINE: automl_regressor
+================================================================================
+
+
+[STEP 1/4] Running Bias Detection...
+================================================================================
+BIAS DETECTION: automl_regressor on test dataset
+================================================================================
+
+Analyzing 7 dimensions...
+  Processing: Popularity... Error computing metrics for Popularity: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: dff2be7f-49a5-4fa4-b13c-64ff35ff50f3
+
+(0 slices)
+  Processing: Book Length... Error computing metrics for Book Length: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: b19a6674-a3b6-4e11-ae29-09ce66466de8
+
+(0 slices)
+  Processing: Book Era... Error computing metrics for Book Era: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: f1028054-297b-495e-9f48-f190d2bc21f4
+
+(0 slices)
+  Processing: Genre Diversity... Error computing metrics for Genre Diversity: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: 33c1fc6e-0b1d-4592-bec0-af652963fd1d
+
+(0 slices)
+  Processing: User Activity... Error computing metrics for User Activity: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: 5fbe5908-ebfa-4248-8b1f-1dfb099f487c
+
+(0 slices)
+  Processing: Reading Pace... Error computing metrics for Reading Pace: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: 62cb4582-bcc8-429c-9337-29e8a95a05c8
+
+(0 slices)
+  Processing: Rating Range... Error computing metrics for Rating Range: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: 95f82747-ea95-41e7-a124-a50b14a848db
+
+(0 slices)
+
+Computed metrics for 0 total slices
+
+Analyzing disparities...
+
+Generating recommendations...
+
+================================================================================
+BIAS DETECTION SUMMARY
+================================================================================
+
+Model: automl_regressor
+Dataset: test
+Timestamp: 2025-11-12T21:14:38.928660
+Total Slices Analyzed: 0
+
+--- Performance Disparities ---
+  No significant disparities detected
+
+--- High-Risk Slices ---
+  No high-risk slices identified
+
+--- Recommendations ---
+  1. ✅ No significant bias detected across analyzed dimensions.
+
+================================================================================
+
+Bias report saved to: data/bias_reports/automl_regressor_detection_report.json
+No slice metrics to save for automl_regressor; skipping BigQuery write
+
+[STEP 1.5/5] Generating Visualizations...
+
+================================================================================
+GENERATING VISUALIZATIONS: automl_regressor
+================================================================================
+
+1. Creating fairness scorecard...
+/mnt/d/Study/goodreads_recommendations/src/bias_visualization.py:408: UserWarning: Glyph 9989 (\N{WHITE HEAVY CHECK MARK}) missing from font(s) DejaVu Sans.
+  plt.savefig(filepath, dpi=300, bbox_inches='tight')
+Saved: data/bias_reports/visualizations/automl_regressor_fairness_scorecard.png
+2. Creating disparity heatmap...
+Warning: Could not generate visualizations: "None of ['Dimension'] are in the columns"
+
+[STEP 2/5] Skipping mitigation (no significant bias detected or not requested)
+
+[STEP 3/5] Skipping validation (no mitigation applied)
+
+[STEP 4/5] Generating Comprehensive Audit Report...
+
+Comprehensive audit report saved to: data/bias_reports/automl_regressor_comprehensive_audit.json
+
+[STEP 5/5] Skipping model selection (disabled or handled separately)
+
+================================================================================
+BIAS AUDIT COMPLETE
+================================================================================
+
+Full audit report: data/bias_reports/automl_regressor_comprehensive_audit.json
+
+
+################################################################################
+# AUDITING MODEL 3/3: matrix_factorization
+################################################################################
+
+
+================================================================================
+BIAS AUDIT PIPELINE: matrix_factorization
+================================================================================
+
+
+[STEP 1/4] Running Bias Detection...
+================================================================================
+BIAS DETECTION: matrix_factorization on test dataset
+================================================================================
+
+Analyzing 7 dimensions...
+  Processing: Popularity... (3 slices)
+  Processing: Book Length... (4 slices)
+  Processing: Book Era... (4 slices)
+  Processing: Genre Diversity... (2 slices)
+  Processing: User Activity... (1 slices)
+  Processing: Reading Pace... (4 slices)
+  Processing: Rating Range... (2 slices)
+
+Computed metrics for 20 total slices
+
+Analyzing disparities...
+
+Generating recommendations...
+
+================================================================================
+BIAS DETECTION SUMMARY
+================================================================================
+
+Model: matrix_factorization
+Dataset: test
+Timestamp: 2025-11-12T21:14:45.022445
+Total Slices Analyzed: 20
+
+--- Performance Disparities ---
+  • Popularity [MEDIUM]:
+    MAE Range: 0.4647, CV: 0.1136
+  • Book Era [MEDIUM]:
+    MAE Range: 0.7349, CV: 0.1862
+  • Rating Range [HIGH]:
+    MAE Range: 2.6437, CV: 0.4334
+
+--- High-Risk Slices ---
+  • Rating Range=Medium (3-4): MAE=4.3715 (+43.3% above average)
+
+--- Recommendations ---
+  1. HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range
+  2. MEDIUM PRIORITY: 2 dimensions show moderate disparities. Dimensions: Popularity, Book Era
+  3. Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 4.371)
+  4. Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups
+
+================================================================================
+
+Bias report saved to: data/bias_reports/matrix_factorization_detection_report.json
+Error converting Pandas column with name: "analysis_timestamp" and datatype: "object" to an appropriate pyarrow datatype: Array, ListArray, or StructArray
+Error creating bias metrics table: Error converting Pandas column with name: "analysis_timestamp" and datatype: "object" to an appropriate pyarrow datatype: Array, ListArray, or StructArray
+
+[STEP 1.5/5] Generating Visualizations...
+
+================================================================================
+GENERATING VISUALIZATIONS: matrix_factorization
+================================================================================
+
+1. Creating fairness scorecard...
+Saved: data/bias_reports/visualizations/matrix_factorization_fairness_scorecard.png
+2. Creating disparity heatmap...
+Saved: data/bias_reports/visualizations/matrix_factorization_disparity_heatmap.png
+3. Creating slice comparison charts...
+   1/7: Rating Range
+Saved: data/bias_reports/visualizations/matrix_factorization_Rating_Range_mae_comparison.png
+   2/7: Book Era
+Saved: data/bias_reports/visualizations/matrix_factorization_Book_Era_mae_comparison.png
+   3/7: Genre Diversity
+Saved: data/bias_reports/visualizations/matrix_factorization_Genre_Diversity_mae_comparison.png
+   4/7: Reading Pace
+Saved: data/bias_reports/visualizations/matrix_factorization_Reading_Pace_mae_comparison.png
+   5/7: Popularity
+Saved: data/bias_reports/visualizations/matrix_factorization_Popularity_mae_comparison.png
+   6/7: User Activity
+Saved: data/bias_reports/visualizations/matrix_factorization_User_Activity_mae_comparison.png
+   7/7: Book Length
+Saved: data/bias_reports/visualizations/matrix_factorization_Book_Length_mae_comparison.png
+
+All visualizations saved to: data/bias_reports/visualizations
+
+================================================================================
+
+
+[STEP 2/5] Skipping mitigation (no significant bias detected or not requested)
+
+[STEP 3/5] Skipping validation (no mitigation applied)
+
+[STEP 4/5] Generating Comprehensive Audit Report...
+
+Comprehensive audit report saved to: data/bias_reports/matrix_factorization_comprehensive_audit.json
+
+[STEP 5/5] Skipping model selection (disabled or handled separately)
+
+================================================================================
+BIAS AUDIT COMPLETE
+================================================================================
+
+Full audit report: data/bias_reports/matrix_factorization_comprehensive_audit.json
+Visualizations: data/bias_reports/visualizations/
+
+
+================================================================================
+RUNNING MODEL SELECTION
+================================================================================
+
+BiasDetector initialized for project: recommendation-system-475301
+BiasVisualizer initialized
+Output directory: data/bias_reports/model_selection
+
+ModelSelector initialized
+  Performance weight: 0.6
+  Fairness weight: 0.4
+  Min fairness threshold: 60.0
+
+
+================================================================================
+MODEL SELECTION BASED ON PERFORMANCE + FAIRNESS
+================================================================================
+
+Evaluating 3 models...
+Criteria: 60% Performance + 40% Fairness
+
+
+Evaluating model: boosted_tree_regressor
+  Predictions table: recommendation-system-475301.books.boosted_tree_rating_predictions
+================================================================================
+BIAS DETECTION: boosted_tree_regressor on test dataset
+================================================================================
+
+Analyzing 7 dimensions...
+  Processing: Popularity... (3 slices)
+  Processing: Book Length... (4 slices)
+  Processing: Book Era... (4 slices)
+  Processing: Genre Diversity... (2 slices)
+  Processing: User Activity... (1 slices)
+  Processing: Reading Pace... (4 slices)
+  Processing: Rating Range... (2 slices)
+
+Computed metrics for 20 total slices
+
+Analyzing disparities...
+
+Generating recommendations...
+
+================================================================================
+BIAS DETECTION SUMMARY
+================================================================================
+
+Model: boosted_tree_regressor
+Dataset: test
+Timestamp: 2025-11-12T21:15:10.976112
+Total Slices Analyzed: 20
+
+--- Performance Disparities ---
+  • Book Era [MEDIUM]:
+    MAE Range: 0.7607, CV: 0.2431
+  • Rating Range [HIGH]:
+    MAE Range: 2.3548, CV: 0.4575
+
+--- High-Risk Slices ---
+  • Book Era=classic: MAE=1.5214 (+25.2% above average)
+  • Rating Range=Medium (3-4): MAE=3.7511 (+45.7% above average)
+
+--- Recommendations ---
+  1. HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range
+  2. MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era
+  3. Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)
+  4. Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups
+  5. Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups
+
+================================================================================
+MAE: 1.3963, RMSE: 1.6382
+
+Evaluating model: automl_regressor
+  Predictions table: recommendation-system-475301.books.automl_rating_predictions
+  Error getting validation metrics: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: a3c45767-49aa-46ad-9df2-ca675c29eda2
+
+Failed to evaluate automl_regressor: 404 Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US; reason: notFound, message: Not found: Table recommendation-system-475301:books.automl_rating_predictions was not found in location US
+
+Location: US
+Job ID: a3c45767-49aa-46ad-9df2-ca675c29eda2
+
+
+Evaluating model: matrix_factorization
+  Predictions table: recommendation-system-475301.books.matrix_factorization_rating_predictions
+================================================================================
+BIAS DETECTION: matrix_factorization on test dataset
+================================================================================
+
+Analyzing 7 dimensions...
+  Processing: Popularity... (3 slices)
+  Processing: Book Length... (4 slices)
+  Processing: Book Era... (4 slices)
+  Processing: Genre Diversity... (2 slices)
+  Processing: User Activity... (1 slices)
+  Processing: Reading Pace... (4 slices)
+  Processing: Rating Range... (2 slices)
+
+Computed metrics for 20 total slices
+
+Analyzing disparities...
+
+Generating recommendations...
+
+================================================================================
+BIAS DETECTION SUMMARY
+================================================================================
+
+Model: matrix_factorization
+Dataset: test
+Timestamp: 2025-11-12T21:15:16.161721
+Total Slices Analyzed: 20
+
+--- Performance Disparities ---
+  • Popularity [MEDIUM]:
+    MAE Range: 0.4647, CV: 0.1136
+  • Book Era [MEDIUM]:
+    MAE Range: 0.7349, CV: 0.1862
+  • Rating Range [HIGH]:
+    MAE Range: 2.6437, CV: 0.4334
+
+--- High-Risk Slices ---
+  • Rating Range=Medium (3-4): MAE=4.3715 (+43.3% above average)
+
+--- Recommendations ---
+  1. HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range
+  2. MEDIUM PRIORITY: 2 dimensions show moderate disparities. Dimensions: Popularity, Book Era
+  3. Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 4.371)
+  4. Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups
+
+================================================================================
+MAE: 1.7278, RMSE: 1.9534
+
+  boosted_tree_regressor:
+    MAE: 1.3963 | RMSE: 1.6382
+    Performance Score: 100.0/100
+    Fairness Score: 70/100
+    Combined Score: 88.0/100
+
+  matrix_factorization:
+    MAE: 1.7278 | RMSE: 1.9534
+    Performance Score: 78.5/100
+    Fairness Score: 60/100
+    Combined Score: 71.1/100
+
+================================================================================
+MODEL SELECTION SUMMARY
+================================================================================
+
+SELECTED MODEL: boosted_tree_regressor
+   Combined Score: 88.0/100
+   Performance Score: 100.0/100
+   Fairness Score: 70.0/100
+   Validation MAE: 1.3963
+   Validation RMSE: 1.6382
+
+ALL CANDIDATES:
+Model                          MAE        Perf     Fair     Combined   Status
+-------------------------------------------------------------------------------------
+boosted_tree_regressor         1.3963     100.0    70.0     88.0       SELECTED
+matrix_factorization           1.7278     78.5     60.0     71.1         
+
+RATIONALE:
+   Selected 'boosted_tree_regressor' with combined score of 88.0/100. This model has the best performance and is the least biased among candidates. NOTE: Model has 1 high-severity bias disparities. Consider mitigation before deployment.
+
+   TRADE-OFFS:
+   No trade-off: Selected model is also the best performer
+
+================================================================================
+
+Selection report saved: data/bias_reports/model_selection_report.json
+
+Generating comparison visualizations...
+Saved: data/bias_reports/model_selection/model_comparison.png
+
+
+================================================================================
+APPLYING MITIGATION TO SELECTED MODEL
+================================================================================
+
+Model: boosted_tree_regressor
+Bias disparities detected: 2
+
+Applying prediction shrinkage to reduce bias...
+
+================================================================================
+BIAS AUDIT PIPELINE: boosted_tree_regressor_final
+================================================================================
+
+
+[STEP 1/4] Running Bias Detection...
+================================================================================
+BIAS DETECTION: boosted_tree_regressor_final on test dataset
+================================================================================
+
+Analyzing 7 dimensions...
+  Processing: Popularity... (3 slices)
+  Processing: Book Length... (4 slices)
+  Processing: Book Era... (4 slices)
+  Processing: Genre Diversity... (2 slices)
+  Processing: User Activity... (1 slices)
+  Processing: Reading Pace... (4 slices)
+  Processing: Rating Range... (2 slices)
+
+Computed metrics for 20 total slices
+
+Analyzing disparities...
+
+Generating recommendations...
+
+================================================================================
+BIAS DETECTION SUMMARY
+================================================================================
+
+Model: boosted_tree_regressor_final
+Dataset: test
+Timestamp: 2025-11-12T21:15:23.787678
+Total Slices Analyzed: 20
+
+--- Performance Disparities ---
+  • Book Era [MEDIUM]:
+    MAE Range: 0.7607, CV: 0.2431
+  • Rating Range [HIGH]:
+    MAE Range: 2.3548, CV: 0.4575
+
+--- High-Risk Slices ---
+  • Book Era=classic: MAE=1.5214 (+25.2% above average)
+  • Rating Range=Medium (3-4): MAE=3.7511 (+45.7% above average)
+
+--- Recommendations ---
+  1. HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range
+  2. MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era
+  3. Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)
+  4. Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups
+  5. Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups
+
+================================================================================
+
+Bias report saved to: data/bias_reports/boosted_tree_regressor_final_detection_report.json
+Error converting Pandas column with name: "analysis_timestamp" and datatype: "object" to an appropriate pyarrow datatype: Array, ListArray, or StructArray
+Error creating bias metrics table: Error converting Pandas column with name: "analysis_timestamp" and datatype: "object" to an appropriate pyarrow datatype: Array, ListArray, or StructArray
+
+[STEP 2/5] Applying Bias Mitigation...
+
+  Applying prediction shrinkage mitigation...
+  Lambda: 0.3
+  Target dimension: Book Era
+  Original MAE CV: 0.2431
+  Debiased predictions saved to: recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased
+  MAE change: +1.29%
+
+[STEP 3/5] Validating Mitigation Effectiveness...
+
+  Re-running bias detection on mitigated predictions...
+================================================================================
+BIAS DETECTION: boosted_tree_regressor_final_mitigated on test dataset
+================================================================================
+
+Analyzing 7 dimensions...
+  Processing: Popularity... (3 slices)
+  Processing: Book Length... (4 slices)
+  Processing: Book Era... (4 slices)
+  Processing: Genre Diversity... (2 slices)
+  Processing: User Activity... (1 slices)
+  Processing: Reading Pace... (4 slices)
+  Processing: Rating Range... (2 slices)
+
+Computed metrics for 20 total slices
+
+Analyzing disparities...
+
+Generating recommendations...
+
+================================================================================
+BIAS DETECTION SUMMARY
+================================================================================
+
+Model: boosted_tree_regressor_final_mitigated
+Dataset: test
+Timestamp: 2025-11-12T21:15:44.069365
+Total Slices Analyzed: 20
+
+--- Performance Disparities ---
+  • Book Era [MEDIUM]:
+    MAE Range: 0.4033, CV: 0.1195
+  • Rating Range [HIGH]:
+    MAE Range: 2.4119, CV: 0.4603
+
+--- High-Risk Slices ---
+  • Rating Range=Medium (3-4): MAE=3.8261 (+46.0% above average)
+
+--- Recommendations ---
+  1. HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range
+  2. MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era
+  3. Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.826)
+  4. Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups
+
+================================================================================
+
+[STEP 4/5] Generating Comprehensive Audit Report...
+
+Comprehensive audit report saved to: data/bias_reports/boosted_tree_regressor_final_comprehensive_audit.json
+
+[STEP 5/5] Skipping model selection (disabled or handled separately)
+
+================================================================================
+BIAS AUDIT COMPLETE
+================================================================================
+
+Full audit report: data/bias_reports/boosted_tree_regressor_final_comprehensive_audit.json
+
+PRODUCTION-READY TABLE (Debiased):
+  recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased
+  Use this table for production deployment
+
+Mitigation complete!
+  Debiased table: recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased
+
+
+================================================================================
+MODEL SELECTION COMPLETE
+================================================================================
+
+   SELECTED MODEL: boosted_tree_regressor
+   Validation MAE: 1.3963
+   Fairness Score: 70.0/100
+   Combined Score: 88.0/100
+
+RATIONALE:
+   Selected 'boosted_tree_regressor' with combined score of 88.0/100. This model has the best performance and is the least biased among candidates. NOTE: Model has 1 high-severity bias disparities. Consider mitigation before deployment.
+
+PRODUCTION-READY TABLE (Debiased):
+   recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased
+   Use this table for production deployment
+
+Reports:
+   Model Selection: data/bias_reports/model_selection_report.json
+   Visualizations: data/bias_reports/model_selection/
+
+
+================================================================================
+PIPELINE COMPLETE
+================================================================================
+
+SELECTED MODEL: boosted_tree_regressor
+   Production Table: recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased
+
+Generated Files:
+   - Model Selection Report: data/bias_reports/model_selection_report.json
+   - Model Comparison Chart: data/bias_reports/model_selection/model_comparison.png
+   - Fairness Visualizations: data/bias_reports/visualizations/
+

@@ -1,21 +1,21 @@
 {
   "audit_metadata": {
     "model_name": "boosted_tree_regressor_final",
-    "timestamp": "2025-11-12T20:49:50.860261",
+    "timestamp": "2025-11-12T21:15:19.318865",
     "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
     "debiased_table": "recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased"
   },
   "bias_detection": {
-    "timestamp": "2025-11-12T20:49:55.265186",
+    "timestamp": "2025-11-12T21:15:23.787678",
     "total_slices_analyzed": 20,
     "disparities_found": 2,
     "high_risk_slices": 2,
     "recommendations": [
-      "\u26a0\ufe0f HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range",
-      "\u26a1 MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era",
-      "\ud83c\udfaf Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)",
-      "\ud83d\udcca Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups",
-      "\ud83d\udcca Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
+      "HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range",
+      "MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era",
+      "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)",
+      "Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups",
+      "Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
     ]
   },
   "mitigation_applied": {
@@ -27,21 +27,21 @@
         "technique": "prediction_shrinkage",
         "output_table": "recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased",
         "improvements": {
-          "mae_change": 1.2867160997988265,
+          "mae_change": 1.2867160997994624,
           "disparity_reduction": "See validation step"
         }
       }
     ]
   },
   "validation": {
-    "timestamp": "2025-11-12T20:50:02.409802",
+    "timestamp": "2025-11-12T21:15:30.977682",
     "techniques_applied": [
       "prediction_shrinkage"
     ],
     "effectiveness": {
       "prediction_shrinkage": {
         "improvements": {
-          "mae_change": 1.2867160997988265,
+          "mae_change": 1.2867160997994624,
           "disparity_reduction": "See validation step"
         },
         "output_table": "recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased",
@@ -49,15 +49,15 @@
           {
             "dimension": "Book Era",
             "severity": "medium",
-            "mae_range": 0.403331133006668,
-            "mae_cv": 0.11949891952871257,
+            "mae_range": 0.4033311330066669,
+            "mae_cv": 0.11949891952871237,
             "recommendation": "Significant performance disparity detected in Book Era. Consider bias mitigation."
           },
           {
             "dimension": "Rating Range",
             "severity": "high",
-            "mae_range": 2.411908241132882,
-            "mae_cv": 0.46025498199593234,
+            "mae_range": 2.4119082411328767,
+            "mae_cv": 0.46025498199593085,
             "recommendation": "Significant performance disparity detected in Rating Range. Consider bias mitigation."
           }
         ]

@@ -1,21 +1,21 @@
 {
   "audit_metadata": {
     "model_name": "boosted_tree_regressor",
-    "timestamp": "2025-11-12T20:48:50.801503",
+    "timestamp": "2025-11-12T21:14:07.457743",
     "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
     "debiased_table": null
   },
   "bias_detection": {
-    "timestamp": "2025-11-12T20:48:56.963354",
+    "timestamp": "2025-11-12T21:14:12.901146",
     "total_slices_analyzed": 20,
     "disparities_found": 2,
     "high_risk_slices": 2,
     "recommendations": [
-      "\u26a0\ufe0f HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range",
-      "\u26a1 MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era",
-      "\ud83c\udfaf Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)",
-      "\ud83d\udcca Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups",
-      "\ud83d\udcca Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
+      "HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range",
+      "MEDIUM PRIORITY: 1 dimensions show moderate disparities. Dimensions: Book Era",
+      "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.751), Book Era=classic (MAE: 1.521)",
+      "Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups",
+      "Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
     ]
   },
   "mitigation_applied": null,
