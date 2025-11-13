@@ -27,6 +27,7 @@ class ModelCandidate:
     predictions_table: str
     validation_mae: float
     validation_rmse: float
+    performance_score: float
     fairness_score: float
     bias_disparities: int
     high_severity_disparities: int
@@ -113,6 +114,12 @@ class ModelSelector:
         """
         Normalize performance metrics to 0-100 scale (higher is better).
         
+        Uses a hybrid approach:
+        - With 3+ models: Uses min-max normalization for relative comparison
+        - With 2 models: Uses percentage-based scoring from best model
+        
+        This prevents artificial extremes (100 vs 0) when comparing only 2 models.
+
         Args:
             mae: Model's MAE
             rmse: Model's RMSE
@@ -122,24 +129,40 @@ class ModelSelector:
         Returns:
             Normalized performance score (0-100)
         """
-        # For MAE and RMSE, lower is better, so invert the scale
-        # Normalize to 0-1, then invert, then scale to 0-100
         
         mae_min, mae_max = min(all_maes), max(all_maes)
         rmse_min, rmse_max = min(all_rmses), max(all_rmses)
+
+        # If only 2 models, use percentage-based scoring to show actual gaps
+        if len(all_maes) == 2:
+            # Calculate percentage difference from best model
+            mae_pct_diff = ((mae - mae_min) / mae_min) * 100 if mae_min > 0 else 0
+            rmse_pct_diff = ((rmse - rmse_min) / rmse_min) * 100 if rmse_min > 0 else 0
+            
+            # Score: 100 - (percentage worse)
+            # Cap at 0 minimum, allow models within 100% of best to have positive scores
+            mae_score = max(0, 100 - mae_pct_diff)
+            rmse_score = max(0, 100 - rmse_pct_diff)
+            
+            performance_score = (mae_score + rmse_score) / 2
+            
+            return performance_score
         
-        # Avoid division by zero
-        mae_range = mae_max - mae_min if mae_max > mae_min else 1.0
-        rmse_range = rmse_max - rmse_min if rmse_max > rmse_min else 1.0
-        
-        # Normalize (lower is better, so subtract from 1)
-        mae_norm = 1 - ((mae - mae_min) / mae_range)
-        rmse_norm = 1 - ((rmse - rmse_min) / rmse_range)
-        
-        # Average and scale to 0-100
-        performance_score = ((mae_norm + rmse_norm) / 2) * 100
-        
-        return performance_score
+        # With 3+ models, use traditional min-max normalization
+        else:
+
+            # Avoid division by zero
+            mae_range = mae_max - mae_min if mae_max > mae_min else 1.0
+            rmse_range = rmse_max - rmse_min if rmse_max > rmse_min else 1.0
+            
+            # Normalize (lower is better, so subtract from 1)
+            mae_norm = 1 - ((mae - mae_min) / mae_range)
+            rmse_norm = 1 - ((rmse - rmse_min) / rmse_range)
+            
+            # Average and scale to 0-100
+            performance_score = ((mae_norm + rmse_norm) / 2) * 100
+            
+            return performance_score
     
     def calculate_combined_score(
         self,
@@ -227,7 +250,13 @@ class ModelSelector:
         
         print(f"\nEvaluating {len(model_candidates)} models...")
         print(f"Criteria: {self.performance_weight*100:.0f}% Performance + "
-              f"{self.fairness_weight*100:.0f}% Fairness\n")
+             f"{self.fairness_weight*100:.0f}% Fairness")
+        
+        if len(model_candidates) == 2:
+            print("\n⚠️  Note: With 2 models, performance scores use percentage-based comparison")
+            print("   This shows actual performance gaps rather than artificial extremes\n")
+        else:
+            print()
         
         # Evaluate all models
         candidates = []
@@ -284,6 +313,13 @@ class ModelSelector:
             
             candidate['performance_score'] = perf_score
             candidate['combined_score'] = combined_score
+
+            # Log scoring details for transparency
+            print(f"\n  {candidate['model_name']}:")
+            print(f"    MAE: {candidate['mae']:.4f} | RMSE: {candidate['rmse']:.4f}")
+            print(f"    Performance Score: {perf_score:.1f}/100")
+            print(f"    Fairness Score: {candidate['fairness_score']}/100")
+            print(f"    Combined Score: {combined_score:.1f}/100")
         
         # Sort by combined score (descending)
         candidates.sort(key=lambda x: x['combined_score'], reverse=True)
@@ -338,6 +374,7 @@ class ModelSelector:
                 predictions_table=c['predictions_table'],
                 validation_mae=c['mae'],
                 validation_rmse=c['rmse'],
+                performance_score=c['performance_score'],
                 fairness_score=c['fairness_score'],
                 bias_disparities=c['disparities_count'],
                 high_severity_disparities=c['high_severity_count'],
@@ -372,21 +409,35 @@ class ModelSelector:
         # Rationale
         rationale_parts = []
         rationale_parts.append(f"Selected '{selected['model_name']}' with combined score of {selected['combined_score']:.1f}/100.")
-        
+
         if selected == best_performance and selected == best_fairness:
-            rationale_parts.append("This model achieves BOTH the best performance AND best fairness.")
+            if selected['fairness_score'] >= 80:
+                rationale_parts.append("This model achieves BOTH the best performance AND best fairness.")
+            elif selected['fairness_score'] >= 70:
+                rationale_parts.append("This model has the best performance and is the least biased among candidates.")
+            else:
+                rationale_parts.append("This model outperforms alternatives in both accuracy and fairness, though fairness could be improved.")
         elif selected == best_performance:
             rationale_parts.append("This model has the best validation performance.")
         elif selected == best_fairness:
-            rationale_parts.append("This model has the best fairness score.")
+            if selected['fairness_score'] >= 80:
+                rationale_parts.append("This model has excellent fairness.")
+            else:
+                rationale_parts.append("This model has the best fairness score among candidates.")
         else:
             rationale_parts.append(f"This model balances performance and fairness optimally under the {self.performance_weight*100:.0f}/{self.fairness_weight*100:.0f} weighting.")
         
         if trade_offs['performance_sacrifice'] > 0:
             rationale_parts.append(f"Accepts {trade_offs['performance_sacrifice']:.1f}% higher MAE for {trade_offs['fairness_gain']:.1f} point fairness improvement.")
         
+        # Enhanced warning with severity context
         if selected['high_severity_count'] > 0:
-            rationale_parts.append(f"⚠️ NOTE: Model has {selected['high_severity_count']} high-severity bias disparities. Consider mitigation.")
+            if selected['fairness_score'] < 70:
+                rationale_parts.append(f"⚠️ CAUTION: Model has {selected['high_severity_count']} high-severity bias disparities and low fairness ({selected['fairness_score']}/100). Mitigation strongly recommended before deployment.")
+            else:
+                rationale_parts.append(f"⚠️ NOTE: Model has {selected['high_severity_count']} high-severity bias disparities. Consider mitigation before deployment.")
+        elif selected['disparities_count'] > 0:
+            rationale_parts.append(f"Model has {selected['disparities_count']} moderate bias disparities. Monitor for fairness in production.")
         
         rationale = " ".join(rationale_parts)
         
@@ -409,17 +460,20 @@ class ModelSelector:
         
         print(f"\n🎯 SELECTED MODEL: {report.selected_model.model_name}")
         print(f"   Combined Score: {report.selected_model.combined_score:.1f}/100")
-        print(f"   Validation MAE: {report.selected_model.validation_mae:.4f}")
+        print(f"   Performance Score: {report.selected_model.performance_score:.1f}/100")
         print(f"   Fairness Score: {report.selected_model.fairness_score:.1f}/100")
+        print(f"   Validation MAE: {report.selected_model.validation_mae:.4f}")
+        print(f"   Validation RMSE: {report.selected_model.validation_rmse:.4f}")
         
         print(f"\n📊 ALL CANDIDATES:")
-        print(f"{'Model':<30} {'MAE':<10} {'Fairness':<12} {'Combined':<12} {'Status'}")
-        print("-" * 80)
+        print(f"{'Model':<30} {'MAE':<10} {'Perf':<8} {'Fair':<8} {'Combined':<10} {'Status'}")
+        print("-" * 85)
         
         for candidate in report.candidates:
             status = "✓ SELECTED" if candidate == report.selected_model else "  "
             print(f"{candidate.model_name:<30} {candidate.validation_mae:<10.4f} "
-                  f"{candidate.fairness_score:<12.1f} {candidate.combined_score:<12.1f} {status}")
+                  f"{candidate.performance_score:<8.1f} {candidate.fairness_score:<8.1f} "
+                  f"{candidate.combined_score:<10.1f} {status}")
         
         print(f"\n💡 RATIONALE:")
         print(f"   {report.rationale}")

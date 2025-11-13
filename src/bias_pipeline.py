@@ -114,10 +114,22 @@ class BiasAuditPipeline:
             print("\n[STEP 2/5] Applying Bias Mitigation...")
             
             if mitigation_techniques is None:
-                mitigation_techniques = ['threshold_adjustment']
+                mitigation_techniques = ['prediction_shrinkage']
             
             for technique in mitigation_techniques:
-                if technique == 'threshold_adjustment':
+                if technique == 'prediction_shrinkage':
+                    # Apply shrinkage directly to predictions (NEW)
+                    mitigation_result = self._apply_prediction_shrinkage(
+                        predictions_table,
+                        model_name,
+                        detection_report
+                    )
+                    if mitigation_result:
+                        audit_results['mitigation_results'].append(mitigation_result)
+                        # Update predictions table to debiased version for validation
+                        audit_results['debiased_table'] = mitigation_result.output_table
+                
+                elif technique == 'threshold_adjustment':
                     mitigation_result = self._apply_threshold_mitigation(
                         predictions_table,
                         model_name,
@@ -169,6 +181,12 @@ class BiasAuditPipeline:
         if audit_results['visualizations_generated']:
             print("Visualizations: data/bias_reports/visualizations/")
         
+        # Show production-ready table if mitigation was applied
+        if audit_results.get('debiased_table'):
+            print(f"\n✓ PRODUCTION-READY TABLE (Debiased):")
+            print(f"  {audit_results['debiased_table']}")
+            print(f"  Use this table for production deployment")
+        
         return audit_results
     
     def _apply_threshold_mitigation(
@@ -213,6 +231,113 @@ class BiasAuditPipeline:
         self.mitigator.save_mitigation_report(result, report_path)
         
         return result
+    
+    def _apply_prediction_shrinkage(
+        self,
+        predictions_table: str,
+        model_name: str,
+        detection_report: BiasReport,
+        lambda_shrinkage: float = 0.3
+    ) -> MitigationResult:
+        """
+        Apply shrinkage directly to predictions to reduce Book Era bias.
+        
+        This is faster than retraining and works on already-generated predictions.
+        """
+        print("\n  Applying prediction shrinkage mitigation...")
+        print(f"  Lambda: {lambda_shrinkage}")
+        
+        disparities = detection_report.disparity_analysis['detailed_disparities']
+        if not disparities:
+            return None
+        
+        # Focus on Book Era (the mitigatable bias)
+        book_era_disp = next((d for d in disparities if d['dimension'] == 'Book Era'), None)
+        
+        if not book_era_disp:
+            print("  No Book Era bias detected, skipping shrinkage")
+            return None
+        
+        output_table = f"{self.project_id}.{self.dataset_id}.{model_name}_rating_predictions_debiased"
+        
+        print(f"  Target dimension: Book Era")
+        print(f"  Original MAE CV: {book_era_disp['mae_cv']:.4f}")
+        
+        # Apply shrinkage query
+        from google.cloud import bigquery
+        query = f"""
+        CREATE OR REPLACE TABLE `{output_table}` AS
+        WITH era_stats AS (
+            SELECT 
+                book_era,
+                AVG(predicted_rating) as era_mean,
+                COUNT(*) as era_count
+            FROM `{predictions_table}`
+            WHERE book_era IS NOT NULL
+            GROUP BY book_era
+        ),
+        global_stats AS (
+            SELECT AVG(predicted_rating) as global_mean
+            FROM `{predictions_table}`
+        )
+        SELECT 
+            p.* EXCEPT(predicted_rating, absolute_error, error),
+            predicted_rating as original_predicted_rating,
+            -- Apply shrinkage
+            predicted_rating - ({lambda_shrinkage} * (e.era_mean - g.global_mean)) as predicted_rating,
+            -- Recalculate errors
+            ABS(actual_rating - (predicted_rating - ({lambda_shrinkage} * (e.era_mean - g.global_mean)))) as absolute_error,
+            (actual_rating - (predicted_rating - ({lambda_shrinkage} * (e.era_mean - g.global_mean)))) as error
+        FROM `{predictions_table}` p
+        LEFT JOIN era_stats e ON p.book_era = e.book_era
+        CROSS JOIN global_stats g
+        WHERE p.actual_rating IS NOT NULL
+        """
+        
+        try:
+            client = bigquery.Client(project=self.project_id)
+            job = client.query(query)
+            job.result()
+            print(f"  ✓ Debiased predictions saved to: {output_table}")
+            
+            # Compute metrics
+            orig_mae = self._get_table_mae(predictions_table)
+            mit_mae = self._get_table_mae(output_table)
+            mae_change = ((mit_mae - orig_mae) / orig_mae * 100)
+            
+            improvement_pct = {
+                'mae_change': mae_change,
+                'disparity_reduction': 'See validation step'
+            }
+            
+            result = MitigationResult(
+                technique="prediction_shrinkage",
+                timestamp=datetime.now().isoformat(),
+                original_metrics={'mae': orig_mae},
+                mitigated_metrics={'mae': mit_mae},
+                improvement_pct=improvement_pct,
+                output_table=output_table
+            )
+            
+            print(f"  ✓ MAE change: {mae_change:+.2f}%")
+            
+            return result
+            
+        except Exception as e:
+            print(f"  ✗ Error applying prediction shrinkage: {e}")
+            return None
+    
+    def _get_table_mae(self, table: str) -> float:
+        """Helper to get MAE from a table."""
+        from google.cloud import bigquery
+        client = bigquery.Client(project=self.project_id)
+        query = f"""
+        SELECT AVG(absolute_error) as mae
+        FROM `{table}`
+        WHERE actual_rating IS NOT NULL
+        """
+        result = client.query(query).to_dataframe(create_bqstorage_client=False)
+        return float(result['mae'].iloc[0])
     
     def _apply_shrinkage_mitigation(
         self,
@@ -277,7 +402,7 @@ class BiasAuditPipeline:
                 }
                 
                 # Re-run bias detection on mitigated predictions
-                if result.technique == 'threshold_adjustment':
+                if result.technique in ['threshold_adjustment', 'prediction_shrinkage']:
                     print(f"\n  Re-running bias detection on mitigated predictions...")
                     post_mitigation_report = self.detector.detect_bias(
                         predictions_table=result.output_table,
@@ -300,7 +425,8 @@ class BiasAuditPipeline:
             'audit_metadata': {
                 'model_name': audit_results['model_name'],
                 'timestamp': audit_results['timestamp'],
-                'predictions_table': audit_results['predictions_table']
+                'predictions_table': audit_results['predictions_table'],
+                'debiased_table': audit_results.get('debiased_table')  # Production-ready table
             },
             'bias_detection': {
                 'timestamp': audit_results['detection_report'].timestamp,
@@ -496,7 +622,7 @@ def run_bias_audit_for_all_models(with_model_selection: bool = True):
                     model_name=model['model_name'],
                     predictions_table=model['predictions_table'],
                     apply_mitigation=True,
-                    mitigation_techniques=['threshold_adjustment'],
+                    mitigation_techniques=['prediction_shrinkage'],  # Use prediction shrinkage by default
                     generate_visualizations=True
                 )
                 all_results[model['model_name']] = results
