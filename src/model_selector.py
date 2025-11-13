@@ -531,10 +531,13 @@ def main():
             'model_name': 'boosted_tree_regressor',
             'predictions_table': f'{selector.detector.project_id}.books.boosted_tree_rating_predictions'
         },
-        # Add more models if they exist
+        {
+            'model_name': 'matrix_factorization',
+            'predictions_table': f'{selector.detector.project_id}.books.matrix_factorization_rating_predictions'
+        },
         # {
-        #     'model_name': 'automl_regressor',
-        #     'predictions_table': f'{selector.detector.project_id}.books.automl_rating_predictions'
+        #      'model_name': 'automl_regressor',
+        #      'predictions_table': f'{selector.detector.project_id}.books.automl_rating_predictions'
         # },
     ]
     

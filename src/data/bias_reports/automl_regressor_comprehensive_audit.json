@@ -1,0 +1,25 @@
+{
+  "audit_metadata": {
+    "model_name": "automl_regressor",
+    "timestamp": "2025-11-12T20:02:00.141136",
+    "predictions_table": "recommendation-system-475301.books.automl_rating_predictions"
+  },
+  "bias_detection": {
+    "timestamp": "2025-11-12T20:02:02.002028",
+    "total_slices_analyzed": 0,
+    "disparities_found": 0,
+    "high_risk_slices": 0,
+    "recommendations": [
+      "\u2705 No significant bias detected across analyzed dimensions."
+    ]
+  },
+  "mitigation_applied": null,
+  "validation": null,
+  "executive_summary": {
+    "bias_detected": false,
+    "severity": "none",
+    "dimensions_with_bias": [],
+    "mitigation_applied": false,
+    "overall_status": "PASS"
+  }
+}

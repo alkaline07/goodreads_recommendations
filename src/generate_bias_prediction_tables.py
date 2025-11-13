@@ -260,6 +260,100 @@ class BiasReadyPredictionGenerator:
             print(f"\n✗ Error generating predictions: {e}")
             return False
     
+    def generate_matrix_factorization_predictions(self, model_path: str) -> bool:
+        """
+        Generate predictions from Matrix Factorization model with bias detection features.
+        
+        Args:
+            model_path: Full path to the model
+            
+        Returns:
+            True if successful
+        """
+        print("\n" + "="*80)
+        print("GENERATING MATRIX FACTORIZATION PREDICTIONS FOR BIAS DETECTION")
+        print("="*80 + "\n")
+        
+        output_table = f"{self.project_id}.{self.dataset_id}.matrix_factorization_rating_predictions"
+        test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
+        
+        query = f"""
+        CREATE OR REPLACE TABLE `{output_table}` AS
+        SELECT
+          pred.user_id_clean,
+          pred.book_id,
+          pred.rating AS actual_rating,
+          pred.predicted_rating,
+          ABS(pred.rating - pred.predicted_rating) AS absolute_error,
+          (pred.rating - pred.predicted_rating) AS error,
+          -- Slicing features for bias detection
+          pred.book_popularity_normalized,
+          pred.book_length_category,
+          pred.book_era,
+          pred.num_genres,
+          pred.user_activity_count,
+          pred.reading_pace_category,
+          pred.average_rating,
+          pred.ratings_count,
+          pred.num_pages,
+          pred.publication_year
+        FROM ML.PREDICT(
+          MODEL `{model_path}`,
+          (
+            SELECT
+              user_id_clean,
+              book_id,
+              rating,
+              book_popularity_normalized,
+              book_length_category,
+              book_era,
+              num_genres,
+              user_activity_count,
+              reading_pace_category,
+              average_rating,
+              ratings_count,
+              num_pages,
+              publication_year
+            FROM `{test_table}`
+            WHERE rating IS NOT NULL
+          )
+        ) AS pred
+        """
+        
+        try:
+            print(f"Model: {model_path}")
+            print(f"Output: {output_table}")
+            print("\nExecuting query (this may take 2-5 minutes)...")
+            
+            job = self.client.query(query)
+            job.result()
+            
+            # Get statistics
+            stats_query = f"""
+            SELECT 
+                COUNT(*) as num_predictions,
+                AVG(absolute_error) as mean_absolute_error,
+                SQRT(AVG(POWER(error, 2))) as root_mean_squared_error,
+                AVG(predicted_rating) as avg_predicted_rating,
+                AVG(actual_rating) as avg_actual_rating
+            FROM `{output_table}`
+            """
+            stats = self.client.query(stats_query).to_dataframe(create_bqstorage_client=False)
+            
+            print("\n✓ Matrix Factorization Predictions Generated Successfully!")
+            print("\nStatistics:")
+            print(f"  Predictions: {stats['num_predictions'].iloc[0]:,.0f}")
+            print(f"  MAE: {stats['mean_absolute_error'].iloc[0]:.4f}")
+            print(f"  RMSE: {stats['root_mean_squared_error'].iloc[0]:.4f}")
+            print(f"  Avg Predicted: {stats['avg_predicted_rating'].iloc[0]:.4f}")
+            print(f"  Avg Actual: {stats['avg_actual_rating'].iloc[0]:.4f}")
+            
+            return True
+            
+        except Exception as e:
+            print(f"\n✗ Error generating predictions: {e}")
+            return False
+        
     def list_available_models(self) -> Dict[str, List[str]]:
         """List all available models in the dataset."""
         print("\n" + "="*80)
@@ -308,7 +402,7 @@ class BiasReadyPredictionGenerator:
         
         Args:
             model_types: List of model types to generate predictions for
-                        ['boosted_tree', 'automl'] or None for all
+                        ['boosted_tree', 'automl', 'matrix_factorization'] or None for all
         """
         start_time = time.time()
         
@@ -327,7 +421,7 @@ class BiasReadyPredictionGenerator:
         
         # Step 3: Determine which models to process
         if model_types is None:
-            model_types = ['boosted_tree', 'automl']
+            model_types = ['boosted_tree', 'automl', 'matrix_factorization']
         
         results = {}
         
@@ -345,6 +439,13 @@ class BiasReadyPredictionGenerator:
                 results['automl'] = self.generate_automl_predictions(model_path)
             else:
                 results['automl'] = False
+        
+        if 'matrix_factorization' in model_types and available_models.get('matrix_factorization'):
+            model_path = self.find_latest_model('matrix_factorization_model')
+            if model_path:
+                results['matrix_factorization'] = self.generate_matrix_factorization_predictions(model_path)
+            else:
+                results['matrix_factorization'] = False
         
         # Summary
         end_time = time.time()
@@ -379,7 +480,7 @@ def main():
     generator = BiasReadyPredictionGenerator()
     
     # Generate predictions for all available models
-    generator.run(model_types=['boosted_tree', 'automl'])
+    generator.run(model_types=['boosted_tree', 'automl', 'matrix_factorization'])
 
 
 if __name__ == "__main__":

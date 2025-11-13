@@ -455,6 +455,10 @@ def run_bias_audit_for_all_models(with_model_selection: bool = True):
         {
             'model_name': 'automl_regressor',
             'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.automl_rating_predictions"
+        },
+        {
+            'model_name': 'matrix_factorization',
+            'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.matrix_factorization_rating_predictions"
         }
     ]
     
@@ -611,6 +615,10 @@ Examples:
             {
                 'model_name': 'automl_regressor',
                 'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.automl_rating_predictions"
+            },
+            {
+                'model_name': 'matrix_factorization',
+                'predictions_table': f"{pipeline.project_id}.{pipeline.dataset_id}.matrix_factorization_rating_predictions"
             }
         ]
         
