@@ -105,9 +105,18 @@ class BiasReadyPredictionGenerator:
         
         output_table = f"{self.project_id}.{self.dataset_id}.boosted_tree_rating_predictions"
         test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
-        
+
         query = f"""
         CREATE OR REPLACE TABLE `{output_table}` AS
+        WITH books_with_author AS (
+          SELECT
+            book_id,
+            SAFE_CAST(
+              JSON_EXTRACT_SCALAR(authors_flat[SAFE_OFFSET(0)], '$.author_id') AS INT64
+            ) AS author_id
+          FROM `{self.project_id}.{self.dataset_id}.goodreads_books_cleaned`
+          WHERE authors_flat IS NOT NULL
+        )
         SELECT
           pred.user_id_clean,
           pred.book_id,
@@ -125,7 +134,8 @@ class BiasReadyPredictionGenerator:
           pred.average_rating,
           pred.ratings_count,
           pred.num_pages,
-          pred.publication_year
+          pred.publication_year,
+          gmap.author_gender_group
         FROM ML.PREDICT(
           MODEL `{model_path}`,
           (
@@ -151,8 +161,11 @@ class BiasReadyPredictionGenerator:
             WHERE rating IS NOT NULL
           )
         ) AS pred
+        LEFT JOIN books_with_author AS b ON pred.book_id = b.book_id
+        LEFT JOIN `{self.project_id}.{self.dataset_id}.goodreads_author_gender_map` AS gmap 
+            ON b.author_id = gmap.author_id
         """
-        
+
         try:
             print(f"Model: {model_path}")
             print(f"Output: {output_table}")
@@ -276,9 +289,18 @@ class BiasReadyPredictionGenerator:
         
         output_table = f"{self.project_id}.{self.dataset_id}.matrix_factorization_rating_predictions"
         test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
-        
+
         query = f"""
         CREATE OR REPLACE TABLE `{output_table}` AS
+        WITH books_with_author AS (
+          SELECT
+            book_id,
+            SAFE_CAST(
+              JSON_EXTRACT_SCALAR(authors_flat[SAFE_OFFSET(0)], '$.author_id') AS INT64
+            ) AS author_id
+          FROM `{self.project_id}.{self.dataset_id}.goodreads_books_cleaned`
+          WHERE authors_flat IS NOT NULL
+        )
         SELECT
           pred.user_id_clean,
           pred.book_id,
@@ -296,7 +318,8 @@ class BiasReadyPredictionGenerator:
           pred.average_rating,
           pred.ratings_count,
           pred.num_pages,
-          pred.publication_year
+          pred.publication_year,
+          gmap.author_gender_group
         FROM ML.PREDICT(
           MODEL `{model_path}`,
           (
@@ -318,8 +341,11 @@ class BiasReadyPredictionGenerator:
             WHERE rating IS NOT NULL
           )
         ) AS pred
+        LEFT JOIN books_with_author AS b ON pred.book_id = b.book_id
+        LEFT JOIN `{self.project_id}.{self.dataset_id}.goodreads_author_gender_map` AS gmap 
+            ON b.author_id = gmap.author_id
         """
-        
+
         try:
             print(f"Model: {model_path}")
             print(f"Output: {output_table}")
