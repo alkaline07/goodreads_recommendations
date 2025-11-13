@@ -275,14 +275,14 @@ class BiasDetector:
             high_severity = [d for d in disparity_analysis["detailed_disparities"] if d["severity"] == "high"]
             if high_severity:
                 recommendations.append(
-                    f"⚠️ HIGH PRIORITY: {len(high_severity)} dimensions show severe performance disparities. "
+                    f"HIGH PRIORITY: {len(high_severity)} dimensions show severe performance disparities. "
                     f"Dimensions: {', '.join([d['dimension'] for d in high_severity])}"
                 )
             
             medium_severity = [d for d in disparity_analysis["detailed_disparities"] if d["severity"] == "medium"]
             if medium_severity:
                 recommendations.append(
-                    f"⚡ MEDIUM PRIORITY: {len(medium_severity)} dimensions show moderate disparities. "
+                    f"MEDIUM PRIORITY: {len(medium_severity)} dimensions show moderate disparities. "
                     f"Dimensions: {', '.join([d['dimension'] for d in medium_severity])}"
                 )
         
@@ -292,7 +292,7 @@ class BiasDetector:
                              key=lambda x: x["mae_deviation_pct"], 
                              reverse=True)[:3]
             recommendations.append(
-                f"🎯 Target these high-error slices for mitigation: " +
+                f"Target these high-error slices for mitigation: " +
                 ", ".join([f"{s['slice']} (MAE: {s['mae']:.3f})" for s in top_risk])
             )
         
@@ -300,7 +300,7 @@ class BiasDetector:
         for dim_name, summary in disparity_analysis["summary"].items():
             if summary["mae_coefficient_of_variation"] > 0.2:
                 recommendations.append(
-                    f"📊 {dim_name}: Consider re-weighting training data or adjusting decision thresholds "
+                    f"{dim_name}: Consider re-weighting training data or adjusting decision thresholds "
                     f"to balance performance across {summary['num_slices']} groups"
                 )
         
@@ -344,7 +344,7 @@ class BiasDetector:
                 slice_label
             )
             all_metrics.extend(metrics)
-            print(f"✓ ({len(metrics)} slices)")
+            print(f"({len(metrics)} slices)")
         
         print(f"\nComputed metrics for {len(all_metrics)} total slices")
         
@@ -422,7 +422,7 @@ class BiasDetector:
         with open(output_path, 'w') as f:
             json.dump(report_dict, f, indent=2)
         
-        print(f"\n✓ Bias report saved to: {output_path}")
+        print(f"\nBias report saved to: {output_path}")
     
     def create_bias_metrics_table(
         self,
@@ -440,6 +440,11 @@ class BiasDetector:
             # Convert to DataFrame
             metrics_data = [asdict(m) for m in report.slice_metrics]
             df = pd.DataFrame(metrics_data)
+             # If no metrics (e.g., missing predictions table), skip writing
+            if df.empty:
+                print(f"No slice metrics to save for {report.model_name}; skipping BigQuery write")
+                return
+            # Add metadata
             df['model_name'] = report.model_name
             df['dataset'] = report.dataset
             df['analysis_timestamp'] = report.timestamp
@@ -467,7 +472,7 @@ class BiasDetector:
             job = self.client.load_table_from_dataframe(df, output_table, job_config=job_config)
             job.result()
             
-            print(f"✓ Bias metrics table created: {output_table}")
+            print(f"Bias metrics table created: {output_table}")
             
         except Exception as e:
             print(f"Error creating bias metrics table: {e}")

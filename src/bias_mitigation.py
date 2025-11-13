@@ -155,7 +155,7 @@ class BiasMitigator:
             print(f"Executing shrinkage mitigation query...")
             job = self.client.query(query)
             job.result()
-            print(f"✓ Mitigated data written to: {output_table}")
+            print(f"Mitigated data written to: {output_table}")
             
             # Compute mitigated metrics
             mitigated_metrics = self._compute_group_metrics(output_table, slice_expression)
@@ -260,7 +260,7 @@ class BiasMitigator:
             print(f"Creating re-weighted training table...")
             job = self.client.query(query)
             job.result()
-            print(f"✓ Re-weighted training data written to: {output_table}")
+            print(f"Re-weighted training data written to: {output_table}")
             
             # Analyze weight distribution
             weight_stats = self._analyze_weights(output_table)
@@ -346,7 +346,7 @@ class BiasMitigator:
             print(f"Adjustments: {threshold_adjustments}")
             job = self.client.query(query)
             job.result()
-            print(f"✓ Adjusted predictions written to: {output_table}")
+            print(f"Adjusted predictions written to: {output_table}")
             
             # Compute metrics before and after
             original_metrics = self._compute_prediction_metrics(predictions_table)
@@ -544,7 +544,7 @@ class BiasMitigator:
         with open(output_path, 'w') as f:
             json.dump(report_dict, f, indent=2)
         
-        print(f"✓ Mitigation report saved to: {output_path}")
+        print(f"Mitigation report saved to: {output_path}")
 
 
 def main():

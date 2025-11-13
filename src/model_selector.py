@@ -217,7 +217,7 @@ class ModelSelector:
             mae = float(stats['mae'].iloc[0])
             rmse = float(stats['rmse'].iloc[0])
         except Exception as e:
-            print(f"  ✗ Error getting validation metrics: {e}")
+            print(f"  Error getting validation metrics: {e}")
             raise
         
         # Run bias detection
@@ -227,7 +227,7 @@ class ModelSelector:
             dataset="test"
         )
         
-        print(f"  ✓ MAE: {mae:.4f}, RMSE: {rmse:.4f}")
+        print(f"MAE: {mae:.4f}, RMSE: {rmse:.4f}")
         
         return mae, rmse, bias_report
     
@@ -253,7 +253,7 @@ class ModelSelector:
              f"{self.fairness_weight*100:.0f}% Fairness")
         
         if len(model_candidates) == 2:
-            print("\n⚠️  Note: With 2 models, performance scores use percentage-based comparison")
+            print("\nNote: With 2 models, performance scores use percentage-based comparison")
             print("   This shows actual performance gaps rather than artificial extremes\n")
         else:
             print()
@@ -291,7 +291,7 @@ class ModelSelector:
                 all_rmses.append(rmse)
                 
             except Exception as e:
-                print(f"✗ Failed to evaluate {candidate_info['model_name']}: {e}")
+                print(f"Failed to evaluate {candidate_info['model_name']}: {e}")
                 continue
         
         if not candidates:
@@ -334,7 +334,7 @@ class ModelSelector:
         # If no model meets fairness threshold, take best fairness score
         if selected is None:
             selected = max(candidates, key=lambda x: x['fairness_score'])
-            print(f"\n⚠️ WARNING: No model meets fairness threshold ({self.min_fairness_threshold})")
+            print(f"\nWARNING: No model meets fairness threshold ({self.min_fairness_threshold})")
             print(f"   Selecting model with best fairness score instead")
         
         # Generate selection report
@@ -458,24 +458,24 @@ class ModelSelector:
         print("MODEL SELECTION SUMMARY")
         print("="*80)
         
-        print(f"\n🎯 SELECTED MODEL: {report.selected_model.model_name}")
+        print(f"\nSELECTED MODEL: {report.selected_model.model_name}")
         print(f"   Combined Score: {report.selected_model.combined_score:.1f}/100")
         print(f"   Performance Score: {report.selected_model.performance_score:.1f}/100")
         print(f"   Fairness Score: {report.selected_model.fairness_score:.1f}/100")
         print(f"   Validation MAE: {report.selected_model.validation_mae:.4f}")
         print(f"   Validation RMSE: {report.selected_model.validation_rmse:.4f}")
         
-        print(f"\n📊 ALL CANDIDATES:")
+        print(f"\nALL CANDIDATES:")
         print(f"{'Model':<30} {'MAE':<10} {'Perf':<8} {'Fair':<8} {'Combined':<10} {'Status'}")
         print("-" * 85)
         
         for candidate in report.candidates:
-            status = "✓ SELECTED" if candidate == report.selected_model else "  "
+            status = "SELECTED" if candidate == report.selected_model else "  "
             print(f"{candidate.model_name:<30} {candidate.validation_mae:<10.4f} "
                   f"{candidate.performance_score:<8.1f} {candidate.fairness_score:<8.1f} "
                   f"{candidate.combined_score:<10.1f} {status}")
         
-        print(f"\n💡 RATIONALE:")
+        print(f"\nRATIONALE:")
         print(f"   {report.rationale}")
         
         print(f"\n⚖️  TRADE-OFFS:")
@@ -504,7 +504,7 @@ class ModelSelector:
         with open(output_path, 'w') as f:
             json.dump(report_dict, f, indent=2)
         
-        print(f"✓ Selection report saved: {output_path}")
+        print(f"Selection report saved: {output_path}")
         
         return output_path
     
@@ -567,7 +567,7 @@ class ModelSelector:
         
         output_path = "data/bias_reports/model_selection/model_comparison.png"
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
-        print(f"✓ Saved: {output_path}")
+        print(f"Saved: {output_path}")
         plt.close()
 
 
@@ -598,7 +598,7 @@ def main():
     # Compare and select
     report = selector.compare_models(candidates)
     
-    print(f"\n🎯 FINAL SELECTION: {report.selected_model.model_name}")
+    print(f"\nFINAL SELECTION: {report.selected_model.model_name}")
     print(f"   Use table: {report.selected_model.predictions_table}")
 
 
