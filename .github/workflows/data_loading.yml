@@ -32,7 +32,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: goodreads-train-data
-        path: data/train_data.parquet 
+        path: data/
         retention-days: 1
 
     - name: Notify on success

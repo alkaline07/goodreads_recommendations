@@ -28,8 +28,38 @@ jobs:
     - name: Install dependencies
       run: pip install -r model_requirements.txt
     
-    - name: Wait for artifact propagation
-      run: sleep 30
+    - name: Wait for artifact to be available
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+        ARTIFACT_NAME: "goodreads-train-data"
+      run: |
+        echo "Waiting for artifact '$ARTIFACT_NAME' from run $RUN_ID..."
+        
+        timeout=180  # 3 minutes total timeout
+        start_time=$(date +%s)
+        
+        while true; do
+          current_time=$(date +%s)
+          elapsed=$((current_time - start_time))
+          
+          if [ $elapsed -gt $timeout ]; then
+            echo "Error: Timeout after $timeout seconds waiting for artifact."
+            exit 1
+          fi
+          
+          # Use gh api to list artifacts and grep for the exact name
+          artifact_names=$(gh api "repos/$REPO/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | .name' 2>/dev/null)
+          
+          if echo "$artifact_names" | grep -q "^$ARTIFACT_NAME$"; then
+            echo "Success! Artifact '$ARTIFACT_NAME' found."
+            break
+          else
+            echo "Artifact not yet found, retrying in 15s... (Elapsed: ${elapsed}s)"
+            sleep 15
+          fi
+        done
 
     - name: Download data artifact
       uses: actions/download-artifact@v4
