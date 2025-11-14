@@ -109,7 +109,10 @@ class BiasDetector:
             
             # Reading Pace
             ("Reading Pace", "reading_pace_category", "pace_group"),
-            
+
+            # Author Gender
+            ("Author Gender", "author_gender_group", "author_gender_group"),
+
             # Book Rating Range (actual rating)
             ("Rating Range", """
                 CASE

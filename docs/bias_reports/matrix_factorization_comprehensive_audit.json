@@ -1,19 +1,19 @@
 {
   "audit_metadata": {
     "model_name": "matrix_factorization",
-    "timestamp": "2025-11-12T22:08:35.032253",
+    "timestamp": "2025-11-13T17:43:50.406790",
     "predictions_table": "recommendation-system-475301.books.matrix_factorization_rating_predictions",
     "debiased_table": null
   },
   "bias_detection": {
-    "timestamp": "2025-11-12T22:08:39.723408",
-    "total_slices_analyzed": 20,
+    "timestamp": "2025-11-13T17:43:58.099552",
+    "total_slices_analyzed": 23,
     "disparities_found": 3,
     "high_risk_slices": 1,
     "recommendations": [
       "HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range",
       "MEDIUM PRIORITY: 2 dimensions show moderate disparities. Dimensions: Popularity, Book Era",
-      "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 4.371)",
+      "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 4.647)",
       "Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
     ]
   },
