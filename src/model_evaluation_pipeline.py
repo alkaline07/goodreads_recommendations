@@ -37,7 +37,7 @@ class ModelEvaluationPipeline:
     Complete pipeline for model evaluation and interpretability.
     """
 
-    def __init__(self, project_id: Optional[str] = None, use_mlflow: bool = True):
+    def __init__(self, project_id: Optional[str] = None):
         """Initialize the evaluation pipeline."""
         airflow_home = os.environ.get("AIRFLOW_HOME", "")
         possible_paths = [
@@ -62,17 +62,14 @@ class ModelEvaluationPipeline:
         self.project_id = self.client.project
         self.dataset_id = "books"
         self.sensitivity_analyzer = ModelSensitivityAnalyzer(project_id=project_id)
-        self.use_mlflow = use_mlflow
 
-        # Initialize MLflow if enabled
-        if self.use_mlflow:
-            try:
-                mlflow.set_tracking_uri("http://127.0.0.1:5000/")
-                mlflow.set_experiment("bigquery_ml_training")
-                print("MLflow tracking initialized")
-            except Exception as e:
-                print(f"MLflow initialization warning: {e}. Continuing without MLflow tracking.")
-                self.use_mlflow = False
+        # Initialize MLflow
+        try:
+            mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+            mlflow.set_experiment("bigquery_ml_training")
+            print("MLflow tracking initialized")
+        except Exception as e:
+            print(f"MLflow initialization warning: {e}. Continuing with MLflow tracking (errors will be handled gracefully).")
 
         print(f"ModelEvaluationPipeline initialized for project: {self.project_id}")
 
@@ -107,108 +104,18 @@ class ModelEvaluationPipeline:
             'sensitivity_analysis': None
         }
 
-        # Start MLflow run if enabled
-        if self.use_mlflow:
-            run_name = f"evaluation_{model_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            mlflow_run = mlflow.start_run(run_name=run_name)
-            try:
-                # Log run parameters
-                safe_mlflow_log(mlflow.log_param, "model_name", model_name)
-                safe_mlflow_log(mlflow.log_param, "predictions_table", predictions_table)
-                safe_mlflow_log(mlflow.log_param, "project_id", self.project_id)
-                safe_mlflow_log(mlflow.log_param, "dataset_id", self.dataset_id)
-                safe_mlflow_log(mlflow.log_param, "run_sensitivity_analysis", run_sensitivity_analysis)
-                safe_mlflow_log(mlflow.log_param, "sensitivity_sample_size", sensitivity_sample_size)
+        # Start MLflow run
+        run_name = f"evaluation_{model_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        mlflow_run = mlflow.start_run(run_name=run_name)
+        try:
+            # Log run parameters
+            safe_mlflow_log(mlflow.log_param, "model_name", model_name)
+            safe_mlflow_log(mlflow.log_param, "predictions_table", predictions_table)
+            safe_mlflow_log(mlflow.log_param, "project_id", self.project_id)
+            safe_mlflow_log(mlflow.log_param, "dataset_id", self.dataset_id)
+            safe_mlflow_log(mlflow.log_param, "run_sensitivity_analysis", run_sensitivity_analysis)
+            safe_mlflow_log(mlflow.log_param, "sensitivity_sample_size", sensitivity_sample_size)
 
-                # Step 1: Compute Performance Metrics
-                print("[STEP 1/2] Computing Performance Metrics...")
-                performance = self._compute_performance_metrics(predictions_table)
-                evaluation_results['performance_metrics'] = performance
-
-                print(f"\n--- Performance Metrics (Accuracy) ---")
-                print(f"  Predictions: {performance['num_predictions']:,}")
-                print(f"  MAE: {performance['mae']:.4f}")
-                print(f"  RMSE: {performance['rmse']:.4f}")
-                print(f"  R² Score: {performance.get('r_squared', 0):.4f}")
-                print(f"  Correlation: {performance.get('correlation', 0):.4f}")
-                print(f"  Accuracy within ±0.5: {performance.get('accuracy_within_0_5_pct', 0):.2f}%")
-                print(f"  Accuracy within ±1.0: {performance.get('accuracy_within_1_0_pct', 0):.2f}%")
-                print(f"  Accuracy within ±1.5: {performance.get('accuracy_within_1_5_pct', 0):.2f}%")
-                print(f"  Mean Predicted: {performance['mean_predicted']:.4f}")
-                print(f"  Mean Actual: {performance['mean_actual']:.4f}")
-
-                # Log performance metrics to MLflow (accuracy metrics)
-                safe_mlflow_log(mlflow.log_metric, "num_predictions", performance['num_predictions'])
-                safe_mlflow_log(mlflow.log_metric, "mae", performance['mae'])
-                safe_mlflow_log(mlflow.log_metric, "rmse", performance['rmse'])
-                safe_mlflow_log(mlflow.log_metric, "r_squared", performance.get('r_squared', 0))
-                safe_mlflow_log(mlflow.log_metric, "correlation", performance.get('correlation', 0))
-                safe_mlflow_log(mlflow.log_metric, "accuracy_within_0_5_pct", performance.get('accuracy_within_0_5_pct', 0))
-                safe_mlflow_log(mlflow.log_metric, "accuracy_within_1_0_pct", performance.get('accuracy_within_1_0_pct', 0))
-                safe_mlflow_log(mlflow.log_metric, "accuracy_within_1_5_pct", performance.get('accuracy_within_1_5_pct', 0))
-                safe_mlflow_log(mlflow.log_metric, "mean_predicted", performance['mean_predicted'])
-                safe_mlflow_log(mlflow.log_metric, "mean_actual", performance['mean_actual'])
-                safe_mlflow_log(mlflow.log_metric, "std_error", performance['std_error'])
-
-                # Step 2: Feature Importance Analysis
-                if run_sensitivity_analysis:
-                    print(f"\n[STEP 2/2] Running Feature Importance Analysis...")
-                    try:
-                        sensitivity_results = self.sensitivity_analyzer.analyze_feature_importance(
-                            predictions_table=predictions_table,
-                            model_name=model_name,
-                            sample_size=sensitivity_sample_size
-                        )
-                        evaluation_results['sensitivity_analysis'] = sensitivity_results
-
-                        print(f"\n✓ Feature importance analysis complete")
-                        print(f"  Top 3 features:")
-                        for i, feat in enumerate(sensitivity_results['feature_importance'][:3], 1):
-                            print(f"    {i}. {feat['feature']}: {feat['importance']:.4f}")
-
-                        # Log top feature importances to MLflow
-                        for i, feat in enumerate(sensitivity_results['feature_importance'][:10], 1):
-                            safe_mlflow_log(
-                                mlflow.log_metric,
-                                f"feature_importance_rank_{i}_{feat['feature']}",
-                                feat['importance']
-                            )
-
-                        # Log feature importance summary
-                        if sensitivity_results['feature_importance']:
-                            top_feature = sensitivity_results['feature_importance'][0]
-                            safe_mlflow_log(mlflow.log_param, "top_feature", top_feature['feature'])
-                            safe_mlflow_log(mlflow.log_metric, "top_feature_importance", top_feature['importance'])
-
-                    except Exception as e:
-                        print(f"Warning: Could not complete sensitivity analysis: {e}")
-                        evaluation_results['sensitivity_analysis'] = None
-                else:
-                    print(f"\n[STEP 2/2] Skipping sensitivity analysis (disabled)")
-
-                # Save Evaluation Report
-                print(f"\nSaving evaluation report...")
-                report_path = self._save_evaluation_report(evaluation_results, model_name)
-                evaluation_results['report_path'] = report_path
-
-                # Log evaluation report as artifact
-                if os.path.exists(report_path):
-                    safe_mlflow_log(mlflow.log_artifact, report_path, "evaluation_reports")
-
-                print("\n" + "=" * 80)
-                print("MODEL EVALUATION COMPLETE")
-                print("=" * 80)
-                print(f"\nEvaluation report: {report_path}")
-                if evaluation_results.get('sensitivity_analysis'):
-                    print(f"Feature importance: ../docs/model_analysis/sensitivity/")
-                if self.use_mlflow:
-                    print(f"MLflow run ID: {mlflow_run.info.run_id}")
-                    print(f"MLflow UI: http://127.0.0.1:5000")
-
-            finally:
-                mlflow.end_run()
-        else:
-            # Run without MLflow
             # Step 1: Compute Performance Metrics
             print("[STEP 1/2] Computing Performance Metrics...")
             performance = self._compute_performance_metrics(predictions_table)
@@ -226,6 +133,19 @@ class ModelEvaluationPipeline:
             print(f"  Mean Predicted: {performance['mean_predicted']:.4f}")
             print(f"  Mean Actual: {performance['mean_actual']:.4f}")
 
+            # Log performance metrics to MLflow (accuracy metrics)
+            safe_mlflow_log(mlflow.log_metric, "num_predictions", performance['num_predictions'])
+            safe_mlflow_log(mlflow.log_metric, "mae", performance['mae'])
+            safe_mlflow_log(mlflow.log_metric, "rmse", performance['rmse'])
+            safe_mlflow_log(mlflow.log_metric, "r_squared", performance.get('r_squared', 0))
+            safe_mlflow_log(mlflow.log_metric, "correlation", performance.get('correlation', 0))
+            safe_mlflow_log(mlflow.log_metric, "accuracy_within_0_5_pct", performance.get('accuracy_within_0_5_pct', 0))
+            safe_mlflow_log(mlflow.log_metric, "accuracy_within_1_0_pct", performance.get('accuracy_within_1_0_pct', 0))
+            safe_mlflow_log(mlflow.log_metric, "accuracy_within_1_5_pct", performance.get('accuracy_within_1_5_pct', 0))
+            safe_mlflow_log(mlflow.log_metric, "mean_predicted", performance['mean_predicted'])
+            safe_mlflow_log(mlflow.log_metric, "mean_actual", performance['mean_actual'])
+            safe_mlflow_log(mlflow.log_metric, "std_error", performance['std_error'])
+
             # Step 2: Feature Importance Analysis
             if run_sensitivity_analysis:
                 print(f"\n[STEP 2/2] Running Feature Importance Analysis...")
@@ -242,6 +162,20 @@ class ModelEvaluationPipeline:
                     for i, feat in enumerate(sensitivity_results['feature_importance'][:3], 1):
                         print(f"    {i}. {feat['feature']}: {feat['importance']:.4f}")
 
+                    # Log top feature importances to MLflow
+                    for i, feat in enumerate(sensitivity_results['feature_importance'][:10], 1):
+                        safe_mlflow_log(
+                            mlflow.log_metric,
+                            f"feature_importance_rank_{i}_{feat['feature']}",
+                            feat['importance']
+                        )
+
+                    # Log feature importance summary
+                    if sensitivity_results['feature_importance']:
+                        top_feature = sensitivity_results['feature_importance'][0]
+                        safe_mlflow_log(mlflow.log_param, "top_feature", top_feature['feature'])
+                        safe_mlflow_log(mlflow.log_metric, "top_feature_importance", top_feature['importance'])
+
                 except Exception as e:
                     print(f"Warning: Could not complete sensitivity analysis: {e}")
                     evaluation_results['sensitivity_analysis'] = None
@@ -253,12 +187,24 @@ class ModelEvaluationPipeline:
             report_path = self._save_evaluation_report(evaluation_results, model_name)
             evaluation_results['report_path'] = report_path
 
+            # Log evaluation report as artifact
+            if os.path.exists(report_path):
+                safe_mlflow_log(mlflow.log_artifact, report_path, "evaluation_reports")
+
             print("\n" + "=" * 80)
             print("MODEL EVALUATION COMPLETE")
             print("=" * 80)
             print(f"\nEvaluation report: {report_path}")
             if evaluation_results.get('sensitivity_analysis'):
                 print(f"Feature importance: ../docs/model_analysis/sensitivity/")
+            try:
+                print(f"MLflow run ID: {mlflow_run.info.run_id}")
+                print(f"MLflow UI: http://127.0.0.1:5000")
+            except Exception:
+                pass
+
+        finally:
+            mlflow.end_run()
 
         return evaluation_results
 
