@@ -1,0 +1,19 @@
+{
+  "model_name": "matrix_factorization",
+  "timestamp": "2025-11-15T03:14:56.822858",
+  "predictions_table": "recommendation-system-475301.books.matrix_factorization_rating_predictions",
+  "performance_metrics": {
+    "num_predictions": 2858454,
+    "mae": 1.754152891425586,
+    "rmse": 1.9777665143727419,
+    "mean_predicted": -2.106440833203631,
+    "mean_actual": -2.0518967325251922,
+    "std_error": 1.9770145912039092,
+    "r_squared": 0.08782436027725735,
+    "correlation": 0.2963517509265929,
+    "accuracy_within_0_5_pct": 6.776495266322284,
+    "accuracy_within_1_0_pct": 19.38852260697566,
+    "accuracy_within_1_5_pct": 39.66199910860906
+  },
+  "sensitivity_analysis": null
+}

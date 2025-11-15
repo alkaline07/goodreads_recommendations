@@ -4,10 +4,13 @@ Handles concurrent model training and provides better error handling
 """
 
 import os
-from google.cloud import bigquery
-from datetime import datetime
+import json
 import time
+import tempfile
+from datetime import datetime
+from google.cloud import bigquery
 import mlflow
+from mlflow.tracking import MlflowClient
 
 
 def safe_mlflow_log(func, *args, **kwargs):
@@ -38,6 +41,9 @@ class BigQueryMLModelTraining:
         self.client = bigquery.Client()
         self.project_id = self.client.project
         self.dataset_id = "books"
+        
+        # Model version tracking
+        self.model_versions = {}  # Track versions per model type
 
         # Table references
         self.train_table = f"{self.project_id}.{self.dataset_id}.goodreads_train_set"
@@ -173,12 +179,12 @@ class BigQueryMLModelTraining:
             print("Training MATRIX_FACTORIZATION Model")
             print("=" * 60)
 
-            # Model hyperparameters
+            # Model hyperparameters - Optimized for better accuracy
             hyperparams = {
                 "model_type": "MATRIX_FACTORIZATION",
-                "l2_reg": 0.1,
-                "num_factors": 10,
-                "max_iterations": 20,
+                "l2_reg": 0.05,  # Reduced from 0.1 - less regularization for better learning
+                "num_factors": 25,  # Increased from 10 - more latent dimensions to capture patterns
+                "max_iterations": 40,  # Increased from 20 - more iterations for better convergence
                 "feedback_type": "EXPLICIT"
             }
 
@@ -200,9 +206,9 @@ class BigQueryMLModelTraining:
                 item_col='book_id',
                 rating_col='rating',
                 feedback_type='EXPLICIT',
-                l2_reg=0.1,
-                num_factors=10,
-                max_iterations=20  -- Increased but not too much
+                l2_reg=0.05,  -- Reduced regularization for better learning
+                num_factors=25,  -- Increased latent dimensions for richer patterns
+                max_iterations=40  -- More iterations for better convergence
             ) AS
             SELECT
                 user_id_clean,
@@ -223,6 +229,11 @@ class BigQueryMLModelTraining:
             if success:
                 safe_mlflow_log(mlflow.log_metric, "mf_training_time_seconds", training_time)
                 self.evaluate_model(self.matrix_factorization_model, "MATRIX_FACTORIZATION")
+                # Log model metadata for tracking (will be registered to GCP Vertex AI separately)
+                self._log_model_metadata(
+                    model_name=self.matrix_factorization_model,
+                    model_type="matrix_factorization"
+                )
            
             safe_mlflow_log(mlflow.log_param, "mf_model_name", self.matrix_factorization_model)
             safe_mlflow_log(mlflow.log_metric, "mf_training_success", 1 if success else 0)
@@ -245,16 +256,16 @@ class BigQueryMLModelTraining:
             feature_columns = self.get_feature_columns()
             feature_list = ", ".join(feature_columns)
 
-            # Model hyperparameters
+            # Model hyperparameters - Optimized for better accuracy
             hyperparams = {
-                "num_parallel_tree": 5,
-                "max_tree_depth": 4,
-                "subsample": 0.85,
-                "min_split_loss": 0.01,
-                "l1_reg": 0.05,
-                "l2_reg": 0.05,
+                "num_parallel_tree": 10,  # Increased from 5 - more trees for better ensemble
+                "max_tree_depth": 6,  # Increased from 4 - deeper trees for complex patterns
+                "subsample": 0.8,  # Reduced from 0.85 - more regularization with deeper trees
+                "min_split_loss": 0.001,  # Reduced from 0.01 - allows more granular splits
+                "l1_reg": 0.01,  # Reduced from 0.05 - less L1 regularization
+                "l2_reg": 0.05,  # Kept same - balanced regularization
                 "early_stop": True,
-                "min_rel_progress": 0.01
+                "min_rel_progress": 0.005  # Reduced from 0.01 - allows longer training
             }
 
             # Log hyperparameters to MLflow
@@ -274,14 +285,14 @@ class BigQueryMLModelTraining:
                 model_type='BOOSTED_TREE_REGRESSOR',
                 input_label_cols=['rating'],
                 model_registry='VERTEX_AI',
-                num_parallel_tree=5,
-                max_tree_depth=4,
-                subsample=0.85,
-                min_split_loss=0.01,
-                l1_reg=0.05,
-                l2_reg=0.05,
+                num_parallel_tree=10,  -- Increased for better ensemble performance
+                max_tree_depth=6,  -- Deeper trees to capture complex feature interactions
+                subsample=0.8,  -- Slightly reduced for regularization with deeper trees
+                min_split_loss=0.001,  -- Lower threshold for more granular splits
+                l1_reg=0.01,  -- Reduced L1 regularization
+                l2_reg=0.05,  -- Balanced L2 regularization
                 early_stop=True,
-                min_rel_progress=0.01
+                min_rel_progress=0.005  -- Lower threshold for continued training
             ) AS
             SELECT
                 {feature_list},
@@ -301,6 +312,11 @@ class BigQueryMLModelTraining:
             if success:
                 safe_mlflow_log(mlflow.log_metric, "bt_training_time_seconds", training_time)
                 self.evaluate_model(self.boosted_tree_model, "BOOSTED_TREE_REGRESSOR")
+                # Log model metadata for tracking (will be registered to GCP Vertex AI separately)
+                self._log_model_metadata(
+                    model_name=self.boosted_tree_model,
+                    model_type="boosted_tree_regressor"
+                )
            
             safe_mlflow_log(mlflow.log_param, "bt_model_name", self.boosted_tree_model)
             safe_mlflow_log(mlflow.log_metric, "bt_training_success", 1 if success else 0)
@@ -427,6 +443,184 @@ class BigQueryMLModelTraining:
         except Exception as e:
             print(f"Error analyzing data: {e}")
             self.data_stats = {}
+
+    def _get_model_version(self, model_type: str) -> int:
+        """
+        Get or increment model version number for tracking.
+        
+        Args:
+            model_type: Type of model (e.g., "matrix_factorization", "boosted_tree_regressor")
+            
+        Returns:
+            Version number (starts at 1, increments for each training run)
+        """
+        if model_type not in self.model_versions:
+            # Try to get latest version from MLflow experiment history
+            try:
+                experiment = mlflow.get_experiment_by_name("bigquery_ml_training")
+                if experiment:
+                    # Query recent runs to find highest version
+                    from mlflow.tracking import MlflowClient
+                    client = MlflowClient()
+                    runs = client.search_runs(
+                        experiment_ids=[experiment.experiment_id],
+                        filter_string=f"tags.model_type = '{model_type}'",
+                        max_results=100,
+                        order_by=["start_time DESC"]
+                    )
+                    
+                    max_version = 0
+                    for run in runs:
+                        if f"{model_type}_version" in run.data.tags:
+                            try:
+                                version = int(run.data.tags[f"{model_type}_version"])
+                                max_version = max(max_version, version)
+                            except (ValueError, KeyError):
+                                pass
+                    
+                    self.model_versions[model_type] = max_version + 1
+                else:
+                    self.model_versions[model_type] = 1
+            except Exception:
+                # If we can't query MLflow, start at 1
+                self.model_versions[model_type] = 1
+        else:
+            # Increment existing version
+            self.model_versions[model_type] += 1
+        
+        return self.model_versions[model_type]
+
+    def _log_model_metadata(
+            self,
+            model_name: str,
+            model_type: str
+    ):
+        """
+        Log BigQuery ML model metadata to MLflow for experiment tracking with version tracking.
+        Model versioning in GCP Vertex AI is handled separately via register_bqml_models.py.
+        
+        Args:
+            model_name: Full BigQuery model path
+            model_type: Type of model (e.g., "matrix_factorization", "boosted_tree_regressor")
+        """
+        try:
+            # Get or increment model version
+            model_version = self._get_model_version(model_type)
+            
+            # Log model path and version as parameters
+            safe_mlflow_log(mlflow.log_param, f"{model_type}_bq_path", model_name)
+            safe_mlflow_log(mlflow.log_param, f"{model_type}_version", model_version)
+            
+            # Log version as metric for easy comparison
+            safe_mlflow_log(mlflow.log_metric, f"{model_type}_version", model_version)
+            
+            # Log version as tag for filtering
+            safe_mlflow_log(mlflow.set_tag, f"{model_type}_version", str(model_version))
+            safe_mlflow_log(mlflow.set_tag, "model_type", model_type)
+            
+            # Register model in MLflow Model Registry (for UI visibility)
+            self._register_model_in_mlflow_registry(
+                model_name=model_name,
+                model_type=model_type,
+                model_version=model_version
+            )
+            
+            print(f"✓ Tracked model version in MLflow: {model_name}")
+            print(f"  Model Version: {model_version}")
+            print(f"  Note: Register to GCP Vertex AI using: python src/register_bqml_models.py")
+                    
+        except Exception as e:
+            print(f"Warning: Could not log model metadata: {e}")
+            # Continue execution even if logging fails
+
+    def _register_model_in_mlflow_registry(
+            self,
+            model_name: str,
+            model_type: str,
+            model_version: int
+    ):
+        """
+        Register model in MLflow Model Registry for UI visibility.
+        This is separate from GCP Vertex AI registration (handled by register_bqml_models.py).
+        
+        Args:
+            model_name: Full BigQuery model path
+            model_type: Type of model (e.g., "matrix_factorization", "boosted_tree_regressor")
+            model_version: Version number
+        """
+        try:
+            # Check if we're in an active MLflow run
+            active_run = mlflow.active_run()
+            if not active_run:
+                print("Warning: No active MLflow run. Skipping MLflow Model Registry registration.")
+                return
+            
+            # Get MLflow client
+            client = MlflowClient()
+            registry_model_name = f"goodreads_{model_type}"
+            run_id = active_run.info.run_id
+            
+            # Create or get the registered model
+            try:
+                registered_model = client.get_registered_model(registry_model_name)
+                print(f"Found existing registered model in MLflow: {registry_model_name}")
+            except Exception:
+                # Model doesn't exist, create it
+                registered_model = client.create_registered_model(
+                    name=registry_model_name,
+                    description=f"Goodreads {model_type} recommendation model (tracked in MLflow). "
+                               f"GCP Vertex AI registration handled separately via register_bqml_models.py"
+                )
+                print(f"Created new registered model in MLflow: {registry_model_name}")
+            
+            # Register this run's model as a new version
+            # Use the run itself as the source (no metadata artifact needed)
+            model_uri = f"runs:/{run_id}"
+            
+            model_version_obj = client.create_model_version(
+                name=registry_model_name,
+                source=model_uri,
+                description=f"Version {model_version} trained on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}. "
+                           f"BigQuery Model: {model_name}"
+            )
+            
+            print(f"✓ Registered in MLflow Model Registry: {registry_model_name} v{model_version_obj.version}")
+            print(f"  View in MLflow UI: Models section → {registry_model_name}")
+            
+            # Add model metadata as tags
+            safe_mlflow_log(
+                client.set_model_version_tag,
+                registry_model_name,
+                model_version_obj.version,
+                "bigquery_model_path",
+                model_name
+            )
+            safe_mlflow_log(
+                client.set_model_version_tag,
+                registry_model_name,
+                model_version_obj.version,
+                "model_type",
+                model_type
+            )
+            safe_mlflow_log(
+                client.set_model_version_tag,
+                registry_model_name,
+                model_version_obj.version,
+                "version_number",
+                str(model_version)
+            )
+            safe_mlflow_log(
+                client.set_model_version_tag,
+                registry_model_name,
+                model_version_obj.version,
+                "gcp_registration_note",
+                "Register separately to GCP Vertex AI using register_bqml_models.py"
+            )
+            
+        except Exception as e:
+            print(f"Warning: Could not register model in MLflow Model Registry: {e}")
+            print("Model metadata logged, but MLflow registry registration failed.")
+            # Continue execution even if MLflow registry registration fails
 
     def run(self):
         """Execute the training pipeline with proper error handling."""
