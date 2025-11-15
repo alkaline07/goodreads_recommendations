@@ -1,3 +1,5 @@
 pandas_gbq
 bigframes
 mlflow
+google-cloud-aiplatform
+google-cloud-bigquery

@@ -31,23 +31,9 @@ class BigQueryMLModelTraining:
         Args:
             use_versioning: If True, adds timestamp to model names to avoid conflicts
         """
-        # [Keep existing initialization code]
-        airflow_home = os.environ.get("AIRFLOW_HOME", "")
-        possible_paths = [
-            os.path.join(airflow_home, "gcp_credentials.json") if airflow_home else None,
-            "config/gcp_credentials.json",
-            "gcp_credentials.json",
-            os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "gcp_credentials.json")
-        ]
-       
-        credentials_path = None
-        for path in possible_paths:
-            if path and os.path.exists(path):
-                credentials_path = os.path.abspath(path)
-                break
-       
-        if credentials_path:
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
+        if os.environ.get("AIRFLOW_HOME"):
+            # Running locally or through Airflow
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("AIRFLOW_HOME")+"/gcp_credentials.json"
 
         self.client = bigquery.Client()
         self.project_id = self.client.project
@@ -67,9 +53,9 @@ class BigQueryMLModelTraining:
             self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model_{timestamp}"
         else:
             # Use fixed names (will replace existing models)
-            self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model_v2"
-            self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model_v2"
-            self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model_v2"
+            self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
+            self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
+            self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model"
        
         self.popularity_model = f"{self.project_id}.{self.dataset_id}.popularity_baseline"
 
@@ -209,6 +195,7 @@ class BigQueryMLModelTraining:
             CREATE OR REPLACE MODEL `{self.matrix_factorization_model}`
             OPTIONS(
                 model_type='MATRIX_FACTORIZATION',
+                model_registry='VERTEX_AI',
                 user_col='user_id_clean',
                 item_col='book_id',
                 rating_col='rating',
@@ -286,6 +273,7 @@ class BigQueryMLModelTraining:
             OPTIONS(
                 model_type='BOOSTED_TREE_REGRESSOR',
                 input_label_cols=['rating'],
+                model_registry='VERTEX_AI',
                 num_parallel_tree=5,
                 max_tree_depth=4,
                 subsample=0.85,
@@ -530,12 +518,11 @@ def main():
     """Main function with error handling."""
     try:
         # Use versioning to avoid conflicts
-        trainer = BigQueryMLModelTraining(use_versioning=True)
+        trainer = BigQueryMLModelTraining(use_versioning=False)
         trainer.run()
     except Exception as e:
         print(f"Fatal error: {e}")
         raise
-
 
 if __name__ == "__main__":
     main()
