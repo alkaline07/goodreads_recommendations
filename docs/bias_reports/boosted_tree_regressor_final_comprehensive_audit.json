@@ -1,0 +1,76 @@
+{
+  "audit_metadata": {
+    "model_name": "boosted_tree_regressor_final",
+    "timestamp": "2025-11-13T17:44:30.703576",
+    "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
+    "debiased_table": "recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased"
+  },
+  "bias_detection": {
+    "timestamp": "2025-11-13T17:44:35.977137",
+    "total_slices_analyzed": 23,
+    "disparities_found": 2,
+    "high_risk_slices": 2,
+    "recommendations": [
+      "HIGH PRIORITY: 2 dimensions show severe performance disparities. Dimensions: Book Era, Rating Range",
+      "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.702), Book Era=classic (MAE: 1.534)",
+      "Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups",
+      "Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
+    ]
+  },
+  "mitigation_applied": {
+    "techniques": [
+      "prediction_shrinkage"
+    ],
+    "results": [
+      {
+        "technique": "prediction_shrinkage",
+        "output_table": "recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased",
+        "improvements": {
+          "mae_change": 1.3195963335946752,
+          "disparity_reduction": "See validation step"
+        }
+      }
+    ]
+  },
+  "validation": {
+    "timestamp": "2025-11-13T17:44:43.230944",
+    "techniques_applied": [
+      "prediction_shrinkage"
+    ],
+    "effectiveness": {
+      "prediction_shrinkage": {
+        "improvements": {
+          "mae_change": 1.3195963335946752,
+          "disparity_reduction": "See validation step"
+        },
+        "output_table": "recommendation-system-475301.books.boosted_tree_regressor_final_rating_predictions_debiased",
+        "post_mitigation_disparities": [
+          {
+            "dimension": "Book Era",
+            "severity": "medium",
+            "mae_range": 0.4541578066484875,
+            "mae_cv": 0.13331236783939152,
+            "recommendation": "Significant performance disparity detected in Book Era. Consider bias mitigation."
+          },
+          {
+            "dimension": "Rating Range",
+            "severity": "high",
+            "mae_range": 2.3513000887443196,
+            "mae_cv": 0.45209082751920976,
+            "recommendation": "Significant performance disparity detected in Rating Range. Consider bias mitigation."
+          }
+        ]
+      }
+    }
+  },
+  "executive_summary": {
+    "bias_detected": true,
+    "severity": "high",
+    "dimensions_with_bias": [
+      "Book Era",
+      "Rating Range"
+    ],
+    "mitigation_applied": true,
+    "overall_status": "MITIGATED"
+  }
+}

@@ -2,6 +2,8 @@ venv/
 **/gcp_credentials.json
 *pycache*
 
+mlruns/
+
 # Ignore Airflow logs and generated password file
 config/simple_auth_manager_passwords.json.generated
 
@@ -12,6 +14,8 @@ goodreads_recommendations.egg-info
 .pytest_cache/
 
 data/sample_features/
+data/*.parquet
+data/*.csv
 
 **/logs/
 .DS_Store

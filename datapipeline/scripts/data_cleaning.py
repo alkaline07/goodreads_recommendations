@@ -20,9 +20,6 @@ from google.cloud import bigquery
 from datapipeline.scripts.logger_setup import get_logger
 import time
 from datetime import datetime
-from gender_guesser.detector import Detector
-from tqdm import tqdm
-import sys
 
 class DataCleaning:
     
@@ -34,7 +31,6 @@ class DataCleaning:
         - Google Cloud credentials for BigQuery access
         - Logging configuration for data cleaning operations
         - BigQuery client and project information
-        - Column names for median imputation
         """
         # Set Google Application Credentials for BigQuery access
         # Uses AIRFLOW_HOME environment variable to locate credentials file
@@ -43,40 +39,36 @@ class DataCleaning:
         # Initialize logging for data cleaning operations
         self.logger = get_logger("data_cleaning")
 
-        # Columns that will use global median imputation for missing values
-        # These are numeric columns where median is more appropriate than mean
-        self.median_numeric_cols = ["publication_year", "num_pages"]
-
         # Initialize BigQuery client and get project information
         self.client = bigquery.Client()
         self.project_id = self.client.project
+        self.dataset_id="books"
         
 
-    def clean_table(self, dataset_id: str, table_name: str, destination_table: str, apply_global_median: bool = False):
+    def _clean_table_generic(self, table_name: str, destination_table: str, filter_clause: str = None):
         """
-        Clean a BigQuery table by applying data cleaning transformations.
+        Generic function to clean a BigQuery table by applying transformations.
         
         Args:
             dataset_id (str): BigQuery dataset ID containing the source table
             table_name (str): Name of the source table to clean
             destination_table (str): Full table ID for the cleaned destination table
-            apply_global_median (bool): Whether to apply global median imputation for numeric columns
+            filter_clause (str, optional): A SQL WHERE clause to apply for filtering.
             
         The method performs the following cleaning operations:
         - Removes duplicates using SELECT DISTINCT
         - Handles null values with appropriate defaults
         - Cleans and standardizes text fields
         - Flattens array columns for easier processing
-        - Applies median imputation for specified numeric columns
         """
         try:
-            self.logger.info(f"Starting cleaning for table: {dataset_id}.{table_name}")
+            self.logger.info(f"Starting generic cleaning for table: {self.dataset_id}.{table_name}")
 
             # Get table schema information from BigQuery INFORMATION_SCHEMA
             # This allows us to dynamically handle different table structures
             columns_info = self.client.query(f"""
                 SELECT column_name, data_type
-                FROM `{self.project_id}.{dataset_id}.INFORMATION_SCHEMA.COLUMNS`
+                FROM `{self.project_id}.{self.dataset_id}.INFORMATION_SCHEMA.COLUMNS`
                 WHERE table_name = '{table_name}'
                 ORDER BY ordinal_position
             """).to_dataframe(create_bqstorage_client=False)
@@ -92,15 +84,8 @@ class DataCleaning:
             select_exprs = []
             for _, row in columns_info.iterrows():
                 col = row['column_name']
-
-                # For numeric columns that need median imputation
-                if apply_global_median and col in self.median_numeric_cols:
-                    # Replace 0 values with NULL, then use global median as fallback
-                    select_exprs.append(
-                        f"COALESCE(NULLIF({col}, 0), global_medians.{col}_median) AS {col}"
-                    )
                 # For string columns: trim whitespace and replace empty strings with 'Unknown'
-                elif col in string_cols:
+                if col in string_cols:
                     select_exprs.append(f"COALESCE(NULLIF(TRIM({col}), ''), 'Unknown') AS {col}_clean")
                 # For boolean columns: replace NULL with FALSE
                 elif col in bool_cols:
@@ -117,31 +102,21 @@ class DataCleaning:
             # Join all SELECT expressions with proper formatting
             select_sql = ",\n  ".join(select_exprs)
 
-            # Build the final SQL query based on whether median imputation is needed
-            if apply_global_median:
-                # Query with global median calculation for numeric columns
-                # Uses CTEs to calculate medians across the entire dataset
+            # Build the final SQL query based on whether a filter clause is provided
+            if filter_clause:
+                self.logger.info(f"Applying custom filter clause for {table_name}...")
                 query = f"""
-                WITH main AS (
-                    SELECT *
-                    FROM `{self.project_id}.{dataset_id}.{table_name}`
-                ),
-                global_medians AS (
-                    SELECT
-                        {', '.join([f'APPROX_QUANTILES(NULLIF({col}, 0), 2)[OFFSET(1)] AS {col}_median' for col in self.median_numeric_cols])}
-                    FROM main
-                )
                 SELECT DISTINCT
                 {select_sql}
-                FROM main
-                LEFT JOIN global_medians ON TRUE
+                FROM `{self.project_id}.{self.dataset_id}.{table_name}`
+                {filter_clause}
                 """
             else:
-                # Simple query without median imputation
+                self.logger.info(f"Skipping filter clause for {table_name}...")
                 query = f"""
                 SELECT DISTINCT
                 {select_sql}
-                FROM `{self.project_id}.{dataset_id}.{table_name}`
+                FROM `{self.project_id}.{self.dataset_id}.{table_name}`
                 """
 
             # Execute the cleaning query and save results to destination table
@@ -155,7 +130,59 @@ class DataCleaning:
 
         except Exception as e:
             # Log any errors that occur during the cleaning process
-            self.logger.error(f"Error cleaning table {dataset_id}.{table_name}: {e}", exc_info=True)
+            self.logger.error(f"Error cleaning table {self.dataset_id}.{table_name}: {e}", exc_info=True)
+            raise e
+
+    def clean_books_table(self, books_table_name: str, books_destination: str):
+        """
+        Cleans the books table, applying specific outlier filters for pages and year.
+        """
+        self.logger.info(f"Cleaning books table: {self.dataset_id}.{books_table_name}")
+        # Specific outlier filter for books table
+        filter_clause = """
+        WHERE (num_pages >= 10 AND num_pages <= 2000)
+          AND (publication_year >= 1900 AND publication_year <= 2025)
+        """
+        self._clean_table_generic(
+            table_name=books_table_name,
+            destination_table=books_destination,
+            filter_clause=filter_clause
+        )
+
+    def clean_interactions_table(self, interactions_table_name: str, interactions_destination: str, books_destination: str):
+        """
+        Cleans the interactions table (no custom outlier filtering).
+        """
+        self.logger.info(f"Cleaning interactions table: {self.dataset_id}.{interactions_table_name}")
+        self._clean_table_generic(
+            table_name=interactions_table_name,
+            destination_table=interactions_destination,
+            filter_clause=None # No filter
+        )
+
+        # --- Filter interactions table based on cleaned books ---
+        try:
+            self.logger.info(f"Filtering interactions table ({interactions_destination}) against books table ({books_destination})...")
+            
+            filter_query = f"""
+            SELECT t1.*
+            FROM `{interactions_destination}` AS t1
+            INNER JOIN `{books_destination}` AS t2
+            ON t1.book_id = t2.book_id
+            """
+            
+            job_config = bigquery.QueryJobConfig(
+                destination=interactions_destination, # Overwrite the interactions table
+                write_disposition="WRITE_TRUNCATE"
+            )
+            
+            query_job = self.client.query(filter_query, job_config=job_config)
+            query_job.result()
+            
+            self.logger.info(f"Successfully filtered interactions table: {interactions_destination}")
+
+        except Exception as e:
+            self.logger.error(f"Error filtering interactions table: {e}", exc_info=True)
 
     def run(self):
         """
@@ -172,22 +199,21 @@ class DataCleaning:
         self.logger.info(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.logger.info("=" * 60)
         
-        # Clean books table with global median imputation for numeric columns
-        # This helps handle missing publication years and page counts
-        self.clean_table(
-            dataset_id="books",
-            table_name="goodreads_books_mystery_thriller_crime",
-            destination_table=f"{self.project_id}.books.goodreads_books_cleaned_staging",
-            apply_global_median=True  # Apply median imputation for publication_year and num_pages
+        # Define destination table IDs
+        books_table_id = f"{self.project_id}.books.goodreads_books_cleaned_staging"
+        interactions_table_id = f"{self.project_id}.books.goodreads_interactions_cleaned_staging"
+        
+        # Clean books table with outlier filtering
+        self.clean_books_table(
+            books_table_name="goodreads_books_mystery_thriller_crime",
+            books_destination=books_table_id
         )
 
-        # Clean interactions table without median imputation
-        # Interactions data typically doesn't need median imputation
-        self.clean_table(
-            dataset_id="books",
-            table_name="goodreads_interactions_mystery_thriller_crime",
-            destination_table=f"{self.project_id}.books.goodreads_interactions_cleaned_staging",
-            apply_global_median=False
+        # Clean interactions table (initial clean, no outlier filtering)
+        self.clean_interactions_table(
+            interactions_table_name="goodreads_interactions_mystery_thriller_crime",
+            interactions_destination=interactions_table_id,
+            books_destination=books_table_id
         )
 
         # Fetch and log sample rows from cleaned tables for verification
@@ -210,81 +236,13 @@ class DataCleaning:
         except Exception as e:
             self.logger.error(f"Error fetching sample data: {e}", exc_info=True)
             print("Books sample:")
-            
-        # Create author gender mapping for bias analysis
-        self.create_author_gender_map()
         
-        # Log pipeline completion statistics
+        # Log completion
         end_time = time.time()
         self.logger.info("=" * 60)
         self.logger.info(f"Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.logger.info(f"Total runtime: {(end_time - start_time):.2f} seconds")
         self.logger.info("=" * 60)
-
-    def create_author_gender_map(self):
-        """
-        Generate and upload author gender mapping table to BigQuery.
-        
-        This method creates a gender mapping for authors to support bias analysis
-        in the recommendation system. It uses the gender-guesser library to infer
-        gender from author names and stores the results in BigQuery.
-        
-        The gender mapping is used later in the bias analysis pipeline to ensure
-        fair recommendations across different author demographics.
-        """
-        try:
-            self.logger.info("Starting gender mapping for authors...")
-
-            # Load authors table from BigQuery using dynamic project ID
-            query = f"""
-                SELECT author_id, name
-                FROM `{self.project_id}.books.goodreads_book_authors`
-                WHERE name IS NOT NULL
-            """
-            authors_df = self.client.query(query).to_dataframe(create_bqstorage_client=False)
-            self.logger.info(f"Retrieved {len(authors_df)} author rows.")
-
-            # Initialize gender detector with case-insensitive matching
-            detector = Detector(case_sensitive=False)
-
-            def get_gender(name):
-                """
-                Infer gender from author name using gender-guesser library.
-                
-                Args:
-                    name (str): Author's full name
-                    
-                Returns:
-                    str: 'Male', 'Female', or 'Unknown'
-                """
-                # Handle edge cases: empty names, names with periods, or single characters
-                if not name or '.' in name or len(name.split()) == 0:
-                    return "Unknown"
-                    
-                # Use first name for gender inference
-                g = detector.get_gender(name.split()[0])
-                
-                # Map gender-guesser results to our categories
-                if g in ["male", "mostly_male"]:
-                    return "Male"
-                elif g in ["female", "mostly_female"]:
-                    return "Female"
-                else:
-                    return "Unknown"
-
-            tqdm.pandas(desc="Inferring author gender", file=sys.stdout)
-            authors_df["author_gender_group"] = authors_df["name"].progress_apply(get_gender)
-
-            # Upload gender mapping back to BigQuery
-            table_id = f"{self.project_id}.books.goodreads_author_gender_map"
-            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-            job = self.client.load_table_from_dataframe(authors_df, table_id, job_config=job_config)
-            job.result()  # Wait for upload to complete
-            self.logger.info(f"Uploaded {len(authors_df)} rows to {table_id}")
-            self.logger.info("Uploaded gender map to books.goodreads_author_gender_map")
-
-        except Exception as e:
-            self.logger.error(f"Error creating author gender map: {e}", exc_info=True)
 
 
 def main():

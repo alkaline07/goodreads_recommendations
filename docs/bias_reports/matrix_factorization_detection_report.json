@@ -1,0 +1,381 @@
+{
+  "timestamp": "2025-11-13T17:43:58.099552",
+  "model_name": "matrix_factorization",
+  "dataset": "test",
+  "slice_metrics": [
+    {
+      "slice_name": "Popularity=High",
+      "slice_dimension": "Popularity",
+      "slice_value": "High",
+      "count": 60639,
+      "mae": 1.4736302871158222,
+      "rmse": 1.7676612413172632,
+      "mean_predicted": -0.9218180176077012,
+      "mean_actual": -0.7430582907965295,
+      "mean_error": 0.1787597268111722,
+      "std_error": 1.758613722885933
+    },
+    {
+      "slice_name": "Popularity=Low",
+      "slice_dimension": "Popularity",
+      "slice_value": "Low",
+      "count": 2779045,
+      "mae": 1.75993618249236,
+      "rmse": 1.981982418589489,
+      "mean_predicted": -2.137114209768604,
+      "mean_actual": -2.084681911029156,
+      "mean_error": 0.052432298739438485,
+      "std_error": 1.9812891192818687
+    },
+    {
+      "slice_name": "Popularity=Medium",
+      "slice_dimension": "Popularity",
+      "slice_value": "Medium",
+      "count": 18770,
+      "mae": 1.804157370918202,
+      "rmse": 1.9955427894434103,
+      "mean_predicted": -1.3920907606900448,
+      "mean_actual": -1.4261731242374258,
+      "mean_error": -0.034082363547380895,
+      "std_error": 1.9953048698454063
+    },
+    {
+      "slice_name": "Book Length=long",
+      "slice_dimension": "Book Length",
+      "slice_value": "long",
+      "count": 1149748,
+      "mae": 1.7729818013219323,
+      "rmse": 2.0345059231255824,
+      "mean_predicted": -2.0735543604689313,
+      "mean_actual": -1.9878764777106994,
+      "mean_error": 0.08567788275823264,
+      "std_error": 2.0327019568454654
+    },
+    {
+      "slice_name": "Book Length=medium",
+      "slice_dimension": "Book Length",
+      "slice_value": "medium",
+      "count": 1213389,
+      "mae": 1.7228765093972078,
+      "rmse": 1.919991794592348,
+      "mean_predicted": -2.243501831688773,
+      "mean_actual": -2.2461390218451442,
+      "mean_error": -0.00263719015636032,
+      "std_error": 1.9199907746140863
+    },
+    {
+      "slice_name": "Book Length=short",
+      "slice_dimension": "Book Length",
+      "slice_value": "short",
+      "count": 199390,
+      "mae": 1.7714819495585397,
+      "rmse": 1.9703929638785966,
+      "mean_predicted": -1.9643150910582445,
+      "mean_actual": -1.9528540474561311,
+      "mean_error": 0.01146104360211952,
+      "std_error": 1.9703645722686276
+    },
+    {
+      "slice_name": "Book Length=very_long",
+      "slice_dimension": "Book Length",
+      "slice_value": "very_long",
+      "count": 295927,
+      "mae": 1.7975645284725965,
+      "rmse": 1.9924955920526324,
+      "mean_predicted": -1.7679833760917347,
+      "mean_actual": -1.5709126510211713,
+      "mean_error": 0.19707072507056894,
+      "std_error": 1.9827292044244562
+    },
+    {
+      "slice_name": "Book Era=classic",
+      "slice_dimension": "Book Era",
+      "slice_value": "classic",
+      "count": 707249,
+      "mae": 1.8488214972082342,
+      "rmse": 2.0092229543600806,
+      "mean_predicted": -1.7724307815545233,
+      "mean_actual": -1.5115008775309149,
+      "mean_error": 0.26092990402360683,
+      "std_error": 1.9922093457401726
+    },
+    {
+      "slice_name": "Book Era=contemporary",
+      "slice_dimension": "Book Era",
+      "slice_value": "contemporary",
+      "count": 564316,
+      "mae": 1.5604522202775835,
+      "rmse": 1.8092311397129561,
+      "mean_predicted": -2.6129063605168588,
+      "mean_actual": -2.826457291154223,
+      "mean_error": -0.21355093063736005,
+      "std_error": 1.7965853825054905
+    },
+    {
+      "slice_name": "Book Era=modern",
+      "slice_dimension": "Book Era",
+      "slice_value": "modern",
+      "count": 1586851,
+      "mae": 1.7808572885917227,
+      "rmse": 2.0205644529246802,
+      "mean_predicted": -2.075178601872947,
+      "mean_actual": -2.0172545783930316,
+      "mean_error": 0.05792402347992397,
+      "std_error": 2.0197346574818065
+    },
+    {
+      "slice_name": "Book Era=recent",
+      "slice_dimension": "Book Era",
+      "slice_value": "recent",
+      "count": 38,
+      "mae": 1.1807797576270518,
+      "rmse": 1.4167079177431448,
+      "mean_predicted": -2.9005870652544123,
+      "mean_actual": -3.8794960052125496,
+      "mean_error": -0.978908939958137,
+      "std_error": 1.037855731729684
+    },
+    {
+      "slice_name": "Genre Diversity=Multi-genre",
+      "slice_dimension": "Genre Diversity",
+      "slice_value": "Multi-genre",
+      "count": 2858241,
+      "mae": 1.7541535950401654,
+      "rmse": 1.9777628876774007,
+      "mean_predicted": -2.1064102606570616,
+      "mean_actual": -2.051872963851513,
+      "mean_error": 0.05453729680555953,
+      "std_error": 1.9770111508553039
+    },
+    {
+      "slice_name": "Genre Diversity=Some genres",
+      "slice_dimension": "Genre Diversity",
+      "slice_value": "Some genres",
+      "count": 213,
+      "mae": 1.744711107309775,
+      "rmse": 2.0258485250564875,
+      "mean_predicted": -2.5166929742852733,
+      "mean_actual": -2.3708478952176226,
+      "mean_error": 0.14584507906764996,
+      "std_error": 2.0253517989883676
+    },
+    {
+      "slice_name": "User Activity=Low",
+      "slice_dimension": "User Activity",
+      "slice_value": "Low",
+      "count": 2858454,
+      "mae": 1.754152891425586,
+      "rmse": 1.977766514372742,
+      "mean_predicted": -2.106440833203631,
+      "mean_actual": -2.0518967325251922,
+      "mean_error": 0.05454410067843005,
+      "std_error": 1.9770145912039092
+    },
+    {
+      "slice_name": "Reading Pace=long_read",
+      "slice_dimension": "Reading Pace",
+      "slice_value": "long_read",
+      "count": 1169002,
+      "mae": 1.8004700700537686,
+      "rmse": 1.9770737213844514,
+      "mean_predicted": -1.928708178706622,
+      "mean_actual": -1.780331428186692,
+      "mean_error": 0.14837675051993518,
+      "std_error": 1.971498963882174
+    },
+    {
+      "slice_name": "Reading Pace=moderate",
+      "slice_dimension": "Reading Pace",
+      "slice_value": "moderate",
+      "count": 1140528,
+      "mae": 1.744264436475745,
+      "rmse": 1.9366800607802825,
+      "mean_predicted": -2.2505284909194154,
+      "mean_actual": -2.224972547511386,
+      "mean_error": 0.025555943408025535,
+      "std_error": 1.9365122874903957
+    },
+    {
+      "slice_name": "Reading Pace=quick_read",
+      "slice_dimension": "Reading Pace",
+      "slice_value": "quick_read",
+      "count": 359994,
+      "mae": 1.656596769725343,
+      "rmse": 2.121370545908574,
+      "mean_predicted": -2.3899340682392642,
+      "mean_actual": -2.5416979117175122,
+      "mean_error": -0.15176384347825095,
+      "std_error": 2.1159378926887524
+    },
+    {
+      "slice_name": "Reading Pace=very_long",
+      "slice_dimension": "Reading Pace",
+      "slice_value": "very_long",
+      "count": 188930,
+      "mae": 1.713147247915821,
+      "rmse": 1.943649298558189,
+      "mean_predicted": -1.796156372501915,
+      "mean_actual": -1.7540990565902206,
+      "mean_error": 0.04205731591169474,
+      "std_error": 1.9431993629908688
+    },
+    {
+      "slice_name": "Author Gender=Female",
+      "slice_dimension": "Author Gender",
+      "slice_value": "Female",
+      "count": 1140853,
+      "mae": 1.7392291168021436,
+      "rmse": 1.933843305173263,
+      "mean_predicted": -2.203912049226457,
+      "mean_actual": -2.2138356551985714,
+      "mean_error": -0.009923605972107709,
+      "std_error": 1.9338186908172463
+    },
+    {
+      "slice_name": "Author Gender=Male",
+      "slice_dimension": "Author Gender",
+      "slice_value": "Male",
+      "count": 1355558,
+      "mae": 1.7758385044416676,
+      "rmse": 2.0274337384163847,
+      "mean_predicted": -1.977821682605931,
+      "mean_actual": -1.8479748230333466,
+      "mean_error": 0.12984685957258024,
+      "std_error": 2.0232721953839987
+    },
+    {
+      "slice_name": "Author Gender=Unknown",
+      "slice_dimension": "Author Gender",
+      "slice_value": "Unknown",
+      "count": 362043,
+      "mae": 1.719984924752138,
+      "rmse": 1.9256531884885544,
+      "mean_predicted": -2.280868703187657,
+      "mean_actual": -2.3051248574669256,
+      "mean_error": -0.0242561542792712,
+      "std_error": 1.9255030724419764
+    },
+    {
+      "slice_name": "Rating Range=Low (1-3)",
+      "slice_dimension": "Rating Range",
+      "slice_value": "Low (1-3)",
+      "count": 2858441,
+      "mae": 1.7541397347220162,
+      "rmse": 1.9777459560912447,
+      "mean_predicted": -2.1064433688081787,
+      "mean_actual": -2.0519201545413117,
+      "mean_error": 0.054523214266856516,
+      "std_error": 1.9769946012313016
+    },
+    {
+      "slice_name": "Rating Range=Medium (3-4)",
+      "slice_dimension": "Rating Range",
+      "slice_value": "Medium (3-4)",
+      "count": 13,
+      "mae": 4.6470498841156385,
+      "rmse": 4.668178120000824,
+      "mean_predicted": -1.5489119109776663,
+      "mean_actual": 3.0981379731379732,
+      "mean_error": 4.6470498841156385,
+      "std_error": 0.4617526709666696
+    }
+  ],
+  "disparity_analysis": {
+    "summary": {
+      "Popularity": {
+        "mae_range": 0.3305270838023797,
+        "rmse_range": 0.22788154812614714,
+        "mae_coefficient_of_variation": 0.08724505144674108,
+        "num_slices": 3,
+        "max_mae_slice": "Medium",
+        "min_mae_slice": "High"
+      },
+      "Book Length": {
+        "mae_range": 0.07468801907538869,
+        "rmse_range": 0.1145141285332345,
+        "mae_coefficient_of_variation": 0.015335369989749548,
+        "num_slices": 4,
+        "max_mae_slice": "very_long",
+        "min_mae_slice": "medium"
+      },
+      "Book Era": {
+        "mae_range": 0.6680417395811824,
+        "rmse_range": 0.6038565351815355,
+        "mae_coefficient_of_variation": 0.16363980301936623,
+        "num_slices": 4,
+        "max_mae_slice": "classic",
+        "min_mae_slice": "recent"
+      },
+      "Genre Diversity": {
+        "mae_range": 0.00944248773039047,
+        "rmse_range": 0.048085637379086776,
+        "mae_coefficient_of_variation": 0.0026987290260319634,
+        "num_slices": 2,
+        "max_mae_slice": "Multi-genre",
+        "min_mae_slice": "Some genres"
+      },
+      "Reading Pace": {
+        "mae_range": 0.1438733003284256,
+        "rmse_range": 0.18469048512829156,
+        "mae_coefficient_of_variation": 0.030106732968055935,
+        "num_slices": 4,
+        "max_mae_slice": "long_read",
+        "min_mae_slice": "quick_read"
+      },
+      "Author Gender": {
+        "mae_range": 0.05585357968952964,
+        "rmse_range": 0.10178054992783037,
+        "mae_coefficient_of_variation": 0.013275836531575453,
+        "num_slices": 3,
+        "max_mae_slice": "Male",
+        "min_mae_slice": "Unknown"
+      },
+      "Rating Range": {
+        "mae_range": 2.8929101493936225,
+        "rmse_range": 2.6904321639095787,
+        "mae_coefficient_of_variation": 0.45193320642779594,
+        "num_slices": 2,
+        "max_mae_slice": "Medium (3-4)",
+        "min_mae_slice": "Low (1-3)"
+      }
+    },
+    "detailed_disparities": [
+      {
+        "dimension": "Popularity",
+        "severity": "medium",
+        "mae_range": 0.3305270838023797,
+        "mae_cv": 0.08724505144674108,
+        "recommendation": "Significant performance disparity detected in Popularity. Consider bias mitigation."
+      },
+      {
+        "dimension": "Book Era",
+        "severity": "medium",
+        "mae_range": 0.6680417395811824,
+        "mae_cv": 0.16363980301936623,
+        "recommendation": "Significant performance disparity detected in Book Era. Consider bias mitigation."
+      },
+      {
+        "dimension": "Rating Range",
+        "severity": "high",
+        "mae_range": 2.8929101493936225,
+        "mae_cv": 0.45193320642779594,
+        "recommendation": "Significant performance disparity detected in Rating Range. Consider bias mitigation."
+      }
+    ],
+    "high_risk_slices": [
+      {
+        "slice": "Rating Range=Medium (3-4)",
+        "dimension": "Rating Range",
+        "mae": 4.6470498841156385,
+        "mae_deviation_pct": 45.1933206427796,
+        "count": 13
+      }
+    ]
+  },
+  "recommendations": [
+    "HIGH PRIORITY: 1 dimensions show severe performance disparities. Dimensions: Rating Range",
+    "MEDIUM PRIORITY: 2 dimensions show moderate disparities. Dimensions: Popularity, Book Era",
+    "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 4.647)",
+    "Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
+  ]
+}

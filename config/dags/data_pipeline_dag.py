@@ -13,6 +13,7 @@ Pipeline Flow:
 5. Data Normalization - Normalize features for ML algorithms
 6. Staging Table Promotion - Move staging tables to production
 7. Data Versioning - Track data changes with DVC
+8. Train/Test/Val Split - Split data for model training
 
 Author: Goodreads Recommendation Team
 Date: 2025
@@ -36,6 +37,7 @@ from datapipeline.scripts.anomaly_detection import main_pre_validation, main_pos
 from datapipeline.scripts.promote_staging_tables import main as promote_staging_main
 from datapipeline.scripts.feature_metadata import main as feature_metadata_main
 from datapipeline.scripts.train_test_val import main as train_test_split_main
+from datapipeline.scripts.author_gender_mapper import main as author_gender_mapping_main
 
 # Default arguments for all DAG tasks
 default_args = {
@@ -125,6 +127,11 @@ def data_cleaning_run():
     
     logging.info("Data Cleaning Tests Passed Successfully")
 
+def author_gender_mapping_run():
+    author_gender_mapping_main()
+
+    logging.info("Author Gender Mapping completed")
+
     
 def feature_engg_run():
     feature_engg_main()
@@ -173,7 +180,7 @@ def data_versioning_run():
         result = subprocess.run(cmd, capture_output=True, text=True)
         logging.info(result.stdout)
         if result.returncode != 0:
-            raise Exception(f"Command failed: {' '.join(cmd)}")
+            raise Exception(f"Command failed: {' '.join(cmd)}\nError: {result.stderr}")
     
     logging.info("Data Versioning completed successfully")
 
@@ -246,6 +253,11 @@ with DAG(
         python_callable=data_cleaning_run,
     )
 
+    author_gender_mapping_task = PythonOperator(
+        task_id='author_gender_mapping',
+        python_callable=author_gender_mapping_run,
+    )
+
     post_cleaning_validation_task = PythonOperator(
         task_id='validate_cleaned_data',
         python_callable=main_post_validation,
@@ -281,3 +293,5 @@ with DAG(
     start >> data_reading_task >> log_results_task >> data_validation_task >> data_cleaning_task
     data_cleaning_task >> post_cleaning_validation_task >> feature_engg_task >> normalization_task
     normalization_task >> promote_staging_task >> data_versioning_task >> train_test_split_task >> end
+
+    start >> author_gender_mapping_task >> end

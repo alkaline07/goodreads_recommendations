@@ -252,6 +252,50 @@ The `goodreads_recommendation_pipeline` DAG orchestrates a comprehensive data pr
   - Creates final normalized dataset ready for model training
   - Maintains data consistency across different feature types
 
+#### 8. **Promote Staging**
+
+- **Task ID:** `promote_staging_tables`  
+- **Type:** `PythonOperator`  
+
+- **Purpose:** Promotes data from staging tables to final production tables.
+
+- **Functionality:**  
+  - Each preceding task reads from and writes to staging tables to ensure data integrity during intermediate steps.  
+  - Once all validations and tests pass, this task promotes the data by moving it from staging tables to the final tables.  
+  - After promotion, the staging tables are deleted to maintain a clean workspace.  
+  - The finalized tables are then made available for downstream modeling tasks.
+
+---
+
+#### 9. **Data Versioning**
+
+- **Task ID:** `data_versioning_task`  
+- **Type:** `PythonOperator`  
+
+- **Purpose:** Implements data version control using DVC.
+
+- **Functionality:**  
+  - The final features table is versioned using **Data Version Control (DVC)** to track changes over time.  
+  - DVC is integrated with **Google Cloud Storage (GCS)** to enable persistent and scalable storage of versioned datasets.  
+  - This ensures reproducibility, auditability, and consistency across different pipeline runs.
+
+---
+
+#### 10. **Train, Test, and Validation Split**
+
+- **Task ID:** `train_test_split_task`  
+- **Type:** `PythonOperator`  
+
+- **Purpose:** Splits the processed data into training, testing, and validation sets for model development.
+
+- **Functionality:**  
+  - The final features table is partitioned into:  
+    - **Training Set (70%)** — used to train the model.  
+    - **Validation Set (15%)** — used for hyperparameter tuning and model selection.  
+    - **Test Set (15%)** — used for final evaluation and performance assessment.  
+  - This ensures a robust evaluation framework and prevents data leakage between training and testing phases.
+
+
 ### Pipeline Flow & Dependencies
 
 ```text
@@ -481,7 +525,7 @@ This section highlights key findings from our exploratory data analysis and bias
   </p>
 
   <p align="center">
-    <img src="assets/DAG_task_instances.jpg" alt="DAG Task Instances" style="max-width:600px; width:100%; height:auto; border-radius:8px;" />
+    <img src="assets/DAG_task_instances.jpeg" alt="DAG Task Instances" style="max-width:600px; width:100%; height:auto; border-radius:8px;" />
     <br/>
     <em>DAG Task Instances</em>
   </p>
@@ -499,7 +543,7 @@ This section highlights key findings from our exploratory data analysis and bias
   </p>
 
   <p align="center">
-    <img src="assets/gnatt_chart.jpg" alt="Gantt Chart" style="max-width:600px; width:100%; height:auto; border-radius:8px;" />
+    <img src="assets/gantt_chart.jpeg" alt="Gantt Chart" style="max-width:600px; width:100%; height:auto; border-radius:8px;" />
     <br/>
     <em>Gantt Chart (Pipeline Schedule)</em>
   </p>

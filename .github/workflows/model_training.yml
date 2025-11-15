@@ -1,0 +1,52 @@
+name: 2. Model Training
+run-name: Model Retraining
+
+on:
+  workflow_run:
+    workflows: ["1. Load Data"]
+    types: [completed]
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      actions: read
+    
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Download data artifact via GH CLI
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+      run: |
+        gh run download $RUN_ID -R $REPO -n goodreads-train-data
+
+    - name: Move data to correct location
+      run: |
+        mv train_data.parquet data/.
+
+    - name: Train the model
+      run: python -m src.df_model_training
+    
+    - name: Notify on success
+      if: success()
+      run: echo "Model trained successfully"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Model training failed"
