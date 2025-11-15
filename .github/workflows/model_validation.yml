@@ -1,0 +1,56 @@
+name: 3. Model Validation
+run-name: Validate Trained Model
+
+on:
+  workflow_run:
+    workflows: ["2. Model Training"]
+    types: [completed]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Download model artifacts from previous run
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+      run: |
+        echo "Downloading model artifacts..."
+        gh run download $RUN_ID -R $REPO -n trained-model
+
+    - name: Move artifacts to correct locations
+      run: |
+        mkdir -p artifacts/
+        mv trained_model_output/* artifacts/
+
+    - name: Validate model
+      run: |
+        echo "Running validation..."
+        python -m src.model_validation
+
+    - name: Notify validation success
+      if: success()
+      run: echo "Model validation passed Model approved!"
+
+    - name: Notify validation failure
+      if: failure()
+      run: echo "Model validation failed — stopping pipeline."
