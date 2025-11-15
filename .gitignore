@@ -19,3 +19,9 @@ data/*.csv
 
 **/logs/
 .DS_Store
+
+.env
+airflow-webserver.pid
+airflow.cfg 
+webserver_config.py
+gcp_credentials.json
