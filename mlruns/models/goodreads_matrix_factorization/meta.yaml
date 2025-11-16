@@ -1,0 +1,8 @@
+aliases: {}
+creation_timestamp: 1763196220740
+deployment_job_id: null
+deployment_job_state: null
+description: Goodreads matrix_factorization recommendation model (tracked in MLflow).
+  GCP Vertex AI registration handled separately via register_bqml_models.py
+last_updated_timestamp: 1763196221366
+name: goodreads_matrix_factorization

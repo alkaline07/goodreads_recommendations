@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/432640096289898878/146e3feb43634626ad34f09c224e7354/artifacts
+end_time: 1763191281441
+entry_point_name: ''
+experiment_id: '432640096289898878'
+lifecycle_stage: active
+run_id: 146e3feb43634626ad34f09c224e7354
+run_name: training_20251115_013140
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763188301278
+status: 3
+tags: []
+user_id: goyal

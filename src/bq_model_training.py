@@ -4,9 +4,9 @@ Handles concurrent model training and provides better error handling
 """
 
 import os
-from google.cloud import bigquery
-from datetime import datetime
 import time
+from datetime import datetime
+from google.cloud import bigquery
 import mlflow
 
 
@@ -24,12 +24,9 @@ class BigQueryMLModelTraining:
     Fixed class for training BigQuery ML models with concurrency handling.
     """
 
-    def __init__(self, use_versioning=True):
+    def __init__(self):
         """
-        Initialize with optional versioning for model names.
-       
-        Args:
-            use_versioning: If True, adds timestamp to model names to avoid conflicts
+        Initialize BigQuery ML model training.
         """
         if os.environ.get("AIRFLOW_HOME"):
             # Running locally or through Airflow
@@ -44,19 +41,10 @@ class BigQueryMLModelTraining:
         self.val_table = f"{self.project_id}.{self.dataset_id}.goodreads_validation_set"
         self.test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
 
-        # Model naming with optional versioning
-        if use_versioning:
-            # Use timestamp for unique model names
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model_{timestamp}"
-            self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model_{timestamp}"
-            self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model_{timestamp}"
-        else:
-            # Use fixed names (will replace existing models)
-            self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
-            self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
-            self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model"
-       
+        # Model naming
+        self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
+        self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
+        self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model"
         self.popularity_model = f"{self.project_id}.{self.dataset_id}.popularity_baseline"
 
     def check_and_cleanup_existing_models(self):
@@ -173,12 +161,11 @@ class BigQueryMLModelTraining:
             print("Training MATRIX_FACTORIZATION Model")
             print("=" * 60)
 
-            # Model hyperparameters
             hyperparams = {
                 "model_type": "MATRIX_FACTORIZATION",
-                "l2_reg": 0.1,
-                "num_factors": 10,
-                "max_iterations": 20,
+                "l2_reg": 0.05,
+                "num_factors": 25,
+                "max_iterations": 40,
                 "feedback_type": "EXPLICIT"
             }
 
@@ -189,8 +176,6 @@ class BigQueryMLModelTraining:
                 "mf_max_iterations": hyperparams["max_iterations"]
             })
 
-            # First check if we should use the original model parameters
-            # since those seemed to work (low loss)
             query = f"""
             CREATE OR REPLACE MODEL `{self.matrix_factorization_model}`
             OPTIONS(
@@ -200,9 +185,9 @@ class BigQueryMLModelTraining:
                 item_col='book_id',
                 rating_col='rating',
                 feedback_type='EXPLICIT',
-                l2_reg=0.1,
-                num_factors=10,
-                max_iterations=20  -- Increased but not too much
+                l2_reg=0.05,
+                num_factors=25,
+                max_iterations=40
             ) AS
             SELECT
                 user_id_clean,
@@ -245,16 +230,15 @@ class BigQueryMLModelTraining:
             feature_columns = self.get_feature_columns()
             feature_list = ", ".join(feature_columns)
 
-            # Model hyperparameters
             hyperparams = {
-                "num_parallel_tree": 5,
-                "max_tree_depth": 4,
-                "subsample": 0.85,
-                "min_split_loss": 0.01,
-                "l1_reg": 0.05,
+                "num_parallel_tree": 10,
+                "max_tree_depth": 6,
+                "subsample": 0.8,
+                "min_split_loss": 0.001,
+                "l1_reg": 0.01,
                 "l2_reg": 0.05,
                 "early_stop": True,
-                "min_rel_progress": 0.01
+                "min_rel_progress": 0.005
             }
 
             # Log hyperparameters to MLflow
@@ -274,14 +258,14 @@ class BigQueryMLModelTraining:
                 model_type='BOOSTED_TREE_REGRESSOR',
                 input_label_cols=['rating'],
                 model_registry='VERTEX_AI',
-                num_parallel_tree=5,
-                max_tree_depth=4,
-                subsample=0.85,
-                min_split_loss=0.01,
-                l1_reg=0.05,
+                num_parallel_tree=10,
+                max_tree_depth=6,
+                subsample=0.8,
+                min_split_loss=0.001,
+                l1_reg=0.01,
                 l2_reg=0.05,
                 early_stop=True,
-                min_rel_progress=0.01
+                min_rel_progress=0.005
             ) AS
             SELECT
                 {feature_list},
@@ -428,6 +412,7 @@ class BigQueryMLModelTraining:
             print(f"Error analyzing data: {e}")
             self.data_stats = {}
 
+
     def run(self):
         """Execute the training pipeline with proper error handling."""
         start_time = time.time()
@@ -438,65 +423,32 @@ class BigQueryMLModelTraining:
 
         # Start MLflow run
         experiment_name = "bigquery_ml_training"
-        use_mlflow = True
         try:
             # Set MLflow tracking URI
             mlflow.set_tracking_uri("http://127.0.0.1:5000/")
             mlflow.set_experiment(experiment_name)
         except Exception as e:
-            print(f"MLflow initialization warning: {e}. Continuing without MLflow tracking.")
-            use_mlflow = False
+            print(f"MLflow initialization warning: {e}. Continuing with MLflow tracking (errors will be handled gracefully).")
 
-        if use_mlflow:
-            with mlflow.start_run(run_name=f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
-                # Log run metadata
-                safe_mlflow_log(mlflow.log_param, "project_id", self.project_id)
-                safe_mlflow_log(mlflow.log_param, "dataset_id", self.dataset_id)
-                safe_mlflow_log(mlflow.log_param, "train_table", self.train_table)
-                safe_mlflow_log(mlflow.log_param, "val_table", self.val_table)
-                safe_mlflow_log(mlflow.log_param, "test_table", self.test_table)
+        with mlflow.start_run(run_name=f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
+            # Log run metadata
+            safe_mlflow_log(mlflow.log_param, "project_id", self.project_id)
+            safe_mlflow_log(mlflow.log_param, "dataset_id", self.dataset_id)
+            safe_mlflow_log(mlflow.log_param, "train_table", self.train_table)
+            safe_mlflow_log(mlflow.log_param, "val_table", self.val_table)
+            safe_mlflow_log(mlflow.log_param, "test_table", self.test_table)
 
-                # Check and cleanup if needed
-                self.check_and_cleanup_existing_models()
-
-                # Analyze data characteristics
-                self.analyze_data_characteristics()
-                
-                # Log data statistics if available
-                if hasattr(self, 'data_stats') and self.data_stats:
-                    for key, value in self.data_stats.items():
-                        if isinstance(value, (int, float)) and key != 'rating_quartiles':
-                            safe_mlflow_log(mlflow.log_metric, f"data_{key}", value)
-
-                # Train models
-                mf_success = self.train_matrix_factorization()
-                bt_success = self.train_boosted_tree_regressor()
-
-                # Summary
-                end_time = time.time()
-                total_runtime = end_time - start_time
-                
-                # Log final metrics
-                safe_mlflow_log(mlflow.log_metric, "total_runtime_seconds", total_runtime)
-                safe_mlflow_log(mlflow.log_metric, "all_models_success", 1 if (mf_success and bt_success) else 0)
-                
-                print("=" * 60)
-                print(f"Training completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                print(f"Matrix Factorization: {'SUCCESS' if mf_success else 'FAILED'}")
-                print(f"Boosted Tree: {'SUCCESS' if bt_success else 'FAILED'}")
-                print(f"Total runtime: {total_runtime:.2f} seconds")
-                try:
-                    print(f"MLflow run ID: {mlflow.active_run().info.run_id}")
-                except Exception:
-                    pass
-                print("=" * 60)
-        else:
-            # Run without MLflow
             # Check and cleanup if needed
             self.check_and_cleanup_existing_models()
 
             # Analyze data characteristics
             self.analyze_data_characteristics()
+            
+            # Log data statistics if available
+            if hasattr(self, 'data_stats') and self.data_stats:
+                for key, value in self.data_stats.items():
+                    if isinstance(value, (int, float)) and key != 'rating_quartiles':
+                        safe_mlflow_log(mlflow.log_metric, f"data_{key}", value)
 
             # Train models
             mf_success = self.train_matrix_factorization()
@@ -506,19 +458,26 @@ class BigQueryMLModelTraining:
             end_time = time.time()
             total_runtime = end_time - start_time
             
+            # Log final metrics
+            safe_mlflow_log(mlflow.log_metric, "total_runtime_seconds", total_runtime)
+            safe_mlflow_log(mlflow.log_metric, "all_models_success", 1 if (mf_success and bt_success) else 0)
+            
             print("=" * 60)
             print(f"Training completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"Matrix Factorization: {'SUCCESS' if mf_success else 'FAILED'}")
             print(f"Boosted Tree: {'SUCCESS' if bt_success else 'FAILED'}")
             print(f"Total runtime: {total_runtime:.2f} seconds")
+            try:
+                print(f"MLflow run ID: {mlflow.active_run().info.run_id}")
+            except Exception:
+                pass
             print("=" * 60)
 
 
 def main():
     """Main function with error handling."""
     try:
-        # Use versioning to avoid conflicts
-        trainer = BigQueryMLModelTraining(use_versioning=False)
+        trainer = BigQueryMLModelTraining()
         trainer.run()
     except Exception as e:
         print(f"Fatal error: {e}")

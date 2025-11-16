@@ -1,0 +1,16 @@
+{
+  "model_name": "test-model",
+  "timestamp": "2025-11-16T00:45:37.927695",
+  "sample_size": 100,
+  "feature_importance": [
+    {
+      "feature": "num_genres",
+      "importance": 0.225
+    },
+    {
+      "feature": "book_popularity_normalized",
+      "importance": 0.125
+    }
+  ],
+  "categorical_mappings": {}
+}

@@ -1,0 +1,19 @@
+{
+  "model_name": "boosted_tree_regressor",
+  "timestamp": "2025-11-15T02:30:42.666521",
+  "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
+  "performance_metrics": {
+    "num_predictions": 2858454,
+    "mae": 1.4062765938998085,
+    "rmse": 1.644957837946604,
+    "mean_predicted": -1.9550487518932682,
+    "mean_actual": -2.051896732525199,
+    "std_error": 1.6421046558043386,
+    "r_squared": 0.37993117123234027,
+    "correlation": 0.6163855702661608,
+    "accuracy_within_0_5_pct": 16.54198388359582,
+    "accuracy_within_1_0_pct": 35.41634743816063,
+    "accuracy_within_1_5_pct": 56.71450371424554
+  },
+  "sensitivity_analysis": null
+}

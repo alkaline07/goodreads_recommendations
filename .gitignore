@@ -2,7 +2,6 @@ venv/
 **/gcp_credentials.json
 *pycache*
 
-mlruns/
 
 # Ignore Airflow logs and generated password file
 config/simple_auth_manager_passwords.json.generated
@@ -19,3 +18,9 @@ data/*.csv
 
 **/logs/
 .DS_Store
+
+.env
+airflow-webserver.pid
+airflow.cfg 
+webserver_config.py
+gcp_credentials.json
