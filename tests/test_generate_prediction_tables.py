@@ -4,7 +4,7 @@ Test cases for generate_bias_prediction_tables.py
 
 import pytest
 from unittest.mock import Mock, patch
-from src.generate_bias_prediction_tables import BiasReadyPredictionGenerator
+from src.generate_prediction_tables import BiasReadyPredictionGenerator
 
 
 class TestBiasReadyPredictionGenerator:
