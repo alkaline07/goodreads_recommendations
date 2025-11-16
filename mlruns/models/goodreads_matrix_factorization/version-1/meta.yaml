@@ -1,0 +1,15 @@
+creation_timestamp: 1763196220801
+current_stage: None
+deployment_job_state: null
+description: 'Version 1 trained on 2025-11-15 03:43:40. BigQuery Model: recommendation-system-475301.books.matrix_factorization_model'
+last_updated_timestamp: 1763196220801
+model_id: ''
+name: goodreads_matrix_factorization
+run_id: ''
+run_link: ''
+source: runs:/32f4b227cec9436c88815d013a3ec56c
+status: READY
+status_message: null
+storage_location: runs:/32f4b227cec9436c88815d013a3ec56c
+user_id: null
+version: 1

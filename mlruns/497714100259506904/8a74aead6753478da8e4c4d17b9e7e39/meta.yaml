@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/497714100259506904/8a74aead6753478da8e4c4d17b9e7e39/artifacts
+end_time: 1763191847174
+entry_point_name: ''
+experiment_id: '497714100259506904'
+lifecycle_stage: active
+run_id: 8a74aead6753478da8e4c4d17b9e7e39
+run_name: evaluation_boosted_tree_regressor_20251115_023042
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763191843178
+status: 3
+tags: []
+user_id: goyal
