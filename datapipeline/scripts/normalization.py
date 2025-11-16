@@ -165,5 +165,4 @@ def main():
     normalizer.run()
 
 if __name__ == "__main__":
-    # Allow the script to be run directly for testing or development
     main()

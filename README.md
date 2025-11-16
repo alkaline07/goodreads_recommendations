@@ -50,7 +50,7 @@ pip install -e .
 
 > **Note:** Make sure to activate your virtual environment before running any subsequent commands.
 
-### 3. Run Training Pipeline
+### 3. Run Data Pre-Processing Pipeline without Docker
 
 - Set the following environment variables from terminal.
   The variable set is only for this instance of terminal and will not affect others.
@@ -114,6 +114,22 @@ Login using the admin credentials
 #### Locally (for development)
 
 Visit: [http://localhost:8000/docs](http://localhost:8000/docs) to test the API using Swagger UI.
+
+
+### 4. Run Data Pre-Processing Pipeline With Docker
+  - Ensure that correct credentials are set in .env file
+  - Run the docker compose up command : 
+    ```bash
+    docker compose up --build
+    ```
+  - Open your browser and go to: <http://localhost:8080> 
+  - Login using the credentials 
+    - username : admin
+    - password : admin
+  - Run the docker command to shutdown the containers 
+    ```bash
+    docker compose down
+    ```
 
 ## Data Pipeline Architecture & Components
 
