@@ -130,7 +130,6 @@ class RegisterBQMLModels:
                 serving_container_image_uri=serving_image,
                 artifact_uri=f"bq://{bqml_model_id}",
                 parent_model=parent_model,
-                is_default_version=True,
                 is_default_version=set_as_default,
                 description=f"BQML {model_type} model registered from bq://{bqml_model_id}"
             )
