@@ -90,10 +90,17 @@ class RegisterBQMLModels:
             return None
 
 
-    def register_model_in_vertex_ai(self, project_id: str, vertex_region: str, bqml_model_id: str, display_name: str, model_type: str):
+    def register_model_in_vertex_ai(self, project_id: str, vertex_region: str, bqml_model_id: str, display_name: str, model_type: str, set_as_default: bool = False):
         """
         Registers a BQML model in the Vertex AI Model Registry.
-        ...
+        Args:
+            project_id: GCP project ID
+            vertex_region: Vertex AI region
+            bqml_model_id: Full BigQuery model ID (project.dataset.model)
+            display_name: Display name for the model in Vertex AI
+            model_type: Type of model (BOOSTED_TREE, MATRIX_FACTORIZATION, etc.)
+            set_as_default: Whether to set this version as default (default: False)
+                           This should be controlled by the rollback manager
         """
         aiplatform.init(project=project_id, location=vertex_region)
         
@@ -101,8 +108,7 @@ class RegisterBQMLModels:
         serving_image = self.get_serving_image(model_type)
         
         print(f"Registering model '{display_name}' from {bq_model_uri}...")
-
-        # ... (The 'parent_model' try/except block remains the same) ...
+        print(f"Set as default: {set_as_default}")
         parent_model = None
         try:
             existing_models = aiplatform.Model.list(
@@ -125,15 +131,23 @@ class RegisterBQMLModels:
                 artifact_uri=f"bq://{bqml_model_id}",
                 parent_model=parent_model,
                 is_default_version=True,
+                is_default_version=set_as_default,
                 description=f"BQML {model_type} model registered from bq://{bqml_model_id}"
             )
             
             print(f"Successfully registered model: {model.resource_name}")
             print(f"View in Vertex AI Model Registry: {model.versioned_resource_name}")
 
+            if not set_as_default:
+                print("NOTE: Model registered but NOT set as default.")
+                print("      Run model_rollback_manager.py to compare and promote if better.")
+
+            return model
+
         except Exception as e:
             print(f"Failed to register model {bq_model_uri}: {e}")
             print("Please ensure the Vertex AI API is enabled and that the BQML model exists.")
+            return None
 
     def main(self):
         if os.environ.get("AIRFLOW_HOME"):
@@ -168,7 +182,8 @@ class RegisterBQMLModels:
                     vertex_region="us-central1",
                     bqml_model_id=latest_bqml_id,
                     display_name=registry_display_name,
-                    model_type=model_type
+                    model_type=model_type,
+                    set_as_default=False
                 )
             except Exception as e:
                 print(f"Failed to register model {latest_bqml_id}: {e}")
