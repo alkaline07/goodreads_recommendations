@@ -17,8 +17,19 @@ import os
 from datetime import datetime
 from typing import Dict, Optional
 import json
+import pandas as pd
 from google.cloud import bigquery
+import mlflow
 from model_sensitivity_analysis import ModelSensitivityAnalyzer
+
+
+def safe_mlflow_log(func, *args, **kwargs):
+    """Safely log to MLflow, continue if it fails."""
+    try:
+        return func(*args, **kwargs)
+    except Exception as e:
+        print(f"MLflow logging warning: {e}")
+        return None
 
 
 class ModelEvaluationPipeline:
@@ -51,6 +62,14 @@ class ModelEvaluationPipeline:
         self.project_id = self.client.project
         self.dataset_id = "books"
         self.sensitivity_analyzer = ModelSensitivityAnalyzer(project_id=project_id)
+
+        # Initialize MLflow
+        try:
+            mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+            mlflow.set_experiment("bigquery_ml_training")
+            print("MLflow tracking initialized")
+        except Exception as e:
+            print(f"MLflow initialization warning: {e}. Continuing with MLflow tracking (errors will be handled gracefully).")
 
         print(f"ModelEvaluationPipeline initialized for project: {self.project_id}")
 
@@ -85,78 +104,159 @@ class ModelEvaluationPipeline:
             'sensitivity_analysis': None
         }
 
-        # Step 1: Compute Performance Metrics
-        print("[STEP 1/2] Computing Performance Metrics...")
-        performance = self._compute_performance_metrics(predictions_table)
-        evaluation_results['performance_metrics'] = performance
+        # Start MLflow run
+        run_name = f"evaluation_{model_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        mlflow_run = mlflow.start_run(run_name=run_name)
+        try:
+            # Log run parameters
+            safe_mlflow_log(mlflow.log_param, "model_name", model_name)
+            safe_mlflow_log(mlflow.log_param, "predictions_table", predictions_table)
+            safe_mlflow_log(mlflow.log_param, "project_id", self.project_id)
+            safe_mlflow_log(mlflow.log_param, "dataset_id", self.dataset_id)
+            safe_mlflow_log(mlflow.log_param, "run_sensitivity_analysis", run_sensitivity_analysis)
+            safe_mlflow_log(mlflow.log_param, "sensitivity_sample_size", sensitivity_sample_size)
 
-        print(f"\n--- Performance Metrics ---")
-        print(f"  Predictions: {performance['num_predictions']:,}")
-        print(f"  MAE: {performance['mae']:.4f}")
-        print(f"  RMSE: {performance['rmse']:.4f}")
-        print(f"  Mean Predicted: {performance['mean_predicted']:.4f}")
-        print(f"  Mean Actual: {performance['mean_actual']:.4f}")
+            # Step 1: Compute Performance Metrics
+            print("[STEP 1/2] Computing Performance Metrics...")
+            performance = self._compute_performance_metrics(predictions_table)
+            evaluation_results['performance_metrics'] = performance
 
-        # Step 2: Feature Importance Analysis
-        if run_sensitivity_analysis:
-            print(f"\n[STEP 2/2] Running Feature Importance Analysis...")
+            print(f"\n--- Performance Metrics (Accuracy) ---")
+            print(f"  Predictions: {performance['num_predictions']:,}")
+            print(f"  MAE: {performance['mae']:.4f}")
+            print(f"  RMSE: {performance['rmse']:.4f}")
+            print(f"  R² Score: {performance.get('r_squared', 0):.4f}")
+            print(f"  Correlation: {performance.get('correlation', 0):.4f}")
+            print(f"  Accuracy within ±0.5: {performance.get('accuracy_within_0_5_pct', 0):.2f}%")
+            print(f"  Accuracy within ±1.0: {performance.get('accuracy_within_1_0_pct', 0):.2f}%")
+            print(f"  Accuracy within ±1.5: {performance.get('accuracy_within_1_5_pct', 0):.2f}%")
+            print(f"  Mean Predicted: {performance['mean_predicted']:.4f}")
+            print(f"  Mean Actual: {performance['mean_actual']:.4f}")
+
+            # Log performance metrics to MLflow (accuracy metrics)
+            safe_mlflow_log(mlflow.log_metric, "num_predictions", performance['num_predictions'])
+            safe_mlflow_log(mlflow.log_metric, "mae", performance['mae'])
+            safe_mlflow_log(mlflow.log_metric, "rmse", performance['rmse'])
+            safe_mlflow_log(mlflow.log_metric, "r_squared", performance.get('r_squared', 0))
+            safe_mlflow_log(mlflow.log_metric, "correlation", performance.get('correlation', 0))
+            safe_mlflow_log(mlflow.log_metric, "accuracy_within_0_5_pct", performance.get('accuracy_within_0_5_pct', 0))
+            safe_mlflow_log(mlflow.log_metric, "accuracy_within_1_0_pct", performance.get('accuracy_within_1_0_pct', 0))
+            safe_mlflow_log(mlflow.log_metric, "accuracy_within_1_5_pct", performance.get('accuracy_within_1_5_pct', 0))
+            safe_mlflow_log(mlflow.log_metric, "mean_predicted", performance['mean_predicted'])
+            safe_mlflow_log(mlflow.log_metric, "mean_actual", performance['mean_actual'])
+            safe_mlflow_log(mlflow.log_metric, "std_error", performance['std_error'])
+
+            # Step 2: Feature Importance Analysis
+            if run_sensitivity_analysis:
+                print(f"\n[STEP 2/2] Running Feature Importance Analysis...")
+                try:
+                    sensitivity_results = self.sensitivity_analyzer.analyze_feature_importance(
+                        predictions_table=predictions_table,
+                        model_name=model_name,
+                        sample_size=sensitivity_sample_size
+                    )
+                    evaluation_results['sensitivity_analysis'] = sensitivity_results
+
+                    print(f"\n✓ Feature importance analysis complete")
+                    print(f"  Top 3 features:")
+                    for i, feat in enumerate(sensitivity_results['feature_importance'][:3], 1):
+                        print(f"    {i}. {feat['feature']}: {feat['importance']:.4f}")
+
+                    # Log top feature importances to MLflow
+                    for i, feat in enumerate(sensitivity_results['feature_importance'][:10], 1):
+                        safe_mlflow_log(
+                            mlflow.log_metric,
+                            f"feature_importance_rank_{i}_{feat['feature']}",
+                            feat['importance']
+                        )
+
+                    # Log feature importance summary
+                    if sensitivity_results['feature_importance']:
+                        top_feature = sensitivity_results['feature_importance'][0]
+                        safe_mlflow_log(mlflow.log_param, "top_feature", top_feature['feature'])
+                        safe_mlflow_log(mlflow.log_metric, "top_feature_importance", top_feature['importance'])
+
+                except Exception as e:
+                    print(f"Warning: Could not complete sensitivity analysis: {e}")
+                    evaluation_results['sensitivity_analysis'] = None
+            else:
+                print(f"\n[STEP 2/2] Skipping sensitivity analysis (disabled)")
+
+            # Save Evaluation Report
+            print(f"\nSaving evaluation report...")
+            report_path = self._save_evaluation_report(evaluation_results, model_name)
+            evaluation_results['report_path'] = report_path
+
+            # Log evaluation report as artifact
+            if os.path.exists(report_path):
+                safe_mlflow_log(mlflow.log_artifact, report_path, "evaluation_reports")
+
+            print("\n" + "=" * 80)
+            print("MODEL EVALUATION COMPLETE")
+            print("=" * 80)
+            print(f"\nEvaluation report: {report_path}")
+            if evaluation_results.get('sensitivity_analysis'):
+                print(f"Feature importance: ../docs/model_analysis/sensitivity/")
             try:
-                sensitivity_results = self.sensitivity_analyzer.analyze_feature_importance(
-                    predictions_table=predictions_table,
-                    model_name=model_name,
-                    sample_size=sensitivity_sample_size
-                )
-                evaluation_results['sensitivity_analysis'] = sensitivity_results
+                print(f"MLflow run ID: {mlflow_run.info.run_id}")
+                print(f"MLflow UI: http://127.0.0.1:5000")
+            except Exception:
+                pass
 
-                print(f"\n✓ Feature importance analysis complete")
-                print(f"  Top 3 features:")
-                for i, feat in enumerate(sensitivity_results['feature_importance'][:3], 1):
-                    print(f"    {i}. {feat['feature']}: {feat['importance']:.4f}")
-
-            except Exception as e:
-                print(f"Warning: Could not complete sensitivity analysis: {e}")
-                evaluation_results['sensitivity_analysis'] = None
-        else:
-            print(f"\n[STEP 2/2] Skipping sensitivity analysis (disabled)")
-
-        # Save Evaluation Report
-        print(f"\nSaving evaluation report...")
-        report_path = self._save_evaluation_report(evaluation_results, model_name)
-        evaluation_results['report_path'] = report_path
-
-        print("\n" + "=" * 80)
-        print("MODEL EVALUATION COMPLETE")
-        print("=" * 80)
-        print(f"\nEvaluation report: {report_path}")
-        if evaluation_results.get('sensitivity_analysis'):
-            print(f"Feature importance: ../docs/model_analysis/sensitivity/")
+        finally:
+            mlflow.end_run()
 
         return evaluation_results
 
     def _compute_performance_metrics(self, predictions_table: str) -> Dict:
-        """Compute overall performance metrics."""
+        """Compute overall performance metrics including accuracy measures."""
         query = f"""
+        WITH metrics AS (
+            SELECT 
+                COUNT(*) as num_predictions,
+                AVG(ABS(actual_rating - predicted_rating)) as mae,
+                SQRT(AVG(POWER(actual_rating - predicted_rating, 2))) as rmse,
+                AVG(predicted_rating) as mean_predicted,
+                AVG(actual_rating) as mean_actual,
+                STDDEV(actual_rating - predicted_rating) as std_error,
+                -- R² (Coefficient of Determination)
+                CORR(actual_rating, predicted_rating) as correlation,
+                VAR_SAMP(actual_rating) as variance_actual,
+                VAR_SAMP(predicted_rating) as variance_predicted,
+                -- Accuracy within tolerance
+                COUNTIF(ABS(actual_rating - predicted_rating) <= 0.5) as within_0_5,
+                COUNTIF(ABS(actual_rating - predicted_rating) <= 1.0) as within_1_0,
+                COUNTIF(ABS(actual_rating - predicted_rating) <= 1.5) as within_1_5
+            FROM `{predictions_table}`
+            WHERE actual_rating IS NOT NULL 
+                AND predicted_rating IS NOT NULL
+        )
         SELECT 
-            COUNT(*) as num_predictions,
-            AVG(ABS(actual_rating - predicted_rating)) as mae,
-            SQRT(AVG(POWER(actual_rating - predicted_rating, 2))) as rmse,
-            AVG(predicted_rating) as mean_predicted,
-            AVG(actual_rating) as mean_actual,
-            STDDEV(actual_rating - predicted_rating) as std_error
-        FROM `{predictions_table}`
-        WHERE actual_rating IS NOT NULL 
-            AND predicted_rating IS NOT NULL
+            *,
+            -- Calculate R² score
+            POWER(correlation, 2) as r_squared,
+            -- Calculate accuracy percentages
+            SAFE_DIVIDE(within_0_5, num_predictions) * 100 as accuracy_within_0_5_pct,
+            SAFE_DIVIDE(within_1_0, num_predictions) * 100 as accuracy_within_1_0_pct,
+            SAFE_DIVIDE(within_1_5, num_predictions) * 100 as accuracy_within_1_5_pct
+        FROM metrics
         """
 
         try:
             df = self.client.query(query).to_dataframe(create_bqstorage_client=False)
+            row = df.iloc[0]
             return {
-                'num_predictions': int(df['num_predictions'].iloc[0]),
-                'mae': float(df['mae'].iloc[0]),
-                'rmse': float(df['rmse'].iloc[0]),
-                'mean_predicted': float(df['mean_predicted'].iloc[0]),
-                'mean_actual': float(df['mean_actual'].iloc[0]),
-                'std_error': float(df['std_error'].iloc[0]) if df['std_error'].iloc[0] else 0.0
+                'num_predictions': int(row['num_predictions']),
+                'mae': float(row['mae']),
+                'rmse': float(row['rmse']),
+                'mean_predicted': float(row['mean_predicted']),
+                'mean_actual': float(row['mean_actual']),
+                'std_error': float(row['std_error']) if pd.notna(row['std_error']) else 0.0,
+                'r_squared': float(row['r_squared']) if pd.notna(row['r_squared']) else 0.0,
+                'correlation': float(row['correlation']) if pd.notna(row['correlation']) else 0.0,
+                'accuracy_within_0_5_pct': float(row['accuracy_within_0_5_pct']) if pd.notna(row['accuracy_within_0_5_pct']) else 0.0,
+                'accuracy_within_1_0_pct': float(row['accuracy_within_1_0_pct']) if pd.notna(row['accuracy_within_1_0_pct']) else 0.0,
+                'accuracy_within_1_5_pct': float(row['accuracy_within_1_5_pct']) if pd.notna(row['accuracy_within_1_5_pct']) else 0.0
             }
         except Exception as e:
             print(f"Error computing performance metrics: {e}")
