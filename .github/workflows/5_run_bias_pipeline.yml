@@ -1,0 +1,56 @@
+name: 5. Bias Detection & Mitigation Pipeline
+run-name: Run Bias Audit Pipeline
+
+on:
+  workflow_run:
+    workflows: ["4. Generate Bias Predictions"]
+    types: [completed]
+
+jobs:
+  bias-pipeline:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Run Bias Detection & Mitigation Pipeline
+      run: |
+        echo "Starting Bias Audit Pipeline"
+        python -m src.bias_pipeline
+
+    - name: Notify on success
+      if: success()
+      run: echo "Bias Pipeline executed successfully!"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Bias Pipeline failed!"
+
+  notify:
+    needs: bias-pipeline
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.bias-pipeline.result }}
+      workflow_name: ${{ github.workflow }}

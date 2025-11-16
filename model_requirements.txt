@@ -3,3 +3,7 @@ bigframes
 mlflow
 google-cloud-aiplatform
 google-cloud-bigquery
+numpy
+scipy
+cython
+shap

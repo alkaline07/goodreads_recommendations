@@ -1,9 +1,9 @@
-name: 3a. Model Validation
+name: 6. Model Validation
 run-name: Validate Trained Model
 
 on:
   workflow_run:
-    workflows: ["2. Model Training"]
+    workflows: ["5. Model Training"]
     types: [completed]
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
         REPO: ${{ github.repository }}
         RUN_ID: ${{ github.event.workflow_run.id }}
       run: |
-        echo "Downloading model artifacts..."
+        echo "Downloading model artifacts"
         gh run download $RUN_ID -R $REPO -n trained-model
 
     - name: Move artifacts to correct locations
@@ -54,3 +54,11 @@ jobs:
     - name: Notify validation failure
       if: failure()
       run: echo "Model validation failed — stopping pipeline."
+  
+  notify:
+    needs: validate
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.validate.result }}
+      workflow_name: ${{ github.workflow }}  

@@ -1,9 +1,9 @@
-name: 3b. Generate Bias Predictions
+name: 4. Generate Bias Predictions
 run-name: Generate Bias-Ready Prediction Tables
 
 on:
   workflow_run:
-    workflows: ["2. Model Training"]
+    workflows: ["3. Register Model"]
     types: [completed]
 
 jobs:
@@ -44,3 +44,10 @@ jobs:
     - name: Notify on failure
       if: failure()
       run: echo "Bias prediction generation failed!"
+  notify:
+    needs: generate-bias-predictions
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.generate-bias-predictions.result }}
+      workflow_name: ${{ github.workflow }}

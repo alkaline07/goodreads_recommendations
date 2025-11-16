@@ -55,3 +55,11 @@ jobs:
     - name: Notify on failure
       if: failure()
       run: echo "Model training failed"
+
+  notify:
+    needs: train
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.train.result }}
+      workflow_name: ${{ github.workflow }}
