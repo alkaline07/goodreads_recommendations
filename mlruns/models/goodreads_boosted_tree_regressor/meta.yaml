@@ -1,0 +1,8 @@
+aliases: {}
+creation_timestamp: 1763198756859
+deployment_job_id: null
+deployment_job_state: null
+description: Goodreads boosted_tree_regressor recommendation model (tracked in MLflow).
+  GCP Vertex AI registration handled separately via register_bqml_models.py
+last_updated_timestamp: 1763198757199
+name: goodreads_boosted_tree_regressor

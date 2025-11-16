@@ -25,7 +25,9 @@ class BiasReadyPredictionGenerator:
     
     def __init__(self):
         """Initialize the generator."""
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("AIRFLOW_HOME")+"/gcp_credentials.json"
+        airflow_home = os.environ.get("AIRFLOW_HOME")
+        if airflow_home:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = airflow_home + "/gcp_credentials.json"
         
         self.client = bigquery.Client()
         self.project_id = self.client.project

@@ -59,7 +59,9 @@ class BiasDetector:
         Args:
             project_id: GCP project ID (if None, uses default from credentials)
         """
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("AIRFLOW_HOME")+"/gcp_credentials.json"        
+        airflow_home = os.environ.get("AIRFLOW_HOME")
+        if airflow_home:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = airflow_home + "/gcp_credentials.json"        
         self.client = bigquery.Client(project=project_id)
         self.project_id = self.client.project
         self.dataset_id = "books"
@@ -302,9 +304,10 @@ class BiasDetector:
         # Specific mitigation recommendations
         for dim_name, summary in disparity_analysis["summary"].items():
             if summary["mae_coefficient_of_variation"] > 0.2:
+                num_slices = summary.get('num_slices', 'multiple')
                 recommendations.append(
                     f"{dim_name}: Consider re-weighting training data or adjusting decision thresholds "
-                    f"to balance performance across {summary['num_slices']} groups"
+                    f"to balance performance across {num_slices} groups"
                 )
         
         if not recommendations:

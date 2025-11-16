@@ -20,7 +20,7 @@ import json
 import pandas as pd
 from google.cloud import bigquery
 import mlflow
-from model_sensitivity_analysis import ModelSensitivityAnalyzer
+from .model_sensitivity_analysis import ModelSensitivityAnalyzer
 
 
 def safe_mlflow_log(func, *args, **kwargs):

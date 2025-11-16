@@ -16,8 +16,8 @@ import numpy as np
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 from dataclasses import dataclass, asdict
-from bias_detection import BiasDetector
-from bias_visualization import BiasVisualizer
+from .bias_detection import BiasDetector
+from .bias_visualization import BiasVisualizer
 
 
 @dataclass

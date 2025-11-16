@@ -17,10 +17,10 @@ from datetime import datetime
 from typing import List, Dict, Optional
 import json
 import argparse
-from bias_detection import BiasDetector, BiasReport
-from bias_mitigation import BiasMitigator, MitigationResult
-from bias_visualization import BiasVisualizer
-from model_selector import ModelSelector
+from .bias_detection import BiasDetector, BiasReport
+from .bias_mitigation import BiasMitigator, MitigationResult
+from .bias_visualization import BiasVisualizer
+from .model_selector import ModelSelector
 
 
 class BiasAuditPipeline:
@@ -433,7 +433,7 @@ class BiasAuditPipeline:
                 'timestamp': audit_results['detection_report'].timestamp,
                 'total_slices_analyzed': len(audit_results['detection_report'].slice_metrics),
                 'disparities_found': len(audit_results['detection_report'].disparity_analysis['detailed_disparities']),
-                'high_risk_slices': len(audit_results['detection_report'].disparity_analysis['high_risk_slices']),
+                'high_risk_slices': len(audit_results['detection_report'].disparity_analysis.get('high_risk_slices', [])),
                 'recommendations': audit_results['detection_report'].recommendations
             },
             'mitigation_applied': {

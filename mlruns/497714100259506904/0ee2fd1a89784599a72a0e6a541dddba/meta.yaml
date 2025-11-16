@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/497714100259506904/0ee2fd1a89784599a72a0e6a541dddba/artifacts
+end_time: 1763191849967
+entry_point_name: ''
+experiment_id: '497714100259506904'
+lifecycle_stage: active
+run_id: 0ee2fd1a89784599a72a0e6a541dddba
+run_name: evaluation_matrix_factorization_20251115_023047
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763191847200
+status: 3
+tags: []
+user_id: goyal

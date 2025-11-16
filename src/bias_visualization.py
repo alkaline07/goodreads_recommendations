@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Dict, Optional
 from datetime import datetime
-from bias_detection import BiasDetector, BiasReport
+from .bias_detection import BiasDetector, BiasReport
 
 
 class BiasVisualizer:
@@ -464,7 +464,7 @@ def main():
         report_data = json.load(f)
     
     # Reconstruct BiasReport (simplified - just for visualization)
-    from bias_detection import SliceMetrics, BiasReport
+    from .bias_detection import SliceMetrics, BiasReport
     
     slice_metrics = [
         SliceMetrics(**m) for m in report_data['slice_metrics']
