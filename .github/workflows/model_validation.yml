@@ -1,4 +1,4 @@
-name: 3. Model Validation
+name: 3a. Model Validation
 run-name: Validate Trained Model
 
 on:
@@ -44,12 +44,12 @@ jobs:
 
     - name: Validate model
       run: |
-        echo "Running validation..."
+        echo "Running validation."
         python -m src.model_validation
 
     - name: Notify validation success
       if: success()
-      run: echo "Model validation passed Model approved!"
+      run: echo "Model validation passed. Model approved!"
 
     - name: Notify validation failure
       if: failure()

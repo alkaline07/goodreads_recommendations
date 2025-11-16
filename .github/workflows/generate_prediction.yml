@@ -1,0 +1,46 @@
+name: 3b. Generate Bias Predictions
+run-name: Generate Bias-Ready Prediction Tables
+
+on:
+  workflow_run:
+    workflows: ["2. Model Training"]
+    types: [completed]
+
+jobs:
+  generate-bias-predictions:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Install required Python dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Run Bias-Ready Prediction Generator
+      run: |
+        echo "Running bias prediction table generator."
+        python -m src.generate_prediction_tables
+
+    - name: Notify on success
+      if: success()
+      run: echo "Bias-ready prediction tables generated successfully!"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Bias prediction generation failed!"

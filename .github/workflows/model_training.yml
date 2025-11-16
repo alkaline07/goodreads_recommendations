@@ -28,6 +28,11 @@ jobs:
     - name: Install dependencies
       run: pip install -r model_requirements.txt
 
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
     - name: Download data artifact via GH CLI
       env:
         GH_TOKEN: ${{ github.token }}
@@ -40,8 +45,8 @@ jobs:
       run: |
         mv train_data.parquet data/.
 
-    - name: Train the model
-      run: python -m src.df_model_training
+    - name: Train the model (BigQuery ML)
+      run: python -m src.bq_model_training
     
     - name: Notify on success
       if: success()
