@@ -3,7 +3,7 @@ run-name: Run Tests on PR Before Merge
 
 on:
   pull_request:
-    branches: ["master"] 
+    branches: ["master"]
 
 jobs:
   test:
@@ -22,14 +22,10 @@ jobs:
       run: pip install -r model_requirements.txt
 
     - name: Install dev/test dependencies
-      run: pip install pytest pytest-cov 
+      run: pip install pytest pytest-cov seaborn
+
+    - name: Install project as package
+      run: pip install -e .
 
     - name: Run Tests
       run: pytest -q
-
-    - name: Upload coverage report (optional)
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-coverage
-        path: ./.coverage
