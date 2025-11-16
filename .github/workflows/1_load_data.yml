@@ -1,14 +1,12 @@
-name: PR Test Suite
-run-name: Run Tests on Pull Request
+name: 1. Load Data
+run-name: Load Data
 
 on:
-  pull_request:
-    branches: [ "master" ]  
+  workflow_dispatch:
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -18,18 +16,29 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Install main dependencies
+    - name: Authenticate to Google Cloud
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - name: Install dependencies
       run: pip install -r model_requirements.txt
 
-    - name: Install test dependencies
-      run: pip install pytest pytest-cov
+    - name: Load the data
+      run: python -m src.load_data
 
-    - name: Run tests in tests/ folder
-      run: pytest tests -q
-
-    - name: Upload test results 
-      if: always()
+    - name: Upload data artifact
+      if: success() 
       uses: actions/upload-artifact@v4
       with:
-        name: test-results
-        path: ./tests
+        name: goodreads-train-data
+        path: data/train_data.parquet
+        retention-days: 1
+
+    - name: Notify on success
+      if: success()
+      run: echo "Data Loaded successfully"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Data Loading failed"
