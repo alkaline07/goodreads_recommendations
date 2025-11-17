@@ -1,5 +1,5 @@
 """
-Model Rollback Manager for Vertex AI Model Registry
+Model Manager for Vertex AI Model Registry
 
 This module handles intelligent model version management with automatic rollback capability:
 1. Compares performance metrics between new and current default model versions
@@ -33,9 +33,9 @@ def safe_mlflow_log(func, *args, **kwargs):
         return None
 
 
-class ModelRollbackManager:
+class ModelManager:
     """
-    Manages model version rollback based on performance comparison.
+    Manages model version based on performance comparison.
     """
 
     def __init__(
@@ -577,7 +577,7 @@ def main():
         new_predictions_table = f"{project_id}.{dataset_id}.boosted_tree_rating_predictions"
         print(f"Using default model: {model_name}")
     
-    manager = ModelRollbackManager(
+    manager = ModelManager(
         improvement_threshold=improvement_threshold
     )
 

@@ -1,13 +1,13 @@
-name: 6. Model Validation
-run-name: Validate Trained Model
+name: 8. Model Manager
+run-name: Manage model versioning
 
 on:
   workflow_run:
-    workflows: ["5. Bias Detection & Mitigation Pipeline"]
+    workflows: ["7. Model Validation"]
     types: [completed]
 
 jobs:
-  validate:
+  model-manager:
     runs-on: ubuntu-latest
     
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -45,20 +45,20 @@ jobs:
     - name: Validate model
       run: |
         echo "Running validation."
-        python -m src.model_validation
+        python -m src.model_manager
 
-    - name: Notify validation success
+    - name: Notify versioning success
       if: success()
-      run: echo "Model validation passed. Model approved!"
+      run: echo "Model versioning passed. Model approved!"
 
-    - name: Notify validation failure
+    - name: Notify versioning failure
       if: failure()
-      run: echo "Model validation failed — stopping pipeline."
-  
+      run: echo "Model versioning failed — stopping pipeline."
+
   notify:
-    needs: validate
+    needs: model-manager
     if: always()
     uses: ./.github/workflows/send_email.yml
     with:
-      status: ${{ needs.validate.result }}
+      status: ${{ needs.model-manager.result }}
       workflow_name: ${{ github.workflow }}  
