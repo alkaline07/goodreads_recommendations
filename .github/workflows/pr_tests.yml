@@ -1,0 +1,31 @@
+name: PR Test Suite
+run-name: Run Tests on PR Before Merge
+
+on:
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Install dev/test dependencies
+      run: pip install pytest pytest-cov seaborn
+
+    - name: Install project as package
+      run: pip install -e .
+
+    - name: Run Tests
+      run: pytest ./tests -vv --disable-warnings

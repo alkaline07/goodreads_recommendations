@@ -42,3 +42,11 @@ jobs:
     - name: Notify on failure
       if: failure()
       run: echo "Data Loading failed"
+  
+  notify:
+    needs: build
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.build.result }}
+      workflow_name: ${{ github.workflow }}

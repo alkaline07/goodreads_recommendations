@@ -32,8 +32,10 @@ class TestModelSelector:
         """Test initialization with invalid weights"""
         with pytest.raises(ValueError):
             ModelSelector(performance_weight=0.6, fairness_weight=0.5)
-    
-    def test_calculate_fairness_score(self):
+
+    @patch("src.model_selector.BiasDetector")
+    @patch("src.model_selector.BiasVisualizer")
+    def test_calculate_fairness_score(self, mock_visualizer, mock_detector):
         """Test calculating fairness score"""
         selector = ModelSelector.__new__(ModelSelector)
         
@@ -55,12 +57,13 @@ class TestModelSelector:
         
         # 100 - (1 * 20 + 1 * 10) = 70
         assert score == 70
-    
-    def test_normalize_performance_score(self):
+
+    @patch("src.model_selector.BiasDetector")
+    @patch("src.model_selector.BiasVisualizer")
+    def test_normalize_performance_score(self, mock_visualizer, mock_detector):
         """Test normalizing performance score"""
         selector = ModelSelector.__new__(ModelSelector)
         
-        # Test with 2 models (percentage-based)
         score = selector.normalize_performance_score(
             mae=0.6,
             rmse=0.7,
@@ -70,8 +73,10 @@ class TestModelSelector:
         
         assert isinstance(score, float)
         assert 0 <= score <= 100
-    
-    def test_calculate_combined_score(self):
+
+    @patch("src.model_selector.BiasDetector")
+    @patch("src.model_selector.BiasVisualizer")
+    def test_calculate_combined_score(self, mock_visualizer, mock_detector):
         """Test calculating combined score"""
         selector = ModelSelector(
             performance_weight=0.6,
@@ -83,7 +88,6 @@ class TestModelSelector:
             fairness_score=70.0
         )
         
-        # 0.6 * 80 + 0.4 * 70 = 48 + 28 = 76
         assert score == 76.0
     
     @patch('src.model_selector.BiasDetector')
@@ -117,4 +121,3 @@ class TestModelSelector:
         assert mae == 0.5
         assert rmse == 0.6
         assert isinstance(bias_report, BiasReport)
-

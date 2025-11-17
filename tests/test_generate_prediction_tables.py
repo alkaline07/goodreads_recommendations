@@ -4,13 +4,13 @@ Test cases for generate_bias_prediction_tables.py
 
 import pytest
 from unittest.mock import Mock, patch
-from src.generate_bias_prediction_tables import BiasReadyPredictionGenerator
+from src.generate_prediction_tables import BiasReadyPredictionGenerator
 
 
 class TestBiasReadyPredictionGenerator:
     """Test cases for BiasReadyPredictionGenerator class"""
     
-    @patch('src.generate_bias_prediction_tables.bigquery.Client')
+    @patch('src.generate_prediction_tables.bigquery.Client')
     @patch.dict('os.environ', {'AIRFLOW_HOME': '/test/airflow'})
     def test_init(self, mock_client_class):
         """Test initialization"""
@@ -23,7 +23,7 @@ class TestBiasReadyPredictionGenerator:
         assert generator.project_id == "test-project"
         assert generator.dataset_id == "books"
     
-    @patch('src.generate_bias_prediction_tables.bigquery.Client')
+    @patch('src.generate_prediction_tables.bigquery.Client')
     def test_find_latest_model(self, mock_client_class):
         """Test finding latest model"""
         from datetime import datetime
@@ -45,7 +45,7 @@ class TestBiasReadyPredictionGenerator:
         assert model_path is not None
         assert "boosted_tree_regressor_model" in model_path
     
-    @patch('src.generate_bias_prediction_tables.bigquery.Client')
+    @patch('src.generate_prediction_tables.bigquery.Client')
     def test_verify_test_table_exists(self, mock_client_class):
         """Test verifying test table exists"""
         import pandas as pd
@@ -65,7 +65,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert result is True
     
-    @patch('src.generate_bias_prediction_tables.bigquery.Client')
+    @patch('src.generate_prediction_tables.bigquery.Client')
     def test_list_available_models(self, mock_client_class):
         """Test listing available models"""
         mock_client = Mock()
