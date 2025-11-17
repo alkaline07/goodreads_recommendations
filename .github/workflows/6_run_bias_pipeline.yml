@@ -13,7 +13,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     permissions:
-      contents: read
+      contents: write
       actions: read
 
     steps:
@@ -38,6 +38,15 @@ jobs:
       run: |
         echo "Starting Bias Audit Pipeline"
         python -m src.bias_pipeline
+
+    - name: Commit and push new files
+      if: success()
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git add -A
+        git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
+        git push
 
     - name: Notify on success
       if: success()
