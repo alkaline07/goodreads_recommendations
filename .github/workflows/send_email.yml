@@ -17,21 +17,27 @@ jobs:
     steps:
     - name: Send email via Gmail SMTP
       run: |
-        python - << EOF
+        python - << 'EOF'
         import smtplib
         from email.mime.text import MIMEText
-        
-        sender = "${{ secrets.SMTP_EMAIL }}"
-        password = "${{ secrets.SMTP_PASSWORD }}"
-        receiver = "${{ secrets.SMTP_EMAIL }}"
+        import os
+        sender = os.environ["SMTP_EMAIL"]
+        password = os.environ["SMTP_PASSWORD"]
+        receiver = os.environ["SMTP_EMAIL"]
 
-        subject = f"GitHub Workflow: ${{ inputs.workflow_name }} - ${{ inputs.status }}"
+        workflow_name = os.environ["WORKFLOW_NAME"]
+        status = os.environ["STATUS"]
+        repo = os.environ["REPO"]
+        commit_sha = os.environ["SHA"]
+        branch = os.environ["BRANCH"]
+
+        subject = f"GitHub Workflow: {workflow_name} - {status}"
         body = f"""
-        Workflow Name: ${ inputs.workflow_name }
-        Status: ${ inputs.status }
-        Repository: ${{ github.repository }}
-        Commit: ${{ github.sha }}
-        Branch: ${{ github.ref_name }}
+        Workflow Name: {workflow_name}
+        Status: {status}
+        Repository: {repo}
+        Commit: {commit_sha}
+        Branch: {branch}
         """
 
         msg = MIMEText(body)
@@ -52,3 +58,11 @@ jobs:
 
         print("Email sent!")
         EOF
+      env:
+      SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      WORKFLOW_NAME: ${{ inputs.workflow_name }}
+      STATUS: ${{ inputs.status }}
+      REPO: ${{ github.repository }}
+      SHA: ${{ github.sha }}
+      BRANCH: ${{ github.ref_name }}
