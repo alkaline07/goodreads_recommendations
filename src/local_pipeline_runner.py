@@ -36,12 +36,6 @@ if __name__ == "__main__":
         (4, 10),
         (5, 10),
         (6, 10),
-        (7, 10),
-        (8, 10),
-        (6, 25),
-        (6, 50),
-        (6, 75),
-        (6, 100)
     ]
 
     for mf_param in mf_parameter_list:
@@ -52,7 +46,7 @@ if __name__ == "__main__":
             "num_factors": factors,
             "l2_reg": reg,
             "max_iterations": iterations
-        }, bt_hyperparams=bt_hyperparams, model_type="matrix_factorization")
+        }, bt_hyperparams=bt_hyperparams, model_type="MATRIX_FACTORIZATION")
         print("Completed MF run")
 
         registrar = RegisterBQMLModels()
@@ -80,7 +74,7 @@ if __name__ == "__main__":
         trainer.run(mf_hyperparams=mf_hyperparams, bt_hyperparams={
             "max_tree_depth": depth,
             "num_parallel_tree": num_trees
-        }, model_type="boosted_tree")
+        }, model_type="BOOSTED_TREE_REGRESSOR")
         print("Completed BT run")
 
         registrar = RegisterBQMLModels()
