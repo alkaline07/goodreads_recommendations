@@ -69,7 +69,7 @@ class ModelManager:
         # Initialize MLflow
         try:
             mlflow.set_tracking_uri("http://127.0.0.1:5000/")
-            mlflow.set_experiment("model_rollback_management")
+            mlflow.set_experiment("bigquery_ml_training")
             print("MLflow tracking initialized")
         except Exception as e:
             print(f"MLflow initialization warning: {e}")
