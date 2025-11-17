@@ -59,10 +59,10 @@ jobs:
         print("Email sent!")
         EOF
       env:
-      SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
-      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-      WORKFLOW_NAME: ${{ inputs.workflow_name }}
-      STATUS: ${{ inputs.status }}
-      REPO: ${{ github.repository }}
-      SHA: ${{ github.sha }}
-      BRANCH: ${{ github.ref_name }}
+        SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        WORKFLOW_NAME: ${{ inputs.workflow_name }}
+        STATUS: ${{ inputs.status }}
+        REPO: ${{ github.repository }}
+        SHA: ${{ github.sha }}
+        BRANCH: ${{ github.ref_name }}
