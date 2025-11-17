@@ -45,8 +45,33 @@ jobs:
       run: |
         mv train_data.parquet data/.
 
-    - name: Train the model (BigQuery ML)
-      run: python -m src.bq_model_training
+    - name: Train the model Bigquery ML (with MLflow)
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+      run: |
+        echo "Starting MLflow UI in the background..."
+        # Start mlflow ui, redirect output to a log file, and run in background (&)
+        mlflow ui > mlflow.log 2>&1 &
+        
+        # Get the Process ID (PID) of the background process
+        MLFLOW_PID=$!
+        
+        # Set a 'trap'. This command will run on EXIT, killing the mlflow process
+        # This ensures cleanup even if the python script fails
+        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
+
+        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
+        
+        # Wait up to 30 seconds for the server to respond at the /health endpoint
+        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
+        
+        echo "MLflow is ready. Running model training..."
+        
+        # Run your training script
+        python -m src.bq_model_training
+        
+        echo "Training script finished."
+        # The 'trap' will automatically run here to kill the MLflow server
     
     - name: Commit and push new files
       if: success()

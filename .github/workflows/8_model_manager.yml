@@ -42,10 +42,20 @@ jobs:
         mkdir -p artifacts/
         mv trained_model_output/* artifacts/
 
-    - name: Validate model
+    - name: Manage the default model version
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
       run: |
-        echo "Running validation."
+        echo "Starting MLflow UI in the background..."
+        mlflow ui > mlflow.log 2>&1 &
+        MLFLOW_PID=$!
+        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
+        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
+        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
+
+        echo "Running model manager."
         python -m src.model_manager
+        echo "Model manager completed"
 
     - name: Commit and push new files
       if: success()
@@ -56,13 +66,13 @@ jobs:
         git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
         git push
 
-    - name: Notify versioning success
+    - name: Notify manager success
       if: success()
-      run: echo "Model versioning passed. Model approved!"
+      run: echo "Model management passed. Model approved!"
 
-    - name: Notify versioning failure
+    - name: Notify manager failure
       if: failure()
-      run: echo "Model versioning failed — stopping pipeline."
+      run: echo "Model management failed — stopping pipeline."
 
   notify:
     needs: model-manager

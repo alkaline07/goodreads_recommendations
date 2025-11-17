@@ -43,9 +43,19 @@ jobs:
         mv trained_model_output/* artifacts/
 
     - name: Validate model
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
       run: |
+        echo "Starting MLflow UI in the background..."
+        mlflow ui > mlflow.log 2>&1 &
+        MLFLOW_PID=$!
+        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
+        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
+        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
+
         echo "Running validation."
         python -m src.model_validation
+        echo "Validation complete"
 
     - name: Commit and push new files
       if: success()
