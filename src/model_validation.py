@@ -16,27 +16,9 @@ class BigQueryModelValidator:
     def __init__(self, project_id=None, dataset_id="books"):
         """Initialize BigQuery client with credential auto-discovery."""
 
-        airflow_home = os.environ.get("AIRFLOW_HOME", "")
-        possible_paths = [
-            os.path.join(airflow_home, "gcp_credentials.json") if airflow_home else None,
-            "config/gcp_credentials.json",
-            "gcp_credentials.json",
-            "../config/gcp_credentials.json",
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "gcp_credentials.json")
-        ]
-
-        credentials_path = None
-        for path in possible_paths:
-            if path and os.path.exists(path):
-                credentials_path = os.path.abspath(path)
-                break
-
-        if credentials_path:
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
-            print(f"Using GCP credentials from: {credentials_path}")
-        else:
-            print("WARNING: No gcp_credentials.json found. Using default credentials.")
-
+        airflow_home = os.environ.get("AIRFLOW_HOME")
+        if airflow_home:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = airflow_home + "/gcp_credentials.json"
       
         self.client = bigquery.Client(project=project_id)
         self.project_id = self.client.project
@@ -183,23 +165,62 @@ class BigQueryModelValidator:
             else:
                 print("MODEL REJECTED — RMSE too high")
                 return False
+    
+    def get_selected_model_from_report():
+        """
+        Read the model selection report to find which model was selected.
+        
+        Returns:
+            Dictionary with model_name and predictions_table, or None if not found
+        """
+        import json
+        
+        report_path = "../docs/bias_reports/model_selection_report.json"
+        
+        try:
+            with open(report_path, 'r') as f:
+                report = json.load(f)
+            
+            selected = report.get('selected_model')
+            if selected:
+                print(f"Found selected model from report: {selected['model_name']}")
+                return {
+                    'model_name': selected['model_name'],
+                    'predictions_table': selected['predictions_table']
+                }
+        except FileNotFoundError:
+            print(f"Model selection report not found: {report_path}")
+            print("Will use default model (boosted_tree_regressor)")
+        except Exception as e:
+            print(f"Error reading model selection report: {e}")
+        
+        return None
+    
+    def validate_selected_model(self):
+        """
+        Validate the model selected in the model selection report.
+        If no report is found, validate the default boosted_tree_regressor model.
+        """
+        selected_model = self.get_selected_model_from_report()
+        
+        if selected_model:
+            model_name = selected_model['model_name']
+            model_label = "selected_model"
+        else:
+            # Default to boosted_tree_regressor model
+            model_name = f"{self.project_id}.books.boosted_tree_regressor_model"
+            model_label = "boosted_tree"
+        
+        return self.validate_model(model_name, model_label)
 
 
 
 if __name__ == "__main__":
     validator = BigQueryModelValidator(project_id=None)
 
-    mf_ok = validator.validate_model(
-        model_name=f"{validator.project_id}.books.matrix_factorization_model",
-        model_label="matrix_factorization"
-    )
+    ok = validator.validate_selected_model()
 
-    bt_ok = validator.validate_model(
-        model_name=f"{validator.project_id}.books.boosted_tree_regressor_model",
-        model_label="boosted_tree"
-    )
-
-    if not (mf_ok and bt_ok):
+    if not (ok):
         print("Validation FAILED — stopping pipeline.")
         exit(1)
 

@@ -1,9 +1,9 @@
-name: 5. Bias Detection & Mitigation Pipeline
+name: 6. Bias Detection & Mitigation Pipeline
 run-name: Run Bias Audit Pipeline
 
 on:
   workflow_run:
-    workflows: ["4. Generate Bias Predictions"]
+    workflows: ["5. Evaluate Model"]
     types: [completed]
 
 jobs:
