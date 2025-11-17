@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: read
+      contents: write
       actions: read
     
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -47,6 +47,15 @@ jobs:
 
     - name: Train the model (BigQuery ML)
       run: python -m src.bq_model_training
+    
+    - name: Commit and push new files
+      if: success()
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git add -A
+        git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
+        git push
     
     - name: Notify on success
       if: success()
