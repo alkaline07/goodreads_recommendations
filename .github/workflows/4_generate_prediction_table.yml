@@ -44,7 +44,7 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git add -A
         git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
-        git push
+        git push --force
 
     - name: Notify on success
       if: success()
