@@ -24,3 +24,5 @@ airflow-webserver.pid
 airflow.cfg 
 webserver_config.py
 gcp_credentials.json
+
+gha-creds-*.json

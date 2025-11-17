@@ -52,13 +52,24 @@ jobs:
         echo "Evaluation script finished."
 
     - name: Commit and push new files
-      if: success()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        # Create a new branch name (e.g., "artifacts_1678886400")
+        BRANCH_NAME="artifacts_bot_$(date +%s)"
+          
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
+          
+        # Switch to the new branch
+        git checkout -b $BRANCH_NAME
+          
         git add -A
+        # Commit the changes
         git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
-        git push
+          
+        # Push the new branch, not master
+        git push -u origin $BRANCH_NAME
 
     - name: Notify on success
       if: success()
