@@ -166,7 +166,7 @@ class BigQueryModelValidator:
                 print("MODEL REJECTED — RMSE too high")
                 return False
     
-    def get_selected_model_from_report():
+    def get_selected_model_from_report(self):
         """
         Read the model selection report to find which model was selected.
         
