@@ -71,3 +71,4 @@ jobs:
     with:
       status: ${{ needs.model-manager.result }}
       workflow_name: ${{ github.workflow }}  
+    secrets: inherit

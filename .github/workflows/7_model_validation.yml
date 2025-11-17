@@ -71,3 +71,4 @@ jobs:
     with:
       status: ${{ needs.validate.result }}
       workflow_name: ${{ github.workflow }}  
+    secrets: inherit

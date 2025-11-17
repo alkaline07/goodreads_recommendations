@@ -63,3 +63,4 @@ jobs:
     with:
       status: ${{ needs.bias-pipeline.result }}
       workflow_name: ${{ github.workflow }}
+    secrets: inherit
