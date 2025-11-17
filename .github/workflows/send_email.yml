@@ -21,6 +21,7 @@ jobs:
         import smtplib
         from email.mime.text import MIMEText
         import os
+
         sender = os.environ["SMTP_EMAIL"]
         password = os.environ["SMTP_PASSWORD"]
         receiver = os.environ["SMTP_EMAIL"]
