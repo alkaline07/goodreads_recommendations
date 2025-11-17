@@ -1,55 +1,52 @@
-name: Send Email Notification
+name: 1. Load Data
+run-name: Load Data
 
 on:
-  workflow_call:
-    inputs:
-      status:
-        required: true
-        type: string
-      workflow_name:
-        required: true
-        type: string
+  workflow_dispatch:
 
 jobs:
-  notify:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Send email via Gmail SMTP
-      run: |
-        python - << EOF
-        import smtplib
-        from email.mime.text import MIMEText
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-        # Values will now expand correctly
-        sender = "${{ secrets.SMTP_EMAIL }}"
-        password = "${{ secrets.SMTP_PASSWORD }}"
-        receiver = "${{ secrets.SMTP_EMAIL }}"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
 
-        subject = f"GitHub Workflow: ${{ inputs.workflow_name }} - ${{ inputs.status }}"
-        body = f"""
-        Workflow Name: ${ inputs.workflow_name }
-        Status: ${ inputs.status }
-        Repository: ${{ github.repository }}
-        Commit: ${{ github.sha }}
-        Branch: ${{ github.ref_name }}
-        """
+    - name: Authenticate to Google Cloud
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
-        msg = MIMEText(body)
-        msg["Subject"] = subject
-        msg["From"] = sender
-        msg["To"] = receiver
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
 
-        SMTP_SERVER = "smtp.gmail.com"
-        SMTP_PORT = 587
+    - name: Load the data
+      run: python -m src.load_data
 
-        print("Connecting to SMTP...")
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
-            print("Logging in...")
-            server.login(sender, password)
-            print("Sending email...")
-            server.sendmail(sender, receiver.split(","), msg.as_string())
+    - name: Upload data artifact
+      if: success() 
+      uses: actions/upload-artifact@v4
+      with:
+        name: goodreads-train-data
+        path: data/train_data.parquet
+        retention-days: 1
 
-        print("Email sent!")
-        EOF
+    - name: Notify on success
+      if: success()
+      run: echo "Data Loaded successfully"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Data Loading failed"
+  
+  notify:
+    needs: build
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.build.result }}
+      workflow_name: ${{ github.workflow }}
