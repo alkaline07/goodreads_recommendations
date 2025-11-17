@@ -1,0 +1,32 @@
+FROM python:3.11-slim
+
+LABEL maintainer="Goodreads Recommendations Team"
+LABEL description="Docker image for Goodreads ML model development and training"
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    gcc \
+    g++ \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY model_requirements.txt /app/model_requirements.txt
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r model_requirements.txt
+
+COPY src/ /app/src/
+COPY datapipeline/ /app/datapipeline/
+COPY setup.py /app/setup.py
+
+RUN mkdir -p /app/data /app/artifacts /app/mlruns /app/mlartifacts /app/docs
+
+ENV PYTHONPATH="/app:${PYTHONPATH}"
+ENV PYTHONUNBUFFERED=1
+
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+
+CMD ["python", "-m", "src.bq_model_training"]

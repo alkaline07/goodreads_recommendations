@@ -1,0 +1,86 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Airflow specific (we're excluding Airflow from model container)
+config/airflow.cfg
+config/airflow.db
+config/dags/
+
+# Docker
+docker-compose.yaml
+Dockerfile
+
+# Documentation
+README.md
+docs/*.pdf
+assets/
+
+# Data (should be mounted or downloaded at runtime)
+data/*.parquet
+data/*.csv
+data/metadata/*.dvc
+
+# MLflow artifacts (should be persisted via volumes)
+mlruns/
+mlartifacts/
+
+# DVC
+.dvc/
+
+# Test files
+**/test_*.py
+datapipeline/tests/
+
+# Logs
+*.log
+docs/bias_reports/bias_pipeline_logs/
+
+# Temporary files
+*.tmp
+*.bak

@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  model-training:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-training
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=file:///app/mlruns
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.bq_model_training
+    
+  model-registration:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-registration
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=file:///app/mlruns
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.register_bqml_models
+    depends_on:
+      - model-training
+
+  model-validation:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-validation
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=file:///app/mlruns
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.model_validation
+    depends_on:
+      - model-registration
+
+  bias-pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-bias-pipeline
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=file:///app/mlruns
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.bias_pipeline
+
+  data-loader:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-data-loader
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+    command: python -m src.load_data
+
+  # Interactive shell for development/debugging
+  model-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-dev
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=file:///app/mlruns
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: /bin/bash
+    stdin_open: true
+    tty: true
