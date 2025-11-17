@@ -413,7 +413,7 @@ class BigQueryMLModelTraining:
             self.data_stats = {}
 
 
-    def run(self, mf_hyperparams, bt_hyperparams, model_type=None):
+    def run(self, mf_hyperparams, bt_hyperparams):
         """Execute the training pipeline with proper error handling."""
         start_time = time.time()
         print("=" * 60)
@@ -451,22 +451,8 @@ class BigQueryMLModelTraining:
                         safe_mlflow_log(mlflow.log_metric, f"data_{key}", value)
 
             # Train models
-            if model_type == "MATRIX_FACTORIZATION":
-                mf_success = self.train_matrix_factorization(
-                    num_factors=mf_hyperparams["num_factors"],
-                    l2_reg=mf_hyperparams["l2_reg"],
-                    max_iterations=mf_hyperparams["max_iterations"]
-                )
-                bt_success = True
-            elif model_type == "BOOSTED_TREE_REGRESSOR":
-                bt_success = self.train_boosted_tree_regressor(
-                    max_tree_depth=bt_hyperparams["max_tree_depth"],
-                    num_parallel_tree=bt_hyperparams["num_parallel_tree"]
-                )
-                mf_success = True
-            else:
-                mf_success = self.train_matrix_factorization(num_factors=mf_hyperparams["num_factors"], l2_reg=mf_hyperparams["l2_reg"], max_iterations=mf_hyperparams["max_iterations"])
-                bt_success = self.train_boosted_tree_regressor(max_tree_depth=bt_hyperparams["max_tree_depth"], num_parallel_tree=bt_hyperparams["num_parallel_tree"])
+            mf_success = self.train_matrix_factorization(num_factors=mf_hyperparams["num_factors"], l2_reg=mf_hyperparams["l2_reg"], max_iterations=mf_hyperparams["max_iterations"])
+            bt_success = self.train_boosted_tree_regressor(max_tree_depth=bt_hyperparams["max_tree_depth"], num_parallel_tree=bt_hyperparams["num_parallel_tree"])
 
             # Summary
             end_time = time.time()
