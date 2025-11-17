@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       actions: read
 
     steps:
@@ -37,6 +37,15 @@ jobs:
         echo "Running bias prediction table generator."
         python -m src.generate_prediction_tables
 
+    - name: Commit and push new files
+      if: success()
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git add -A
+        git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
+        git push --force
+
     - name: Notify on success
       if: success()
       run: echo "Prediction tables generated successfully!"
@@ -51,3 +60,4 @@ jobs:
     with:
       status: ${{ needs.generate-predictions.result }}
       workflow_name: ${{ github.workflow }}
+    secrets: inherit
