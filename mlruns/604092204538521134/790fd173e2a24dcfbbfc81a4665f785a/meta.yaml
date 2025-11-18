@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/604092204538521134/790fd173e2a24dcfbbfc81a4665f785a/artifacts
+end_time: 1763492728553
+entry_point_name: ''
+experiment_id: '604092204538521134'
+lifecycle_stage: active
+run_id: 790fd173e2a24dcfbbfc81a4665f785a
+run_name: validate_matrix_factorization_20251118_190513
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763492713276
+status: 3
+tags: []
+user_id: root

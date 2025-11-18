@@ -1,18 +1,18 @@
 {
   "audit_metadata": {
     "model_name": "boosted_tree_regressor",
-    "timestamp": "2025-11-13T17:43:21.671770",
+    "timestamp": "2025-11-18T20:54:22.394964",
     "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
     "debiased_table": null
   },
   "bias_detection": {
-    "timestamp": "2025-11-13T17:43:30.224384",
+    "timestamp": "2025-11-18T20:54:34.246137",
     "total_slices_analyzed": 23,
     "disparities_found": 2,
-    "high_risk_slices": 2,
+    "high_risk_slices": 3,
     "recommendations": [
       "HIGH PRIORITY: 2 dimensions show severe performance disparities. Dimensions: Book Era, Rating Range",
-      "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.702), Book Era=classic (MAE: 1.534)",
+      "Target these high-error slices for mitigation: Rating Range=Medium (3-4) (MAE: 3.444), Book Era=classic (MAE: 1.389), Book Era=modern (MAE: 1.327)",
       "Book Era: Consider re-weighting training data or adjusting decision thresholds to balance performance across 4 groups",
       "Rating Range: Consider re-weighting training data or adjusting decision thresholds to balance performance across 2 groups"
     ]

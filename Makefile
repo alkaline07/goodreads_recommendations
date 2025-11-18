@@ -19,14 +19,14 @@ help:
 	@echo "Run Individual Components:"
 	@echo "  make load-data          Load data from BigQuery"
 	@echo "  make train              Train ML models"
-	@echo "  make register           Register models to Vertex AI"
 	@echo "  make predict            Generate prediction tables"
 	@echo "  make bias               Run bias detection & mitigation"
 	@echo "  make validate           Validate trained models"
+	@echo "  make rollback           Rollback model"
 	@echo ""
 	@echo "Run Pipeline:"
 	@echo "  make pipeline-all       Run complete pipeline (all steps)"
-	@echo "  make pipeline-train     Run training pipeline (load→train→register)"
+	@echo "  make pipeline-train     Run training pipeline (load→train)"
 	@echo "  make pipeline-eval      Run evaluation pipeline (predict→bias→validate)"
 	@echo ""
 	@echo "Development Commands:"
@@ -65,11 +65,6 @@ train:
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-training
 	@echo "Model training complete!"
 
-register:
-	@echo "Registering models to Vertex AI"
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-registration
-	@echo "Model registration complete!"
-
 predict:
 	@echo "Generating prediction tables"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) run --rm \
@@ -87,6 +82,12 @@ validate:
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-validation
 	@echo "Model validation complete!"
 
+rollback:
+	@echo "Running rollback manager"
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-rollback
+	@echo "Rollback manager complete!"
+
+
 pipeline-all:
 	@echo "Running complete pipeline"
 	@echo ""
@@ -96,17 +97,17 @@ pipeline-all:
 	@echo "Step 2/6: Training models"
 	@make train
 	@echo ""
-	@echo "Step 3/6: Registering models"
-	@make register
-	@echo ""
-	@echo "Step 4/6: Generating predictions"
+	@echo "Step 3/6: Generating predictions"
 	@make predict
 	@echo ""
-	@echo "Step 5/6: Running bias analysis"
+	@echo "Step 4/6: Running bias analysis"
 	@make bias
 	@echo ""
-	@echo "Step 6/6: Validating models"
+	@echo "Step 5/6: Validating models"
 	@make validate
+	@echo ""
+	@echo "Step 6/6: Rollback models"
+	@make rollback
 	@echo ""
 	@echo "Complete pipeline finished!"
 
@@ -114,7 +115,6 @@ pipeline-train:
 	@echo "Running training pipeline"
 	@make load-data
 	@make train
-	@make register
 	@echo "Training pipeline finished!"
 
 pipeline-eval:

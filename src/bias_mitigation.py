@@ -19,7 +19,9 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple
 import json
 from dataclasses import dataclass, asdict
-
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "bias_reports")
+os.makedirs(DOCS_DIR, exist_ok=True)
 
 @dataclass
 class MitigationConfig:
@@ -569,10 +571,8 @@ def main():
         lambda_shrinkage=0.5
     )
     
-    mitigator.save_mitigation_report(
-        result,
-        "../docs/bias_reports/shrinkage_mitigation_report.json"
-    )
+    output_path = os.path.join(DOCS_DIR, "shrinkage_mitigation_report.json")
+    mitigator.save_mitigation_report(result, output_path)
 
 
 if __name__ == "__main__":

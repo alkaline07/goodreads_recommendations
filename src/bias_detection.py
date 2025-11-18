@@ -19,7 +19,9 @@ import numpy as np
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, asdict
 import json
-
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "bias_reports")
+os.makedirs(DOCS_DIR, exist_ok=True)
 
 @dataclass
 class SliceMetrics:
@@ -497,10 +499,9 @@ def main():
         dataset="test"
     )
     
-    # Save report
-    detector.save_report(report, "../docs/bias_reports/boosted_tree_bias_report.json")
-    
-    # Save to BigQuery
+    output_path = os.path.join(DOCS_DIR, "boosted_tree_bias_report.json")
+    detector.save_report(report, output_path)   
+
     output_table = f"{detector.project_id}.{detector.dataset_id}.bias_metrics_boosted_tree"
     detector.create_bias_metrics_table(report, output_table)
 

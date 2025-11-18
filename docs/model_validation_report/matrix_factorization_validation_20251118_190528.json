@@ -1,0 +1,33 @@
+{
+  "model_label": "matrix_factorization",
+  "model_name": "recommendation-system-475301.books.matrix_factorization_model",
+  "timestamp": "20251118_190528",
+  "project_id": "recommendation-system-475301",
+  "dataset_id": "books",
+  "metrics": {
+    "train": {
+      "mean_absolute_error": 0.6321036436562355,
+      "mean_squared_error": 0.9486974419815877,
+      "mean_squared_log_error": 1.6572889749233606,
+      "median_absolute_error": 0.355830629447516,
+      "r2_score": 0.7808807694762784,
+      "explained_variance": 0.7808807694762782
+    },
+    "val": {
+      "mean_absolute_error": 1.7402791485783309,
+      "mean_squared_error": 13.130921106864358,
+      "mean_squared_log_error": 5.19013815424193,
+      "median_absolute_error": 1.6957318033430273,
+      "r2_score": -2.043783594219102,
+      "explained_variance": -2.043777851083
+    },
+    "test": {
+      "mean_absolute_error": 1.7326988729608714,
+      "mean_squared_error": 15.665232341294617,
+      "mean_squared_log_error": 5.06581463988079,
+      "median_absolute_error": 1.6847460543347201,
+      "r2_score": -2.6683709332172407,
+      "explained_variance": -2.6683328674513973
+    }
+  }
+}
