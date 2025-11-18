@@ -83,14 +83,15 @@ jobs:
         git config --global user.name "github-actions[bot]"
           
         # Switch to the new branch
-        git checkout -b $BRANCH_NAME
-          
+        git fetch origin $BRANCH_NAME || true
+        git checkout -B $BRANCH_NAME
+
         git add -A
         # Commit the changes
         git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
           
         # Push the new branch, not master
-        git push -u origin $BRANCH_NAME
+        git push -f origin $BRANCH_NAME
     
     - name: Notify on success
       if: success()
