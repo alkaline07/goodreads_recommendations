@@ -26,7 +26,10 @@ class TestBiasVisualizer:
         """Test initialization with default output directory"""
         visualizer = BiasVisualizer()
         
-        assert visualizer.output_dir == "../docs/bias_reports/visualizations"
+        from src.bias_visualization import DOCS_DIR
+        expected = os.path.join(DOCS_DIR, "visualizations")
+
+        assert visualizer.output_dir == expected
         mock_makedirs.assert_called()
     
     def test_generate_slice_comparison_chart_success(self):
