@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/923083200099565462/cada710f3ca34fd4a3d1ad06ee99bb13/artifacts
+end_time: 1763450579868
+entry_point_name: ''
+experiment_id: '923083200099565462'
+lifecycle_stage: active
+run_id: cada710f3ca34fd4a3d1ad06ee99bb13
+run_name: evaluation_matrix_factorization_20251118_022257
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763450577777
+status: 3
+tags: []
+user_id: arpitawagulde
