@@ -89,7 +89,7 @@ jobs:
         git fetch origin $BRANCH_NAME || true
         git checkout -B $BRANCH_NAME
 
-        git add -A --exclude-standard
+        git add -A
 
         # Commit the changes
         git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
