@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/923083200099565462/0e97769e25894e3ab773c7bfe16c67b2/artifacts
+end_time: 1763450558580
+entry_point_name: ''
+experiment_id: '923083200099565462'
+lifecycle_stage: active
+run_id: 0e97769e25894e3ab773c7bfe16c67b2
+run_name: training_20251118_013355
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763447635520
+status: 3
+tags: []
+user_id: arpitawagulde

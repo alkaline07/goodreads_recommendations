@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/262280099377893410
+creation_time: 1763372974365
+experiment_id: '262280099377893410'
+last_update_time: 1763372974365
+lifecycle_stage: active
+name: goodreads_model_validation
