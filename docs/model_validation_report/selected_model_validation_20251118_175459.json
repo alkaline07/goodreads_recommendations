@@ -1,0 +1,33 @@
+{
+  "model_label": "selected_model",
+  "model_name": "recommendation-system-475301.books.boosted_tree_regressor_model",
+  "timestamp": "20251118_175459",
+  "project_id": "recommendation-system-475301",
+  "dataset_id": "books",
+  "metrics": {
+    "train": {
+      "mean_absolute_error": 1.27464217606395,
+      "mean_squared_error": 2.5012673768771108,
+      "mean_squared_log_error": 3.8065990075681957,
+      "median_absolute_error": 1.09177835782369,
+      "r2_score": 0.4222860116386268,
+      "explained_variance": 0.42289359209936084
+    },
+    "val": {
+      "mean_absolute_error": 1.2699167728857155,
+      "mean_squared_error": 2.498340071779218,
+      "mean_squared_log_error": 4.073238323942982,
+      "median_absolute_error": 1.089191024120037,
+      "r2_score": 0.42087790632702693,
+      "explained_variance": 0.42136296615123203
+    },
+    "test": {
+      "mean_absolute_error": 1.2684470988692336,
+      "mean_squared_error": 2.490625323778355,
+      "mean_squared_log_error": 3.8951838096242164,
+      "median_absolute_error": 1.0868651185716907,
+      "r2_score": 0.4167633556765723,
+      "explained_variance": 0.4173017313663455
+    }
+  }
+}
