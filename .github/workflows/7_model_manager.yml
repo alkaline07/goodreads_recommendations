@@ -6,12 +6,14 @@ on:
     secrets:
       GCP_CREDENTIALS:
         required: true
-      GITHUB_TOKEN:
+      CALLER_GITHUB_TOKEN:
         required: true
 
 jobs:
   model-manager:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.CALLER_GITHUB_TOKEN }}
     
     permissions:
       contents: write

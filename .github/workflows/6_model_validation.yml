@@ -82,7 +82,7 @@ jobs:
     uses: ./.github/workflows/7_model_manager.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CALLER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify:
     needs: validate
