@@ -12,24 +12,6 @@ For basic setup instructions (cloning repository, Python environment setup), ple
 
 > **Note:** For instructions on running the data pre-processing pipeline without Docker, please refer to [README.md](README.md#3-run-training-pipeline).
 
-## Docker
-
-### Run Data Pre-Processing Pipeline With Docker
-
-- Ensure that correct credentials are set in .env file
-- Run the docker compose up command : 
-  ```bash
-  docker compose up --build
-  ```
-- Open your browser and go to: <http://localhost:8080> 
-- Login using the credentials 
-  - username : admin
-  - password : admin
-- Run the docker command to shutdown the containers 
-  ```bash
-  docker compose down
-  ```
-
 ## GitHub Actions
 
 Our project uses GitHub Actions to automate the complete ML pipeline from data loading to model deployment. The workflows are orchestrated in a sequential pipeline that ensures data quality, model training, evaluation, bias detection, validation, and version management.
@@ -134,7 +116,7 @@ The workflows require the following secrets to be configured in GitHub:
 
 ### Artifact Branch Strategy
 
-All generated artifacts (models, reports, visualizations) are committed to the `artifacts_bot` branch rather than the main branch. This strategy:
+All generated artifacts (models, reports, visualizations) are committed to the `artifacts_bot_<datestamp>` branch rather than the main branch. This strategy:
 
 - **Keeps main clean**: Main branch contains only source code
 - **Version control**: All artifacts are versioned and tracked
