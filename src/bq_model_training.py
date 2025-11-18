@@ -152,7 +152,7 @@ class BigQueryMLModelTraining:
                    
         return False
 
-    def train_matrix_factorization(self, num_factors, l2_reg, max_iterations):
+    def train_matrix_factorization(self):
         """
         Train MATRIX_FACTORIZATION model with error handling.
         """
@@ -163,9 +163,9 @@ class BigQueryMLModelTraining:
 
             hyperparams = {
                 "model_type": "MATRIX_FACTORIZATION",
-                "l2_reg": l2_reg,
-                "num_factors": num_factors,
-                "max_iterations": max_iterations,
+                "l2_reg": 0.05,
+                "num_factors": 25,
+                "max_iterations": 40,
                 "feedback_type": "EXPLICIT"
             }
 
@@ -181,13 +181,14 @@ class BigQueryMLModelTraining:
             OPTIONS(
                 model_type='MATRIX_FACTORIZATION',
                 model_registry='VERTEX_AI',
+                vertex_ai_model_id='goodreads_matrix_factorization',
                 user_col='user_id_clean',
                 item_col='book_id',
                 rating_col='rating',
                 feedback_type='EXPLICIT',
-                l2_reg={l2_reg},
-                num_factors={num_factors},
-                max_iterations={max_iterations}
+                l2_reg=0.05,
+                num_factors=25,
+                max_iterations=40
             ) AS
             SELECT
                 user_id_clean,
@@ -218,7 +219,7 @@ class BigQueryMLModelTraining:
             safe_mlflow_log(mlflow.log_metric, "mf_training_success", 0)
             return False
 
-    def train_boosted_tree_regressor(self, max_tree_depth, num_parallel_tree):
+    def train_boosted_tree_regressor(self):
         """
         Train BOOSTED_TREE_REGRESSOR model with error handling.
         """
@@ -231,8 +232,8 @@ class BigQueryMLModelTraining:
             feature_list = ", ".join(feature_columns)
 
             hyperparams = {
-                "num_parallel_tree": num_parallel_tree,
-                "max_tree_depth": max_tree_depth,
+                "num_parallel_tree": 10,
+                "max_tree_depth": 6,
                 "subsample": 0.8,
                 "min_split_loss": 0.001,
                 "l1_reg": 0.01,
@@ -258,8 +259,9 @@ class BigQueryMLModelTraining:
                 model_type='BOOSTED_TREE_REGRESSOR',
                 input_label_cols=['rating'],
                 model_registry='VERTEX_AI',
-                num_parallel_tree={num_parallel_tree},
-                max_tree_depth={max_tree_depth},
+                vertex_ai_model_id='goodreads_boosted_tree_regressor',
+                num_parallel_tree=10,
+                max_tree_depth=6,
                 subsample=0.8,
                 min_split_loss=0.001,
                 l1_reg=0.01,
@@ -413,7 +415,7 @@ class BigQueryMLModelTraining:
             self.data_stats = {}
 
 
-    def run(self, mf_hyperparams, bt_hyperparams):
+    def run(self):
         """Execute the training pipeline with proper error handling."""
         start_time = time.time()
         print("=" * 60)
@@ -451,8 +453,8 @@ class BigQueryMLModelTraining:
                         safe_mlflow_log(mlflow.log_metric, f"data_{key}", value)
 
             # Train models
-            mf_success = self.train_matrix_factorization(num_factors=mf_hyperparams["num_factors"], l2_reg=mf_hyperparams["l2_reg"], max_iterations=mf_hyperparams["max_iterations"])
-            bt_success = self.train_boosted_tree_regressor(max_tree_depth=bt_hyperparams["max_tree_depth"], num_parallel_tree=bt_hyperparams["num_parallel_tree"])
+            mf_success = self.train_matrix_factorization()
+            bt_success = self.train_boosted_tree_regressor()
 
             # Summary
             end_time = time.time()
@@ -478,16 +480,7 @@ def main():
     """Main function with error handling."""
     try:
         trainer = BigQueryMLModelTraining()
-        mf_hyperparams = {
-            "num_factors": 25,
-            "l2_reg": 0.05,
-            "max_iterations": 40
-        }
-        bt_hyperparams = {
-            "max_tree_depth": 6,
-            "num_parallel_tree": 10
-        }
-        trainer.run(mf_hyperparams ,bt_hyperparams)
+        trainer.run()
     except Exception as e:
         print(f"Fatal error: {e}")
         raise

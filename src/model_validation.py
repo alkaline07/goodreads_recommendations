@@ -109,7 +109,7 @@ class BigQueryModelValidator:
         print("=" * 80)
 
         mlflow.set_tracking_uri("http://127.0.0.1:5000/")
-        mlflow.set_experiment("goodreads_model_validation")
+        mlflow.set_experiment("bigquery_ml_training")
 
         with mlflow.start_run(run_name=f"validate_{model_label}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
 
@@ -204,11 +204,11 @@ class BigQueryModelValidator:
         selected_model = self.get_selected_model_from_report()
         
         if selected_model:
-            model_name = selected_model['model_name']
+            model_name = f"{self.project_id}.{self.dataset_id}.{selected_model['model_name']}_model"
             model_label = "selected_model"
         else:
             # Default to boosted_tree_regressor model
-            model_name = f"{self.project_id}.books.boosted_tree_regressor_model"
+            model_name = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
             model_label = "boosted_tree"
         
         return self.validate_model(model_name, model_label)
