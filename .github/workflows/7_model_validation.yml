@@ -25,22 +25,13 @@ jobs:
       with:
         python-version: "3.11"
 
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+    
     - name: Install dependencies
       run: pip install -r model_requirements.txt
-
-    - name: Download model artifacts from previous run
-      env:
-        GH_TOKEN: ${{ github.token }}
-        REPO: ${{ github.repository }}
-        RUN_ID: ${{ github.event.workflow_run.id }}
-      run: |
-        echo "Downloading model artifacts"
-        gh run download $RUN_ID -R $REPO -n trained-model
-
-    - name: Move artifacts to correct locations
-      run: |
-        mkdir -p artifacts/
-        mv trained_model_output/* artifacts/
 
     - name: Validate model
       env:
@@ -61,8 +52,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Create a new branch name (e.g., "artifacts_1678886400")
-        BRANCH_NAME="artifacts_bot_$(date +%s)"
+        BRANCH_NAME="artifacts_bot"
           
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
