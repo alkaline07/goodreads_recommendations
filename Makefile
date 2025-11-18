@@ -1,7 +1,8 @@
 .PHONY: help build up down clean logs shell test pipeline-all
 .DEFAULT_GOAL := help
 
-IMAGE_NAME := goodreads-model:latest
+# IMAGE_NAME := goodreads-model:latest
+IMAGE_NAME := ghcr.io/purva-agarwal/goodreads-model:b61b8bda6d088c99da580089dda0811204bbd4ef
 COMPOSE_FILE := docker-compose.model.yaml
 
 
@@ -225,3 +226,14 @@ run-custom:
 		-e GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json \
 		$(IMAGE_NAME) \
 		python -m $$module
+
+run-ghcr:
+	@echo "Running GHCR image: $(IMAGE_NAME)"
+	docker run --rm \
+		-v $(shell pwd)/config:/app/config \
+		-v $(shell pwd)/data:/app/data \
+		-v $(shell pwd)/docs:/app/docs \
+		-v $(shell pwd)/mlruns:/app/mlruns \
+		-v $(shell pwd)/mlartifacts:/app/mlartifacts \
+		-e GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json \
+		$(IMAGE_NAME)
