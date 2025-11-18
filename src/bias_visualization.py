@@ -20,6 +20,9 @@ import seaborn as sns
 from typing import List, Dict, Optional
 from datetime import datetime
 from .bias_detection import BiasDetector, BiasReport
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "bias_reports")
+os.makedirs(DOCS_DIR, exist_ok=True)
 
 
 class BiasVisualizer:
@@ -27,17 +30,19 @@ class BiasVisualizer:
     Generate visualizations for bias analysis reports.
     """
     
-    def __init__(self, output_dir: str = "../docs/bias_reports/visualizations"):
+    def __init__(self, output_dir: str = None):
         """
         Initialize the visualizer.
         
         Args:
             output_dir: Directory to save visualizations
         """
+        if output_dir is None:
+            output_dir = os.path.join(DOCS_DIR, "visualizations")
+
         self.output_dir = output_dir
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
         
-        # Set style
         sns.set_style("whitegrid")
         plt.rcParams['figure.figsize'] = (12, 6)
         plt.rcParams['font.size'] = 10
@@ -446,7 +451,8 @@ def main():
     visualizer = BiasVisualizer()
     
     # Load most recent report
-    report_dir = "../docs/bias_reports"
+    
+    report_dir = DOCS_DIR
     report_files = [f for f in os.listdir(report_dir) if f.endswith('_detection_report.json')]
     
     if not report_files:

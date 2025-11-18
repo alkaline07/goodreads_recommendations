@@ -18,7 +18,11 @@ from datetime import datetime
 from dataclasses import dataclass, asdict
 from .bias_detection import BiasDetector
 from .bias_visualization import BiasVisualizer
-
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "bias_reports")
+MODEL_SELECTION_DIR = os.path.join(DOCS_DIR, "model_selection")
+os.makedirs(DOCS_DIR, exist_ok=True)
+os.makedirs(MODEL_SELECTION_DIR, exist_ok=True)
 
 @dataclass
 class ModelCandidate:
@@ -73,7 +77,8 @@ class ModelSelector:
         self.min_fairness_threshold = min_fairness_threshold
         
         self.detector = BiasDetector()
-        self.visualizer = BiasVisualizer(output_dir="../docs/bias_reports/model_selection")
+        self.visualizer = BiasVisualizer(output_dir=MODEL_SELECTION_DIR)
+
         
         print(f"ModelSelector initialized")
         print(f"  Performance weight: {performance_weight}")
@@ -498,7 +503,8 @@ class ModelSelector:
             'rationale': report.rationale
         }
         
-        output_path = "../docs/bias_reports/model_selection_report.json"
+        output_path = os.path.join(DOCS_DIR, "model_selection_report.json")
+
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         with open(output_path, 'w') as f:
@@ -565,7 +571,7 @@ class ModelSelector:
         
         plt.tight_layout()
         
-        output_path = "../docs/bias_reports/model_selection/model_comparison.png"
+        output_path = os.path.join(MODEL_SELECTION_DIR, "model_comparison.png")
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         print(f"Saved: {output_path}")
         plt.close()
