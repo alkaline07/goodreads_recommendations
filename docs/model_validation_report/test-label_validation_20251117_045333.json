@@ -1,0 +1,18 @@
+{
+  "model_label": "test-label",
+  "model_name": "test-model",
+  "timestamp": "20251117_045333",
+  "project_id": "test-project",
+  "dataset_id": "books",
+  "metrics": {
+    "train": {
+      "rmse": 3.5
+    },
+    "val": {
+      "rmse": 3.5
+    },
+    "test": {
+      "rmse": 3.5
+    }
+  }
+}

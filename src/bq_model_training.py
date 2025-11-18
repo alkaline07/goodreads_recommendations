@@ -8,7 +8,11 @@ import time
 from datetime import datetime
 from google.cloud import bigquery
 import mlflow
-
+from pathlib import Path
+from dotenv import load_dotenv
+root_env = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(root_env)
+print("Loaded .env from:", root_env)
 
 def safe_mlflow_log(func, *args, **kwargs):
     """Safely log to MLflow, continue if it fails."""

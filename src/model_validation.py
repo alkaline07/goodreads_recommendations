@@ -8,8 +8,13 @@ import os
 import json
 from datetime import datetime
 from google.cloud import bigquery
+from pathlib import Path
 import mlflow
 import pandas as pd
+from dotenv import load_dotenv
+root_env = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(root_env)
+print("Loaded .env from:", root_env)
 
 
 class BigQueryModelValidator:
@@ -125,8 +130,8 @@ class BigQueryModelValidator:
         print("\n" + "=" * 80)
         print(f"     VALIDATION REPORT FOR MODEL: {model_label}")
         print("=" * 80)
-
-        mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+        mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI", "file:///app/mlruns")
+        mlflow.set_tracking_uri(mlflow_uri)
         mlflow.set_experiment("goodreads_model_validation")
 
         with mlflow.start_run(run_name=f"validate_{model_label}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
