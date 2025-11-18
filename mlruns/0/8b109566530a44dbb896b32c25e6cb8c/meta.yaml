@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/8b109566530a44dbb896b32c25e6cb8c/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 8b109566530a44dbb896b32c25e6cb8c
+run_name: whimsical-quail-608
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763435253514
+status: 1
+tags: []
+user_id: goyal

@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/c29778f0277c4820b60bb9ba98a431fb/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c29778f0277c4820b60bb9ba98a431fb
+run_name: fortunate-mouse-459
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763435986776
+status: 1
+tags: []
+user_id: goyal
