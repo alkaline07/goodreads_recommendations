@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/bffa9cdb96bc46d981a83c0fc62997d0/artifacts
+end_time: 1763437246112
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: bffa9cdb96bc46d981a83c0fc62997d0
+run_name: delicate-dove-303
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763437244903
+status: 3
+tags: []
+user_id: goyal

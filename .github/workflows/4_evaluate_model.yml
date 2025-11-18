@@ -1,0 +1,88 @@
+name: 4. Evaluate Model
+run-name: Run Model Evaluation Pipeline
+
+on:
+  workflow_run:
+    workflows: ["3. Generate Predictions"]
+    types: [completed]
+
+jobs:
+  evaluate-model:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Run Model Evaluation
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+      run: |
+        echo "Starting MLflow UI in the background..."
+        mlflow ui > mlflow.log 2>&1 &
+        MLFLOW_PID=$!
+        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
+        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
+        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
+        
+        echo "MLflow is ready. Running Model Evaluation Pipeline"
+
+        python -m src.model_evaluation_pipeline
+
+        echo "Evaluation script finished."
+
+    - name: Commit and push new files
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        BRANCH_NAME="artifacts_bot"
+          
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+          
+        # Switch to the new branch
+        git checkout -b $BRANCH_NAME
+          
+        git add -A
+        # Commit the changes
+        git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
+          
+        # Push the new branch, not master
+        git push -u origin $BRANCH_NAME
+
+    - name: Notify on success
+      if: success()
+      run: echo "Model Evaluation executed successfully!"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Model Evaluation failed!"
+
+  notify:
+    needs: evaluate-model
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.evaluate-model.result }}
+      workflow_name: ${{ github.workflow }}
+    secrets: inherit

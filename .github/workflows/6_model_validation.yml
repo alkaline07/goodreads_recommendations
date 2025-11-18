@@ -1,9 +1,9 @@
-name: 7. Model Validation
+name: 6. Model Validation
 run-name: Validate Trained Model
 
 on:
   workflow_run:
-    workflows: ["6. Bias Detection & Mitigation Pipeline"]
+    workflows: ["5. Bias Detection & Mitigation Pipeline"]
     types: [completed]
 
 jobs:
@@ -25,36 +25,47 @@ jobs:
       with:
         python-version: "3.11"
 
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+    
     - name: Install dependencies
       run: pip install -r model_requirements.txt
 
-    - name: Download model artifacts from previous run
-      env:
-        GH_TOKEN: ${{ github.token }}
-        REPO: ${{ github.repository }}
-        RUN_ID: ${{ github.event.workflow_run.id }}
-      run: |
-        echo "Downloading model artifacts"
-        gh run download $RUN_ID -R $REPO -n trained-model
-
-    - name: Move artifacts to correct locations
-      run: |
-        mkdir -p artifacts/
-        mv trained_model_output/* artifacts/
-
     - name: Validate model
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
       run: |
+        echo "Starting MLflow UI in the background..."
+        mlflow ui > mlflow.log 2>&1 &
+        MLFLOW_PID=$!
+        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
+        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
+        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
+
         echo "Running validation."
         python -m src.model_validation
+        echo "Validation complete"
 
     - name: Commit and push new files
-      if: success()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        BRANCH_NAME="artifacts_bot"
+          
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
+          
+        # Switch to the new branch
+        git checkout -b $BRANCH_NAME
+          
         git add -A
+        # Commit the changes
         git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
-        git push
+          
+        # Push the new branch, not master
+        git push -u origin $BRANCH_NAME
 
     - name: Notify validation success
       if: success()

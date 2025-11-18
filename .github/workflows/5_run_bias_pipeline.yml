@@ -1,13 +1,13 @@
-name: 5. Evaluate Model
+name: 5. Bias Detection & Mitigation Pipeline
 run-name: Run Bias Audit Pipeline
 
 on:
   workflow_run:
-    workflows: ["4. Generate Predictions"]
+    workflows: ["4. Evaluate Model"]
     types: [completed]
 
 jobs:
-  evaluate-model:
+  bias-pipeline:
     runs-on: ubuntu-latest
 
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -34,33 +34,43 @@ jobs:
     - name: Install dependencies
       run: pip install -r model_requirements.txt
 
-    - name: Run Model Evaluation
+    - name: Run Bias Detection & Mitigation Pipeline
       run: |
-        echo "Starting Model Evaluation Pipeline"
-        python -m src.model_evaluation_pipeline
+        echo "Starting Bias Audit Pipeline"
+        python -m src.bias_pipeline
 
     - name: Commit and push new files
-      if: success()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        BRANCH_NAME="artifacts_bot"
+          
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
+          
+        # Switch to the new branch
+        git checkout -b $BRANCH_NAME
+          
         git add -A
+        # Commit the changes
         git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
-        git push
+          
+        # Push the new branch, not master
+        git push -u origin $BRANCH_NAME
 
     - name: Notify on success
       if: success()
-      run: echo "Model Evaluation executed successfully!"
+      run: echo "Bias Pipeline executed successfully!"
 
     - name: Notify on failure
       if: failure()
-      run: echo "Model Evaluation failed!"
+      run: echo "Bias Pipeline failed!"
 
   notify:
-    needs: evaluate-model
+    needs: bias-pipeline
     if: always()
     uses: ./.github/workflows/send_email.yml
     with:
-      status: ${{ needs.evaluate-model.result }}
+      status: ${{ needs.bias-pipeline.result }}
       workflow_name: ${{ github.workflow }}
     secrets: inherit

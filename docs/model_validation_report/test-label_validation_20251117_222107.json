@@ -1,0 +1,18 @@
+{
+  "model_label": "test-label",
+  "model_name": "test-model",
+  "timestamp": "20251117_222107",
+  "project_id": "test-project",
+  "dataset_id": "books",
+  "metrics": {
+    "train": {
+      "root_mean_squared_error": 2.5
+    },
+    "val": {
+      "root_mean_squared_error": 2.5
+    },
+    "test": {
+      "root_mean_squared_error": 2.5
+    }
+  }
+}
