@@ -77,34 +77,38 @@ class ModelManager:
         print(f"ModelRollbackManager initialized for project: {self.project_id}")
         print(f"Improvement threshold: {self.improvement_threshold * 100}%")
 
-    def get_model_versions(self, display_name: str) -> List[aiplatform.Model]:
+    def get_model_versions(self, display_name: str) -> List:
         """
         Get all versions of a model from Vertex AI Model Registry.
-
-        Args:
-            display_name: Display name of the model in Vertex AI
-
-        Returns:
-            List of Model objects sorted by version (descending)
+        Returns a list of VersionInfo objects sorted by version ID (descending).
         """
         try:
+            # 1. Find the Parent Model
             models = aiplatform.Model.list(
                 filter=f'display_name="{display_name}"',
-                location=self.vertex_region,
-                order_by="create_time desc"
+                location=self.vertex_region
             )
             
             if not models:
                 print(f"No models found with display name: {display_name}")
                 return []
             
-            print(f"Found {len(models)} version(s) of model '{display_name}'")
-            for model in models:
-                version_id = model.version_id if hasattr(model, 'version_id') else 'N/A'
-                is_default = getattr(model, 'version_aliases', [])
-                print(f"  - Version {version_id}, Aliases: {is_default}")
+            parent_model = models[0]
             
-            return models
+            # 2. Get version history
+            # These are VersionInfo objects, NOT full Model resources
+            versions = parent_model.versioning_registry.list_versions()
+            
+            print(f"Found {len(versions)} version(s) of model '{display_name}'")
+            
+            # Debug print to help inspect attributes if needed
+            for v in versions:
+                print(f"ID: {v.version_id}, Aliases: {v.version_aliases}")
+
+            # 3. Sort by version_id (converted to int) to get the latest
+            versions.sort(key=lambda x: int(x.version_id), reverse=True)
+            
+            return versions
 
         except Exception as e:
             print(f"Error listing model versions: {e}")
