@@ -2,7 +2,6 @@ name: 6. Model Validation
 run-name: Validate Trained Model
 
 on:
-  workflow_dispatch:
   workflow_run:
     workflows: ["5. Bias Detection & Mitigation Pipeline"]
     types: [completed]
