@@ -1,5 +1,5 @@
 name: 5. Evaluate Model
-run-name: Run Bias Audit Pipeline
+run-name: Run Model Evaluation Pipeline
 
 on:
   workflow_run:

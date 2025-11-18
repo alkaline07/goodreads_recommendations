@@ -28,20 +28,6 @@ jobs:
     - name: Install dependencies
       run: pip install -r model_requirements.txt
 
-    - name: Download model artifacts from previous run
-      env:
-        GH_TOKEN: ${{ github.token }}
-        REPO: ${{ github.repository }}
-        RUN_ID: ${{ github.event.workflow_run.id }}
-      run: |
-        echo "Downloading model artifacts"
-        gh run download $RUN_ID -R $REPO -n trained-model
-
-    - name: Move artifacts to correct locations
-      run: |
-        mkdir -p artifacts/
-        mv trained_model_output/* artifacts/
-
     - name: Validate model
       env:
         MLFLOW_TRACKING_URI: http://127.0.0.1:5000
