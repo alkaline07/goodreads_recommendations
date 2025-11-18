@@ -7,7 +7,6 @@ run-name: Model Retraining
 #     types: [completed]
 on:
   workflow_dispatch:
-
 jobs:
   train:
     runs-on: ubuntu-latest
