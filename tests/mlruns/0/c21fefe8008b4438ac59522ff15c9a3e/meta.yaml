@@ -1,0 +1,14 @@
+artifact_uri: file:///E:/Northeastern%20Univeristy/MLOPS-PROJECT/goodreads_recommendations/tests/mlruns/0/c21fefe8008b4438ac59522ff15c9a3e/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c21fefe8008b4438ac59522ff15c9a3e
+run_name: masked-mouse-870
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763434501110
+status: 1
+tags: []
+user_id: goyal

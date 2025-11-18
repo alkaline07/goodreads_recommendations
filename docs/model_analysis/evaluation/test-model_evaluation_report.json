@@ -1,6 +1,6 @@
 {
   "model_name": "test-model",
-  "timestamp": "2025-11-17T04:53:32.801335",
+  "timestamp": "2025-11-17T22:21:06.044780",
   "predictions_table": "test-table",
   "performance_metrics": {
     "num_predictions": 1000,
