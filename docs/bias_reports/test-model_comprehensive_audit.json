@@ -1,7 +1,7 @@
 {
   "audit_metadata": {
     "model_name": "test-model",
-    "timestamp": "2025-11-17T22:42:37.027044",
+    "timestamp": "2025-11-18T14:22:10.663792",
     "predictions_table": "test-table",
     "debiased_table": null
   },
