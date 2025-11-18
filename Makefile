@@ -1,8 +1,7 @@
 .PHONY: help build up down clean logs shell test pipeline-all
 .DEFAULT_GOAL := help
 
-# IMAGE_NAME := goodreads-model:latest
-IMAGE_NAME := ghcr.io/purva-agarwal/goodreads-model:b61b8bda6d088c99da580089dda0811204bbd4ef
+IMAGE_NAME := goodreads-model:latest
 COMPOSE_FILE := docker-compose.model.yaml
 
 
