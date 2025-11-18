@@ -29,24 +29,9 @@ class ModelSensitivityAnalyzer:
 
     def __init__(self, project_id: Optional[str] = None):
         """Initialize the analyzer."""
-        airflow_home = os.environ.get("AIRFLOW_HOME", "")
-        possible_paths = [
-            os.path.join(airflow_home, "gcp_credentials.json") if airflow_home else None,
-            "config/gcp_credentials.json",
-            "gcp_credentials.json",
-            "../config/gcp_credentials.json",
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), "config",
-                         "gcp_credentials.json")
-        ]
-
-        credentials_path = None
-        for path in possible_paths:
-            if path and os.path.exists(path):
-                credentials_path = os.path.abspath(path)
-                break
-
-        if credentials_path:
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
+        airflow_home = os.environ.get("AIRFLOW_HOME")
+        if airflow_home:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = airflow_home + "/gcp_credentials.json"        
 
         self.client = bigquery.Client(project=project_id)
         self.project_id = self.client.project

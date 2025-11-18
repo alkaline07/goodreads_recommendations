@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/923083200099565462/a8eb475c3cf24a57a7449d3b9461e23b/artifacts
+end_time: 1763500886602
+entry_point_name: ''
+experiment_id: '923083200099565462'
+lifecycle_stage: active
+run_id: a8eb475c3cf24a57a7449d3b9461e23b
+run_name: rollback_goodreads_boosted_tree_regressor_20251118_162123
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763500883841
+status: 3
+tags: []
+user_id: arpitawagulde

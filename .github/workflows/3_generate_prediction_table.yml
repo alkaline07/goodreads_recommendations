@@ -1,0 +1,75 @@
+name: 3. Generate Predictions
+run-name: Generate Prediction Tables
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["2. Model Training"]
+    types: [completed]
+
+jobs:
+  generate-predictions:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Install required Python dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Run Prediction Generator
+      run: |
+        echo "Running bias prediction table generator."
+        python -m src.generate_prediction_tables
+
+    - name: Generate Branch Name
+      run: echo "BRANCH_NAME=artifacts_bot_$(date +%s)" >> $GITHUB_ENV
+    
+    - name: Commit and push new files
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |   
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+          
+        # Switch to the new branch
+        git checkout -b $BRANCH_NAME
+          
+        git add -A
+        # Commit the changes
+        git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
+          
+        # Push the new branch, not master
+        git push -u origin $BRANCH_NAME
+    
+    - name: Notify on success
+      if: success()
+      run: echo "Prediction tables generated successfully!"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Prediction generation failed!"
+  notify:
+    needs: generate-predictions
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.generate-predictions.result }}
+      workflow_name: ${{ github.workflow }}
+    secrets: inherit

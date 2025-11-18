@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/72b30ea849a642408ee08e6712086c14/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 72b30ea849a642408ee08e6712086c14
+run_name: gregarious-grub-91
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763435733594
+status: 1
+tags: []
+user_id: goyal

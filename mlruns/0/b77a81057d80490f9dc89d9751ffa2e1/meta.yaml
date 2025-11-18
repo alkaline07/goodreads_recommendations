@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/b77a81057d80490f9dc89d9751ffa2e1/artifacts
+end_time: 1763437113772
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: b77a81057d80490f9dc89d9751ffa2e1
+run_name: angry-kit-339
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763437112744
+status: 3
+tags: []
+user_id: goyal

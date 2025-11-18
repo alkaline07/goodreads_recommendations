@@ -50,3 +50,4 @@ jobs:
     with:
       status: ${{ needs.build.result }}
       workflow_name: ${{ github.workflow }}
+    secrets: inherit

@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/923083200099565462
+creation_time: 1763172494830
+experiment_id: '923083200099565462'
+last_update_time: 1763172494830
+lifecycle_stage: active
+name: bigquery_ml_training

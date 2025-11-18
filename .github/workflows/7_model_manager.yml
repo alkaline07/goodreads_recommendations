@@ -1,0 +1,89 @@
+name: 7. Model Manager
+run-name: Manage model versioning
+
+on:
+  workflow_call:
+    secrets:
+      GCP_CREDENTIALS:
+        required: true
+      CALLER_GITHUB_TOKEN:
+        required: true
+
+jobs:
+  model-manager:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.CALLER_GITHUB_TOKEN }}
+    
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Install dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Manage the default model version
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+      run: |
+        echo "Starting MLflow UI in the background..."
+        mlflow ui > mlflow.log 2>&1 &
+        MLFLOW_PID=$!
+        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
+        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
+        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
+
+        echo "Running model manager."
+        python -m src.model_manager
+        echo "Model manager completed"
+
+    - name: Generate Branch Name
+      run: echo "BRANCH_NAME=artifacts_bot_$(date +%s)" >> $GITHUB_ENV
+    
+    - name: Commit and push new files
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |               
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+          
+        # Switch to the new branch
+        git checkout -b $BRANCH_NAME
+          
+        git add -A
+        # Commit the changes
+        git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
+          
+        # Push the new branch, not master
+        git push -u origin $BRANCH_NAME
+
+    - name: Notify manager success
+      if: success()
+      run: echo "Model management passed. Model approved!"
+
+    - name: Notify manager failure
+      if: failure()
+      run: echo "Model management failed — stopping pipeline."
+
+  notify:
+    needs: model-manager
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.model-manager.result }}
+      workflow_name: ${{ github.workflow }}  
+    secrets: inherit

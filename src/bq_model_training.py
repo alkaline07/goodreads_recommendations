@@ -46,8 +46,8 @@ class BigQueryMLModelTraining:
         self.test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
 
         # Model naming
-        self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
-        self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
+        self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model"
         self.popularity_model = f"{self.project_id}.{self.dataset_id}.popularity_baseline"
 
@@ -185,6 +185,7 @@ class BigQueryMLModelTraining:
             OPTIONS(
                 model_type='MATRIX_FACTORIZATION',
                 model_registry='VERTEX_AI',
+                vertex_ai_model_id='goodreads_matrix_factorization',
                 user_col='user_id_clean',
                 item_col='book_id',
                 rating_col='rating',
@@ -262,6 +263,7 @@ class BigQueryMLModelTraining:
                 model_type='BOOSTED_TREE_REGRESSOR',
                 input_label_cols=['rating'],
                 model_registry='VERTEX_AI',
+                vertex_ai_model_id='goodreads_boosted_tree_regressor',
                 num_parallel_tree=10,
                 max_tree_depth=6,
                 subsample=0.8,
