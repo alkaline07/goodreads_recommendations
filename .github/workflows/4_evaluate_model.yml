@@ -1,42 +1,55 @@
-name: 4. Generate Predictions
-run-name: Generate Prediction Tables
+name: 4. Evaluate Model
+run-name: Run Model Evaluation Pipeline
 
 on:
-  workflow_dispatch:
   workflow_run:
-    workflows: ["3. Register Model"]
+    workflows: ["3. Generate Predictions"]
     types: [completed]
 
 jobs:
-  generate-predictions:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  evaluate-model:
     runs-on: ubuntu-latest
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     permissions:
       contents: write
       actions: read
 
     steps:
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: "3.11"
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-    - name: Install required Python dependencies
+    - name: Install dependencies
       run: pip install -r model_requirements.txt
 
-    - name: Run Prediction Generator
+    - name: Run Model Evaluation
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
       run: |
-        echo "Running bias prediction table generator."
-        python -m src.generate_prediction_tables
+        echo "Starting MLflow UI in the background..."
+        mlflow ui > mlflow.log 2>&1 &
+        MLFLOW_PID=$!
+        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
+        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
+        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
+        
+        echo "MLflow is ready. Running Model Evaluation Pipeline"
+
+        python -m src.model_evaluation_pipeline
+
+        echo "Evaluation script finished."
 
     - name: Commit and push new files
       env:
@@ -59,16 +72,17 @@ jobs:
 
     - name: Notify on success
       if: success()
-      run: echo "Prediction tables generated successfully!"
+      run: echo "Model Evaluation executed successfully!"
 
     - name: Notify on failure
       if: failure()
-      run: echo "Prediction generation failed!"
+      run: echo "Model Evaluation failed!"
+
   notify:
-    needs: generate-predictions
+    needs: evaluate-model
     if: always()
     uses: ./.github/workflows/send_email.yml
     with:
-      status: ${{ needs.generate-predictions.result }}
+      status: ${{ needs.evaluate-model.result }}
       workflow_name: ${{ github.workflow }}
     secrets: inherit

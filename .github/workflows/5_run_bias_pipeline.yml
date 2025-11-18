@@ -1,15 +1,15 @@
-name: 7. Model Validation
-run-name: Validate Trained Model
+name: 5. Bias Detection & Mitigation Pipeline
+run-name: Run Bias Audit Pipeline
 
 on:
   workflow_run:
-    workflows: ["6. Bias Detection & Mitigation Pipeline"]
+    workflows: ["4. Evaluate Model"]
     types: [completed]
 
 jobs:
-  validate:
+  bias-pipeline:
     runs-on: ubuntu-latest
-    
+
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     permissions:
@@ -17,6 +17,7 @@ jobs:
       actions: read
 
     steps:
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -29,24 +30,14 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-    
+
     - name: Install dependencies
       run: pip install -r model_requirements.txt
 
-    - name: Validate model
-      env:
-        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+    - name: Run Bias Detection & Mitigation Pipeline
       run: |
-        echo "Starting MLflow UI in the background..."
-        mlflow ui > mlflow.log 2>&1 &
-        MLFLOW_PID=$!
-        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
-        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
-        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
-
-        echo "Running validation."
-        python -m src.model_validation
-        echo "Validation complete"
+        echo "Starting Bias Audit Pipeline"
+        python -m src.bias_pipeline
 
     - name: Commit and push new files
       env:
@@ -67,19 +58,19 @@ jobs:
         # Push the new branch, not master
         git push -u origin $BRANCH_NAME
 
-    - name: Notify validation success
+    - name: Notify on success
       if: success()
-      run: echo "Model validation passed. Model approved!"
+      run: echo "Bias Pipeline executed successfully!"
 
-    - name: Notify validation failure
+    - name: Notify on failure
       if: failure()
-      run: echo "Model validation failed — stopping pipeline."
-  
+      run: echo "Bias Pipeline failed!"
+
   notify:
-    needs: validate
+    needs: bias-pipeline
     if: always()
     uses: ./.github/workflows/send_email.yml
     with:
-      status: ${{ needs.validate.result }}
-      workflow_name: ${{ github.workflow }}  
+      status: ${{ needs.bias-pipeline.result }}
+      workflow_name: ${{ github.workflow }}
     secrets: inherit

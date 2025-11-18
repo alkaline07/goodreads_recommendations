@@ -181,6 +181,7 @@ class BigQueryMLModelTraining:
             OPTIONS(
                 model_type='MATRIX_FACTORIZATION',
                 model_registry='VERTEX_AI',
+                vertex_ai_model_id='goodreads_matrix_factorization',
                 user_col='user_id_clean',
                 item_col='book_id',
                 rating_col='rating',
@@ -258,6 +259,7 @@ class BigQueryMLModelTraining:
                 model_type='BOOSTED_TREE_REGRESSOR',
                 input_label_cols=['rating'],
                 model_registry='VERTEX_AI',
+                vertex_ai_model_id='goodreads_boosted_tree_regressor',
                 num_parallel_tree=10,
                 max_tree_depth=6,
                 subsample=0.8,
