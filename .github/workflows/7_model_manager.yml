@@ -2,16 +2,17 @@ name: 7. Model Manager
 run-name: Manage model versioning
 
 on:
-  workflow_run:
-    workflows: ["6. Model Validation"]
-    types: [completed]
+  workflow_call:
+    secrets:
+      GCP_CREDENTIALS:
+        required: true
+      GITHUB_TOKEN:
+        required: true
 
 jobs:
   model-manager:
     runs-on: ubuntu-latest
     
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
     permissions:
       contents: write
       actions: read
