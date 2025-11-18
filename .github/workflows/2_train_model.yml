@@ -2,6 +2,7 @@ name: 2. Model Training
 run-name: Model Retraining
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["1. Load Data"]
     types: [completed]
