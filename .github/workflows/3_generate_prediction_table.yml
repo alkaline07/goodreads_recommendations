@@ -1,40 +1,42 @@
-name: 3. Register Model
-run-name: Register Latest BQML Model in Vertex AI
+name: 3. Generate Predictions
+run-name: Generate Prediction Tables
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["2. Model Training"]
     types: [completed]
 
 jobs:
-  register:
+  generate-predictions:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
       actions: read
-    
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: 3.11
-
-    - name: Install dependencies
-      run: pip install -r model_requirements.txt
+        python-version: '3.11'
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-    - name: Run Model Registration Script
-      run: python -m src.register_bqml_models
+    - name: Install required Python dependencies
+      run: pip install -r model_requirements.txt
+
+    - name: Run Prediction Generator
+      run: |
+        echo "Running bias prediction table generator."
+        python -m src.generate_prediction_tables
 
     - name: Commit and push new files
       env:
@@ -55,19 +57,18 @@ jobs:
         # Push the new branch, not master
         git push -u origin $BRANCH_NAME
 
-    - name: Notify Success
+    - name: Notify on success
       if: success()
-      run: echo "Model successfully registered in Vertex AI."
+      run: echo "Prediction tables generated successfully!"
 
-    - name: Notify Failure
+    - name: Notify on failure
       if: failure()
-      run: echo "Model registration failed."
-
+      run: echo "Prediction generation failed!"
   notify:
-    needs: register
+    needs: generate-predictions
     if: always()
     uses: ./.github/workflows/send_email.yml
     with:
-      status: ${{ needs.register.result }}
+      status: ${{ needs.generate-predictions.result }}
       workflow_name: ${{ github.workflow }}
     secrets: inherit

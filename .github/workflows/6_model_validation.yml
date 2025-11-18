@@ -1,15 +1,15 @@
-name: 5. Evaluate Model
-run-name: Run Model Evaluation Pipeline
+name: 6. Model Validation
+run-name: Validate Trained Model
 
 on:
   workflow_run:
-    workflows: ["4. Generate Predictions"]
+    workflows: ["5. Bias Detection & Mitigation Pipeline"]
     types: [completed]
 
 jobs:
-  evaluate-model:
+  validate:
     runs-on: ubuntu-latest
-
+    
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     permissions:
@@ -17,7 +17,6 @@ jobs:
       actions: read
 
     steps:
-
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -30,11 +29,11 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-
+    
     - name: Install dependencies
       run: pip install -r model_requirements.txt
 
-    - name: Run Model Evaluation
+    - name: Validate model
       env:
         MLFLOW_TRACKING_URI: http://127.0.0.1:5000
       run: |
@@ -44,12 +43,10 @@ jobs:
         trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
         echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
         timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
-        
-        echo "MLflow is ready. Running Model Evaluation Pipeline"
 
-        python -m src.model_evaluation_pipeline
-
-        echo "Evaluation script finished."
+        echo "Running validation."
+        python -m src.model_validation
+        echo "Validation complete"
 
     - name: Commit and push new files
       env:
@@ -70,19 +67,19 @@ jobs:
         # Push the new branch, not master
         git push -u origin $BRANCH_NAME
 
-    - name: Notify on success
+    - name: Notify validation success
       if: success()
-      run: echo "Model Evaluation executed successfully!"
+      run: echo "Model validation passed. Model approved!"
 
-    - name: Notify on failure
+    - name: Notify validation failure
       if: failure()
-      run: echo "Model Evaluation failed!"
-
+      run: echo "Model validation failed — stopping pipeline."
+  
   notify:
-    needs: evaluate-model
+    needs: validate
     if: always()
     uses: ./.github/workflows/send_email.yml
     with:
-      status: ${{ needs.evaluate-model.result }}
-      workflow_name: ${{ github.workflow }}
+      status: ${{ needs.validate.result }}
+      workflow_name: ${{ github.workflow }}  
     secrets: inherit
