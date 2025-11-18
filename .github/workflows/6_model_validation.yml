@@ -83,6 +83,8 @@ jobs:
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       CALLER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
 
   notify:
     needs: validate

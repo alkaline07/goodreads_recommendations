@@ -8,6 +8,10 @@ on:
         required: true
       CALLER_GITHUB_TOKEN:
         required: true
+      SMTP_EMAIL:
+        required: true
+      SMTP_PASSWORD:
+        required: true
 
 jobs:
   model-manager:
