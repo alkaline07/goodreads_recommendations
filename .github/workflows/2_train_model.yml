@@ -15,7 +15,7 @@ jobs:
       contents: write
       actions: read
     
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout code
@@ -38,9 +38,9 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
         REPO: ${{ github.repository }}
-        RUN_ID: ${{ github.event.workflow_run.id }}
+        # RUN_ID: ${{ github.event.workflow_run.id }}
       run: |
-        gh run download $RUN_ID -R $REPO -n goodreads-train-data
+        # gh run download $RUN_ID -R $REPO -n goodreads-train-data
 
     # - name: Move data to correct location
     #   run: |
