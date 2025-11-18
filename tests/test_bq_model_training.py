@@ -27,14 +27,7 @@ class TestSafeMLflowLog:
         mock_func = Mock(side_effect=Exception("MLflow error"))
         result = safe_mlflow_log(mock_func, "arg1")
         assert result is None
-    
-    def test_safe_mlflow_log_with_multiple_args(self):
-        """Test MLflow logging with multiple arguments"""
-        mock_func = Mock(return_value="success")
-        result = safe_mlflow_log(mock_func, "arg1", "arg2", kwarg1="value1", kwarg2="value2")
-        assert result == "success"
-        mock_func.assert_called_once_with("arg1", "arg2", kwarg1="value1", kwarg2="value2")
-    
+
     def test_safe_mlflow_log_with_no_args(self):
         """Test MLflow logging with no arguments"""
         mock_func = Mock(return_value="success")

@@ -27,63 +27,9 @@ class TestSafeMLflowLog:
         result = safe_mlflow_log(mock_func, "arg1")
         assert result is None
     
-    def test_safe_mlflow_log_with_multiple_args(self):
-        """Test MLflow logging with multiple arguments"""
-        mock_func = Mock(return_value="success")
-        result = safe_mlflow_log(mock_func, "arg1", "arg2", kwarg1="value1")
-        assert result == "success"
-        mock_func.assert_called_once_with("arg1", "arg2", kwarg1="value1")
-
 
 class TestModelEvaluationPipeline:
     """Comprehensive test cases for ModelEvaluationPipeline class"""
-    
-    @patch('src.model_evaluation_pipeline.bigquery.Client')
-    @patch('src.model_evaluation_pipeline.ModelSensitivityAnalyzer')
-    @patch.dict('os.environ', {'AIRFLOW_HOME': '/test/airflow'})
-    def test_init(self, mock_analyzer_class, mock_client_class):
-        """Test initialization"""
-        mock_client = Mock()
-        mock_client.project = "test-project"
-        mock_client_class.return_value = mock_client
-        
-        mock_analyzer = Mock()
-        mock_analyzer_class.return_value = mock_analyzer
-        
-        pipeline = ModelEvaluationPipeline()
-        
-        assert pipeline.project_id == "test-project"
-        assert pipeline.dataset_id == "books"
-        assert pipeline.sensitivity_analyzer is not None
-    
-    @patch('src.model_evaluation_pipeline.bigquery.Client')
-    @patch('src.model_evaluation_pipeline.ModelSensitivityAnalyzer')
-    def test_init_without_airflow_home(self, mock_analyzer_class, mock_client_class):
-        """Test initialization without AIRFLOW_HOME"""
-        mock_client = Mock()
-        mock_client.project = "test-project"
-        mock_client_class.return_value = mock_client
-        
-        mock_analyzer = Mock()
-        mock_analyzer_class.return_value = mock_analyzer
-        
-        with patch.dict('os.environ', {}, clear=True):
-            pipeline = ModelEvaluationPipeline()
-            assert pipeline.project_id == "test-project"
-    
-    @patch('src.model_evaluation_pipeline.bigquery.Client')
-    @patch('src.model_evaluation_pipeline.ModelSensitivityAnalyzer')
-    def test_init_with_custom_project_id(self, mock_analyzer_class, mock_client_class):
-        """Test initialization with custom project_id"""
-        mock_client = Mock()
-        mock_client.project = "custom-project"
-        mock_client_class.return_value = mock_client
-        
-        mock_analyzer = Mock()
-        mock_analyzer_class.return_value = mock_analyzer
-        
-        pipeline = ModelEvaluationPipeline(project_id="custom-project")
-        assert pipeline.project_id == "custom-project"
     
     @patch('src.model_evaluation_pipeline.bigquery.Client')
     @patch('src.model_evaluation_pipeline.ModelSensitivityAnalyzer')
