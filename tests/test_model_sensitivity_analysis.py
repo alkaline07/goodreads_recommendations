@@ -7,6 +7,7 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 import pandas as pd
 import numpy as np
+import os
 from src.model_sensitivity_analysis import ModelSensitivityAnalyzer
 
 
@@ -26,7 +27,11 @@ class TestModelSensitivityAnalyzer:
         
         assert analyzer.project_id == "test-project"
         assert analyzer.dataset_id == "books"
-        assert analyzer.output_dir == "../docs/model_analysis/sensitivity"
+        from src.model_sensitivity_analysis import PROJECT_ROOT
+        expected = os.path.join(PROJECT_ROOT, "docs", "model_analysis", "sensitivity")
+
+        assert analyzer.output_dir == expected
+
         mock_makedirs.assert_called()
     
     @patch('src.model_sensitivity_analysis.bigquery.Client')
