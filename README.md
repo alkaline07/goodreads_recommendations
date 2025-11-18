@@ -454,6 +454,90 @@ Initially, the data was fetched as JSON files and processed locally. However, as
 | `setup.py`                    | Python package configuration for installation and distribution management |
 | `README.md`                   | Project documentation with setup instructions, architecture overview, and usage guidelines |
 
+### Core ML Pipeline Modules (`src/`)
+
+The `src/` directory groups together the reusable services that orchestrate model training, fairness analysis, and deployment. Each module is designed to be imported by Airflow DAGs, CLI utilities, or notebooks:
+
+| Module | Purpose |
+|--------|---------|
+| `src/__init__.py` | Exposes the public package surface so DAGs/notebooks can import shared helpers without deep relative paths. |
+| `src/load_data.py` | Bootstraps BigQuery credentials and returns the curated train split as either BigFrames or pandas DataFrames. |
+| `src/df_model_training.py` | Lightweight, in-memory training stub for experimentation and CI smoke tests using pandas data. |
+| `src/bq_model_training.py` | Production BigQuery ML training workflow with concurrency handling, MLflow logging, and evaluation hooks. |
+| `src/generate_prediction_tables.py` | Builds bias-ready prediction tables (features + inferred slices) for every trained model. |
+| `src/bias_detection.py` | Computes slice-aware performance metrics, disparity summaries, and mitigation recommendations. |
+| `src/bias_mitigation.py` | Implements shrinkage, threshold adjustment, and re-weighting strategies to reduce detected bias. |
+| `src/bias_pipeline.py` | End-to-end orchestrator that stitches detection, mitigation, visualization, and reporting steps. |
+| `src/bias_visualization.py` | Generates fairness scorecards, disparity heatmaps, and slice comparison plots for reports. |
+| `src/model_selector.py` | Balances validation accuracy with fairness scores to pick the best candidate model. |
+| `src/model_manager.py` | Compares new Vertex AI versions to the current default and promotes/rolls back based on RMSE deltas. |
+| `src/model_evaluation_pipeline.py` | Logs MAE/RMSE, computes SHAP-based feature importance, and exports evaluation artifacts. |
+| `src/model_sensitivity_analysis.py` | Provides SHAP helpers and visualizations to explain feature impact across models. |
+| `src/model_validation.py` | Runs ML.EVALUATE on train/val/test splits, enforces RMSE thresholds, and persists JSON reports. |
+| `src/register_bqml_models.py` | Uploads the latest BQML artifacts into the Vertex AI Model Registry with version control. |
+
+### Bias Reporting Artifacts (`docs/bias_reports/`)
+
+Bias analysis is treated as a first-class deliverable. Everything the bias pipeline emits is organized under `docs/bias_reports/`, making it easy for reviewers to trace fairness conclusions without re-running notebooks:
+
+| Artifact | Produced By | Detailed Contents & Intended Use |
+|----------|-------------|----------------------------------|
+| `*_detection_report.json` | `bias_detection.py` | For each model/dataset pair we persist the exact slice metrics (MAE, RMSE, counts, mean error), the disparity summary per dimension, the list of high-risk slices, and the auto-generated recommendations. These JSONs are ingested by dashboards and also used later when comparing mitigation effectiveness. |
+| `*_mitigation_report.json` | `bias_mitigation.py` | Captures before/after metrics for the specific technique that ran (shrinkage, threshold adjustment, re-weighting). Includes parameter choices (e.g., lambda, threshold deltas), improvement percentages, and the BigQuery table where debiased predictions were written, so QA can reproduce results. |
+| `*_comprehensive_audit.json` | `bias_pipeline.py` | Serves as the executive summary for a full run: metadata about the audit, detection highlights, which mitigation steps executed, validation re-checks, and an executive summary block with pass/mitigated/needs-attention status. This is what we attach to compliance reviews. |
+| `bias_pipeline_logs/` | `bias_pipeline.py` CLI / Airflow task | Raw stdout/stdio logs captured with timestamps, showing every step, warning, and recommendation printed during the run. These logs are critical when investigating why a mitigation was skipped or why BigQuery jobs failed. |
+| `visualizations/` | `bias_visualization.py` | Collection of PNGs referenced in reports: fairness scorecard gauges, disparity heatmaps, per-dimension bar charts, before/after comparisons, etc. Each filename embeds the model name and slice to simplify embedding in slide decks. |
+| `model_selection/` | `model_selector.py` | Stores `model_selection_report.json` (combined performance + fairness scoring), along with charts such as `model_comparison.png` so stakeholders can visually inspect the trade-offs the selector considered. |
+| `model_selection_report.json` (root copy) | `model_selector.py` | Latest snapshot of the selection decision for downstream automation (e.g., `model_manager.py` and `model_validation.py` read this file to know which table to promote or validate). |
+
+Together, these artifacts create an auditable trail from raw metrics → mitigation decisions → final deployment approvals. Whenever a regression is suspected we can diff the JSON reports, compare visualization sets, and replay the exact mitigation query using the table paths stored in the reports.
+
+### Model Analysis Artifacts (`docs/model_analysis/`)
+
+Complementing the bias reports, `docs/model_analysis/` captures performance-centric evaluations so data scientists can answer “how accurate?” and “why?” in one place:
+
+| Subfolder / File | Produced By | What It Contains & Why It Matters |
+|------------------|-------------|-----------------------------------|
+| `evaluation/` | `model_evaluation_pipeline.py` | JSON reports such as `boosted_tree_regressor_evaluation_report.json` that store run metadata, MAE/RMSE/correlation statistics, accuracy-within-Δ buckets, and pointers to any sensitivity analysis outputs. These files give product owners a single source of truth for offline performance. |
+| `sensitivity/` | `model_sensitivity_analysis.py` | SHAP analysis artifacts (JSON summaries plus PNG charts referenced in docs). Each JSON lists feature importance scores, categorical encodings, sample sizes, and file paths for the generated plots, enabling explainability reviews without rerunning SHAP. |
+
+By pairing `docs/bias_reports/` with `docs/model_analysis/`, we maintain a clear separation: bias artifacts answer “is it fair?”, while model analysis artifacts answer “is it accurate and interpretable?”. Both folders are versioned so we can compare historical runs.
+
+#### What do the evaluation JSON files look like?
+
+Every JSON inside `docs/model_analysis/evaluation/` follows a consistent schema:
+
+```json
+{
+  "model_name": "boosted_tree_regressor",
+  "timestamp": "2025-01-15T04:27:13.829410",
+  "predictions_table": "project.books.boosted_tree_rating_predictions",
+  "performance_metrics": {
+    "num_predictions": 12456,
+    "mae": 0.6123,
+    "rmse": 0.8124,
+    "r_squared": 0.54,
+    "accuracy_within_0_5_pct": 62.1,
+    "accuracy_within_1_0_pct": 88.8,
+    "accuracy_within_1_5_pct": 97.4,
+    "mean_predicted": 3.84,
+    "mean_actual": 3.79,
+    "std_error": 0.41
+  },
+  "sensitivity_analysis": {
+    "artifact_path": "../docs/model_analysis/sensitivity/boosted_tree_regressor_feature_importance.json",
+    "top_features": [
+      {"feature": "book_popularity_normalized", "importance": 0.142},
+      {"feature": "user_activity_count", "importance": 0.117}
+    ]
+  }
+}
+```
+
+- `performance_metrics` is exactly what gets logged to MLflow; keeping it in JSON allows dashboards or audits to ingest it directly.
+- `sensitivity_analysis` is optional, but when present it points to the SHAP JSON so reviewers can jump straight from accuracy numbers to feature explanations.
+- The `predictions_table` reference lets anyone regenerate metrics or spot-check rows in BigQuery.
+
 ## Data Analysis & Insights
 
 This section highlights key findings from our exploratory data analysis and bias detection notebooks that inform our recommendation system design.

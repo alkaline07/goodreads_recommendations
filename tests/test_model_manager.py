@@ -126,13 +126,22 @@ class TestModelManager:
         mock_client.project = "test-project"
         mock_client_class.return_value = mock_client
         
-        mock_model1 = Mock()
-        mock_model1.version_id = "2"
-        mock_model1.version_aliases = ["default"]
-        mock_model2 = Mock()
-        mock_model2.version_id = "1"
-        mock_model2.version_aliases = []
-        mock_model_list.return_value = [mock_model1, mock_model2]
+        # Create mock version objects
+        mock_version1 = Mock()
+        mock_version1.version_id = "2"
+        mock_version1.version_aliases = ["default"]
+        mock_version2 = Mock()
+        mock_version2.version_id = "1"
+        mock_version2.version_aliases = []
+        
+        # Create mock parent model with versioning_registry
+        mock_parent_model = Mock()
+        mock_versioning_registry = Mock()
+        mock_versioning_registry.list_versions.return_value = [mock_version1, mock_version2]
+        mock_parent_model.versioning_registry = mock_versioning_registry
+        
+        # Model.list() returns list of parent models
+        mock_model_list.return_value = [mock_parent_model]
         
         manager = ModelManager()
         versions = manager.get_model_versions("test-model")
@@ -500,7 +509,14 @@ class TestModelManager:
         mock_new_version.version_aliases = []  # Empty list, not a Mock
         mock_new_version.add_version_aliases = Mock()
         
-        mock_model_list.return_value = [mock_new_version, mock_old_version]
+        # Create mock parent model with versioning_registry
+        mock_parent_model = Mock()
+        mock_versioning_registry = Mock()
+        mock_versioning_registry.list_versions.return_value = [mock_new_version, mock_old_version]
+        mock_parent_model.versioning_registry = mock_versioning_registry
+        
+        # Model.list() returns list of parent models
+        mock_model_list.return_value = [mock_parent_model]
         
         manager = ModelManager()
         manager.set_default_version(mock_new_version, "test-model")
@@ -595,7 +611,15 @@ class TestModelManager:
         mock_model.version_id = "1"
         mock_model.version_aliases = []
         mock_model.add_version_aliases = Mock()
-        mock_model_list.return_value = [mock_model]
+        
+        # Create mock parent model with versioning_registry
+        mock_parent_model = Mock()
+        mock_versioning_registry = Mock()
+        mock_versioning_registry.list_versions.return_value = [mock_model]
+        mock_parent_model.versioning_registry = mock_versioning_registry
+        
+        # Model.list() returns list of parent models
+        mock_model_list.return_value = [mock_parent_model]
         mock_mlflow_run.return_value.__enter__.return_value = None
         
         manager = ModelManager()
@@ -655,7 +679,14 @@ class TestModelManager:
         mock_current_model.version_id = "1"
         mock_current_model.version_aliases = ["default"]
         
-        mock_model_list.return_value = [mock_new_model, mock_current_model]
+        # Create mock parent model with versioning_registry
+        mock_parent_model = Mock()
+        mock_versioning_registry = Mock()
+        mock_versioning_registry.list_versions.return_value = [mock_new_model, mock_current_model]
+        mock_parent_model.versioning_registry = mock_versioning_registry
+        
+        # Model.list() returns list of parent models
+        mock_model_list.return_value = [mock_parent_model]
         mock_mlflow_run.return_value.__enter__.return_value = None
         
         manager = ModelManager()
@@ -716,7 +747,14 @@ class TestModelManager:
         mock_current_model.version_id = "1"
         mock_current_model.version_aliases = ["default"]
         
-        mock_model_list.return_value = [mock_new_model, mock_current_model]
+        # Create mock parent model with versioning_registry
+        mock_parent_model = Mock()
+        mock_versioning_registry = Mock()
+        mock_versioning_registry.list_versions.return_value = [mock_new_model, mock_current_model]
+        mock_parent_model.versioning_registry = mock_versioning_registry
+        
+        # Model.list() returns list of parent models
+        mock_model_list.return_value = [mock_parent_model]
         mock_mlflow_run.return_value.__enter__.return_value = None
         
         manager = ModelManager()
@@ -762,7 +800,14 @@ class TestModelManager:
         mock_current_model.version_id = "1"
         mock_current_model.version_aliases = ["default"]
         
-        mock_model_list.return_value = [mock_new_model, mock_current_model]
+        # Create mock parent model with versioning_registry
+        mock_parent_model = Mock()
+        mock_versioning_registry = Mock()
+        mock_versioning_registry.list_versions.return_value = [mock_new_model, mock_current_model]
+        mock_parent_model.versioning_registry = mock_versioning_registry
+        
+        # Model.list() returns list of parent models
+        mock_model_list.return_value = [mock_parent_model]
         mock_mlflow_run.return_value.__enter__.return_value = None
         
         manager = ModelManager()
