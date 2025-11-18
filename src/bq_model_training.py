@@ -42,8 +42,8 @@ class BigQueryMLModelTraining:
         self.test_table = f"{self.project_id}.{self.dataset_id}.goodreads_test_set"
 
         # Model naming
-        self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
-        self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
+        self.matrix_factorization_model = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.boosted_tree_model = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.automl_regressor_model = f"{self.project_id}.{self.dataset_id}.automl_regressor_model"
         self.popularity_model = f"{self.project_id}.{self.dataset_id}.popularity_baseline"
 
