@@ -423,9 +423,10 @@ class BigQueryMLModelTraining:
 
         # Start MLflow run
         experiment_name = "bigquery_ml_training"
+        mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI", "file:///app/mlruns")
         try:
             # Set MLflow tracking URI
-            mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+            mlflow.set_tracking_uri(mlflow_uri)
             mlflow.set_experiment(experiment_name)
         except Exception as e:
             print(f"MLflow initialization warning: {e}. Continuing with MLflow tracking (errors will be handled gracefully).")
