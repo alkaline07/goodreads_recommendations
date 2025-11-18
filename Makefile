@@ -4,7 +4,7 @@
 IMAGE_NAME := goodreads-model:latest
 COMPOSE_FILE := docker-compose.model.yaml
 
-# Auto-detect Docker Compose command (v1 vs v2)
+
 DOCKER_COMPOSE := $(shell if command -v docker-compose > /dev/null 2>&1; then echo "docker-compose"; elif docker compose version > /dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi)
 
 help:
@@ -46,90 +46,90 @@ help:
 	@echo "════════════════════════════════════════════════════════════════"
 
 build:
-	@echo "🔨 Building Docker image..."
+	@echo "Building Docker image"
 	docker build -f Dockerfile.model -t $(IMAGE_NAME) .
 	@echo "Build complete!"
 
 rebuild:
-	@echo "🔨 Rebuilding Docker image (no cache)..."
+	@echo "Rebuilding Docker image (no cache)"
 	docker build --no-cache -f Dockerfile.model -t $(IMAGE_NAME) .
 	@echo "Rebuild complete!"
 
 load-data:
-	@echo "📥 Loading data from BigQuery..."
+	@echo "Loading data from BigQuery"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up data-loader
 	@echo "Data loading complete!"
 
 train:
-	@echo "🎓 Training models..."
+	@echo "Training models"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-training
 	@echo "Model training complete!"
 
 register:
-	@echo "Registering models to Vertex AI..."
+	@echo "Registering models to Vertex AI"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-registration
 	@echo "Model registration complete!"
 
 predict:
-	@echo "🔮 Generating prediction tables..."
+	@echo "Generating prediction tables"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) run --rm \
 		-e GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json \
 		model-training python -m src.generate_prediction_tables
 	@echo "Prediction generation complete!"
 
 bias:
-	@echo "Running bias detection & mitigation..."
+	@echo "Running bias detection & mitigation"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up bias-pipeline
 	@echo "Bias pipeline complete!"
 
 validate:
-	@echo "Validating models..."
+	@echo "Validating models"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-validation
 	@echo "Model validation complete!"
 
 pipeline-all:
-	@echo "Running complete pipeline..."
+	@echo "Running complete pipeline"
 	@echo ""
-	@echo "Step 1/6: Loading data..."
+	@echo "Step 1/6: Loading data"
 	@make load-data
 	@echo ""
-	@echo "Step 2/6: Training models..."
+	@echo "Step 2/6: Training models"
 	@make train
 	@echo ""
-	@echo "Step 3/6: Registering models..."
+	@echo "Step 3/6: Registering models"
 	@make register
 	@echo ""
-	@echo "Step 4/6: Generating predictions..."
+	@echo "Step 4/6: Generating predictions"
 	@make predict
 	@echo ""
-	@echo "Step 5/6: Running bias analysis..."
+	@echo "Step 5/6: Running bias analysis"
 	@make bias
 	@echo ""
-	@echo "Step 6/6: Validating models..."
+	@echo "Step 6/6: Validating models"
 	@make validate
 	@echo ""
 	@echo "Complete pipeline finished!"
 
 pipeline-train:
-	@echo "Running training pipeline..."
+	@echo "Running training pipeline"
 	@make load-data
 	@make train
 	@make register
 	@echo "Training pipeline finished!"
 
 pipeline-eval:
-	@echo "Running evaluation pipeline..."
+	@echo "Running evaluation pipeline"
 	@make predict
 	@make bias
 	@make validate
 	@echo "Evaluation pipeline finished!"
 
 shell:
-	@echo "Opening interactive shell..."
+	@echo "Opening interactive shell"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) run --rm model-dev
 
 logs:
-	@echo "Showing logs..."
+	@echo "Showing logs"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs --tail=100
 
 ps:
@@ -137,18 +137,18 @@ ps:
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps
 
 down:
-	@echo "Stopping containers..."
+	@echo "Stopping containers"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down
 	@echo "Containers stopped!"
 
 clean: down
-	@echo "🧹 Cleaning up containers..."
+	@echo "🧹 Cleaning up containers"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down --remove-orphans
 	@echo "Cleanup complete!"
 
 clean-volumes:
 	@echo "WARNING: This will delete all data in volumes!"
-	@echo "   This includes: data/, mlruns/, mlartifacts/, docs/"
+	@echo "This includes: data/, mlruns/, mlartifacts/, docs/"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
@@ -159,14 +159,14 @@ clean-volumes:
 	fi
 
 clean-all: clean
-	@echo "Removing Docker image..."
+	@echo "Removing Docker image"
 	docker rmi $(IMAGE_NAME) 2>/dev/null || true
 	@echo "Complete cleanup done!"
 
 check-setup:
-	@echo "Checking prerequisites..."
+	@echo "Checking prerequisites"
 	@echo ""
-	@command -v docker >/dev/null 2>&1 && echo "✅ Docker installed" || echo "❌ Docker not found"
+	@command -v docker >/dev/null 2>&1 && echo "Docker installed" || echo "Docker not found"
 	@if command -v docker-compose > /dev/null 2>&1; then \
 		echo "Docker Compose V1 installed (docker-compose)"; \
 	elif docker compose version > /dev/null 2>&1; then \
@@ -175,17 +175,17 @@ check-setup:
 		echo "Docker Compose not found"; \
 	fi
 	@echo "   Using: $(DOCKER_COMPOSE)"
-	@test -f config/gcp_credentials.json && echo "✅ GCP credentials found" || echo "❌ GCP credentials missing (config/gcp_credentials.json)"
-	@test -f Dockerfile.model && echo "✅ Dockerfile.model found" || echo "❌ Dockerfile.model missing"
-	@test -f $(COMPOSE_FILE) && echo "✅ docker-compose.model.yaml found" || echo "❌ docker-compose.model.yaml missing"
-	@test -f model_requirements.txt && echo "✅ model_requirements.txt found" || echo "❌ model_requirements.txt missing"
+	@test -f config/gcp_credentials.json && echo "GCP credentials found" || echo "GCP credentials missing (config/gcp_credentials.json)"
+	@test -f Dockerfile.model && echo "Dockerfile.model found" || echo "Dockerfile.model missing"
+	@test -f $(COMPOSE_FILE) && echo "docker-compose.model.yaml found" || echo "docker-compose.model.yaml missing"
+	@test -f model_requirements.txt && echo "model_requirements.txt found" || echo "model_requirements.txt missing"
 	@echo ""
 	@echo "Required directories:"
 	@mkdir -p data mlruns mlartifacts docs config
-	@echo "✅ All directories ready"
+	@echo "All directories ready"
 
 version:
-	@echo "📊 Version Information:"
+	@echo "Version Information:"
 	@echo ""
 	@docker --version
 	@if command -v docker-compose > /dev/null 2>&1; then \
@@ -200,12 +200,12 @@ version:
 	@docker images | grep goodreads-model || echo "Docker image not built yet (run 'make build')"
 
 setup-dirs:
-	@echo "Creating required directories..."
+	@echo "Creating required directories"
 	@mkdir -p data mlruns mlartifacts docs config
 	@echo "Directories created!"
 
 test:
-	@echo "Running tests in container..."
+	@echo "Running tests in container"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) run --rm model-dev pytest datapipeline/tests/ -v
 
 mlflow-ui:
@@ -214,7 +214,7 @@ mlflow-ui:
 	@mlflow ui --backend-store-uri file://$(shell pwd)/mlruns --host 0.0.0.0 --port 5000
 
 run-custom:
-	@echo "Running custom command in container..."
+	@echo "Running custom command in container"
 	@read -p "Enter Python module (e.g., src.bq_model_training): " module; \
 	docker run --rm \
 		-v $(shell pwd)/config:/app/config \

@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/604092204538521134/71a7a52a02a14244b67f481005b20a5f/artifacts
+end_time: 1763335320988
+entry_point_name: ''
+experiment_id: '604092204538521134'
+lifecycle_stage: active
+run_id: 71a7a52a02a14244b67f481005b20a5f
+run_name: fearless-doe-827
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763335320420
+status: 3
+tags: []
+user_id: shikha

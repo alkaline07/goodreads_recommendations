@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/604092204538521134/2a34fe18c0174715af2ce53c27a0263c/artifacts
+end_time: 1763335304211
+entry_point_name: ''
+experiment_id: '604092204538521134'
+lifecycle_stage: active
+run_id: 2a34fe18c0174715af2ce53c27a0263c
+run_name: victorious-stoat-160
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763335303706
+status: 3
+tags: []
+user_id: shikha

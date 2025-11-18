@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/604092204538521134/9df1624491fc43a896f8644698956e21/artifacts
+end_time: 1763450395888
+entry_point_name: ''
+experiment_id: '604092204538521134'
+lifecycle_stage: active
+run_id: 9df1624491fc43a896f8644698956e21
+run_name: validate_matrix_factorization_20251118_124942
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763450382961
+status: 3
+tags: []
+user_id: shikha

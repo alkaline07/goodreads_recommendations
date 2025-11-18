@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/432640096289898878/53985e06eb0d4669854d3736811a2f92/artifacts
+end_time: 1763335412993
+entry_point_name: ''
+experiment_id: '432640096289898878'
+lifecycle_stage: active
+run_id: 53985e06eb0d4669854d3736811a2f92
+run_name: capricious-toad-615
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763335412856
+status: 3
+tags: []
+user_id: shikha

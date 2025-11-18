@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/604092204538521134/54d920f3f294433c803bec4a8726eff9/artifacts
+end_time: 1763335478376
+entry_point_name: ''
+experiment_id: '604092204538521134'
+lifecycle_stage: active
+run_id: 54d920f3f294433c803bec4a8726eff9
+run_name: clumsy-koi-669
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763335477900
+status: 3
+tags: []
+user_id: shikha
