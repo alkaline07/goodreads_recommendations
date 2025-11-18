@@ -2,6 +2,7 @@ name: 6. Bias Detection & Mitigation Pipeline
 run-name: Run Bias Audit Pipeline
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["5. Evaluate Model"]
     types: [completed]
