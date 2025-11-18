@@ -1,12 +1,11 @@
 name: 2. Model Training
 run-name: Model Retraining
 
-# on:
-#   workflow_run:
-#     workflows: ["1. Load Data"]
-#     types: [completed]
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["1. Load Data"]
+    types: [completed]
+
 jobs:
   train:
     runs-on: ubuntu-latest
@@ -15,7 +14,7 @@ jobs:
       contents: write
       actions: read
     
-    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout code
@@ -38,44 +37,42 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
         REPO: ${{ github.repository }}
-        # RUN_ID: ${{ github.event.workflow_run.id }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
       run: |
-        # gh run download $RUN_ID -R $REPO -n goodreads-train-data
+        gh run download $RUN_ID -R $REPO -n goodreads-train-data
 
-    # - name: Move data to correct location
-    #   run: |
-    #     mv train_data.parquet data/.
-
-    # - name: Train the model Bigquery ML (with MLflow)
-    #   env:
-    #     MLFLOW_TRACKING_URI: http://127.0.0.1:5000
-    #   run: |
-    #     echo "Starting MLflow UI in the background..."
-    #     # Start mlflow ui, redirect output to a log file, and run in background (&)
-    #     mlflow ui > mlflow.log 2>&1 &
-        
-    #     # Get the Process ID (PID) of the background process
-    #     MLFLOW_PID=$!
-        
-    #     # Set a 'trap'. This command will run on EXIT, killing the mlflow process
-    #     # This ensures cleanup even if the python script fails
-    #     trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
-
-    #     echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
-        
-    #     # Wait up to 30 seconds for the server to respond at the /health endpoint
-    #     timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
-        
-    #     echo "MLflow is ready. Running model training..."
-        
-    #     # Run your training script
-    #     python -m src.bq_model_training
-        
-    #     echo "Training script finished."
-    #     # The 'trap' will automatically run here to kill the MLflow server
-    - name: Make a dummy file so git has something to commit
+    - name: Move data to correct location
       run: |
-        echo "test $(date)" > test_push_file.txt
+        mv train_data.parquet data/.
+
+    - name: Train the model Bigquery ML (with MLflow)
+      env:
+        MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+      run: |
+        echo "Starting MLflow UI in the background..."
+        # Start mlflow ui, redirect output to a log file, and run in background (&)
+        mlflow ui > mlflow.log 2>&1 &
+        
+        # Get the Process ID (PID) of the background process
+        MLFLOW_PID=$!
+        
+        # Set a 'trap'. This command will run on EXIT, killing the mlflow process
+        # This ensures cleanup even if the python script fails
+        trap "echo 'Cleaning up MLflow...'; kill $MLFLOW_PID" EXIT
+
+        echo "Waiting for MLflow server (PID: $MLFLOW_PID) to be ready..."
+        
+        # Wait up to 30 seconds for the server to respond at the /health endpoint
+        timeout 30s bash -c 'until curl -s --fail http://127.0.0.1:5000/health > /dev/null; do echo "Waiting for MLflow..." && sleep 2; done'
+        
+        echo "MLflow is ready. Running model training..."
+        
+        # Run your training script
+        python -m src.bq_model_training
+        
+        echo "Training script finished."
+        # The 'trap' will automatically run here to kill the MLflow server
+    
     - name: Commit and push new files
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -89,8 +86,7 @@ jobs:
         git fetch origin $BRANCH_NAME || true
         git checkout -B $BRANCH_NAME
 
-        git add -A --exclude-standard
-
+        git add -A
         # Commit the changes
         git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
           
