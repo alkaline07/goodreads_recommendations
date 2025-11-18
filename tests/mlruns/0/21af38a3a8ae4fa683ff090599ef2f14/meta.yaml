@@ -1,0 +1,14 @@
+artifact_uri: file:///E:/Northeastern%20Univeristy/MLOPS-PROJECT/goodreads_recommendations/tests/mlruns/0/21af38a3a8ae4fa683ff090599ef2f14/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 21af38a3a8ae4fa683ff090599ef2f14
+run_name: mercurial-fox-568
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763437358021
+status: 1
+tags: []
+user_id: goyal
