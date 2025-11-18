@@ -1,10 +1,12 @@
 name: 2. Model Training
 run-name: Model Retraining
 
+# on:
+#   workflow_run:
+#     workflows: ["1. Load Data"]
+#     types: [completed]
 on:
-  workflow_run:
-    workflows: ["1. Load Data"]
-    types: [completed]
+  workflow_dispatch:
 
 jobs:
   train:
