@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/923083200099565462/ad4b36ca9e1b4339af87d56e624da21d/artifacts
+end_time: 1763473829223
+entry_point_name: ''
+experiment_id: '923083200099565462'
+lifecycle_stage: active
+run_id: ad4b36ca9e1b4339af87d56e624da21d
+run_name: evaluation_boosted_tree_regressor_20251118_192023
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763473823868
+status: 3
+tags: []
+user_id: shikha
