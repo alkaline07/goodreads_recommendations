@@ -22,7 +22,17 @@ from datetime import datetime
 from google.cloud import aiplatform
 from google.cloud import bigquery
 import mlflow
+from pathlib import Path
+from dotenv import load_dotenv
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "bias_reports")
+MODEL_SELECTION_DIR = os.path.join(DOCS_DIR, "model_selection")
+os.makedirs(DOCS_DIR, exist_ok=True)
+os.makedirs(MODEL_SELECTION_DIR, exist_ok=True)
+root_env = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(root_env)
+print("Loaded .env from:", root_env)
 
 def safe_mlflow_log(func, *args, **kwargs):
     """Safely log to MLflow, continue if it fails."""
@@ -65,10 +75,11 @@ class ModelManager:
         self.improvement_threshold = improvement_threshold
         
         aiplatform.init(project=self.project_id, location=self.vertex_region)
+        mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI", "file:///app/mlruns")
 
         # Initialize MLflow
         try:
-            mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+            mlflow.set_tracking_uri(mlflow_uri)
             mlflow.set_experiment("bigquery_ml_training")
             print("MLflow tracking initialized")
         except Exception as e:
@@ -487,8 +498,7 @@ def get_selected_model_from_report() -> Optional[Dict]:
     """
     import json
     
-    report_path = "../docs/bias_reports/model_selection_report.json"
-    
+    report_path = os.path.join(DOCS_DIR, "model_selection_report.json")    
     try:
         with open(report_path, 'r') as f:
             report = json.load(f)

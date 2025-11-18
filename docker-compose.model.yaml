@@ -1,0 +1,165 @@
+version: '3.8'
+
+services:
+  mlflow:
+    image: python:3.11-slim
+    container_name: goodreads-mlflow
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ./docs:/app/docs
+      - ./mlruns:/app/mlruns     
+    ports:
+      - "5500:5000"
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=file:///app/mlruns
+      - MLFLOW_ARTIFACT_ROOT=/app/mlruns
+      - MLFLOW_SERVER_ALLOWED_HOSTS=*
+      - MLFLOW_SERVER_CORS_ORIGINS=*
+      - MLFLOW_SERVER_DISABLE_HOSTNAME_CHECK=true
+    command:  >
+     sh -c "apt-get update && apt-get install -y curl && pip install mlflow && mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri file:///app/mlruns --default-artifact-root /app/mlruns"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  model-training:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-training
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.bq_model_training
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
+  model-validation:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-validation
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.model_validation
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
+  bias-pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-bias-pipeline
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.bias_pipeline
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
+  data-loader:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-data-loader
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+    command: python -m src.load_data
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    
+  model-rollback:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-rollback
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.model_manager
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
+
+  # Interactive shell for development/debugging
+  model-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-dev
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: /bin/bash
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    stdin_open: true
+    tty: true

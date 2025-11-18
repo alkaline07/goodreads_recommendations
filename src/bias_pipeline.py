@@ -21,7 +21,10 @@ from .bias_detection import BiasDetector, BiasReport
 from .bias_mitigation import BiasMitigator, MitigationResult
 from .bias_visualization import BiasVisualizer
 from .model_selector import ModelSelector
-
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "bias_reports")
+os.makedirs(DOCS_DIR, exist_ok=True)
+  
 
 class BiasAuditPipeline:
     """
@@ -93,7 +96,7 @@ class BiasAuditPipeline:
         audit_results['detection_report'] = detection_report
         
         # Save detection report
-        detection_path = f"../docs/bias_reports/{model_name}_detection_report.json"
+        detection_path = os.path.join(DOCS_DIR, f"{model_name}_detection_report.json")
         self.detector.save_report(detection_report, detection_path)
         
         # Save to BigQuery
@@ -228,7 +231,7 @@ class BiasAuditPipeline:
         )
         
         # Save mitigation report
-        report_path = f"../docs/bias_reports/{model_name}_threshold_mitigation.json"
+        report_path = os.path.join(DOCS_DIR, f"{model_name}_threshold_mitigation.json")
         self.mitigator.save_mitigation_report(result, report_path)
         
         return result
@@ -376,7 +379,7 @@ class BiasAuditPipeline:
             lambda_shrinkage=0.5
         )
         
-        report_path = f"../docs/bias_reports/{model_name}_shrinkage_mitigation.json"
+        report_path = os.path.join(DOCS_DIR, f"{model_name}_shrinkage_mitigation.json")
         self.mitigator.save_mitigation_report(result, report_path)
         
         return result
@@ -451,7 +454,7 @@ class BiasAuditPipeline:
             'executive_summary': self._generate_executive_summary(audit_results)
         }
         
-        output_path = f"../docs/bias_reports/{model_name}_comprehensive_audit.json"
+        output_path = os.path.join(DOCS_DIR, f"{model_name}_comprehensive_audit.json")
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         with open(output_path, 'w') as f:
@@ -677,7 +680,7 @@ def run_bias_audit_for_all_models(with_model_selection: bool = True):
                 all_results[model['model_name']] = {'error': str(e)}
         
         # Save consolidated report
-        consolidated_path = "../docs/bias_reports/consolidated_audit_report.json"
+        consolidated_path = os.path.join(DOCS_DIR, "consolidated_audit_report.json")
         os.makedirs(os.path.dirname(consolidated_path), exist_ok=True)
         
         with open(consolidated_path, 'w') as f:
@@ -759,7 +762,8 @@ Examples:
     args = parser.parse_args()
     
     # Set up tee logging to save all console output
-    log_dir = "../docs/bias_reports/bias_pipeline_logs"
+    log_dir = os.path.join(DOCS_DIR, "bias_pipeline_logs")
+
     os.makedirs(log_dir, exist_ok=True)
     log_path = os.path.join(log_dir, f"pipeline_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
     class _Tee:

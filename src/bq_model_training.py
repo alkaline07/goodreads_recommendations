@@ -8,7 +8,11 @@ import time
 from datetime import datetime
 from google.cloud import bigquery
 import mlflow
-
+from pathlib import Path
+from dotenv import load_dotenv
+root_env = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(root_env)
+print("Loaded .env from:", root_env)
 
 def safe_mlflow_log(func, *args, **kwargs):
     """Safely log to MLflow, continue if it fails."""
@@ -425,9 +429,10 @@ class BigQueryMLModelTraining:
 
         # Start MLflow run
         experiment_name = "bigquery_ml_training"
+        mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI", "file:///app/mlruns")
         try:
             # Set MLflow tracking URI
-            mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+            mlflow.set_tracking_uri(mlflow_uri)
             mlflow.set_experiment(experiment_name)
         except Exception as e:
             print(f"MLflow initialization warning: {e}. Continuing with MLflow tracking (errors will be handled gracefully).")

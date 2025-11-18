@@ -1,0 +1,19 @@
+{
+  "model_name": "test-model",
+  "timestamp": "2025-11-17T04:51:43.308860",
+  "predictions_table": "test-table",
+  "performance_metrics": {
+    "num_predictions": 1000,
+    "mae": 0.5,
+    "rmse": 0.6,
+    "mean_predicted": 3.5,
+    "mean_actual": 3.6,
+    "std_error": 0.2,
+    "r_squared": 0.64,
+    "correlation": 0.8,
+    "accuracy_within_0_5_pct": 60.0,
+    "accuracy_within_1_0_pct": 80.0,
+    "accuracy_within_1_5_pct": 90.0
+  },
+  "sensitivity_analysis": null
+}

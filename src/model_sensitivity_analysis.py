@@ -18,6 +18,9 @@ from typing import Optional, Dict, List
 import json
 from datetime import datetime
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "docs", "model_analysis", "sensitivity")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 class ModelSensitivityAnalyzer:
     """
@@ -33,8 +36,9 @@ class ModelSensitivityAnalyzer:
         self.client = bigquery.Client(project=project_id)
         self.project_id = self.client.project
         self.dataset_id = "books"
-        self.output_dir = "../docs/model_analysis/sensitivity"
+        self.output_dir = OUTPUT_DIR
         os.makedirs(self.output_dir, exist_ok=True)
+
 
         print(f"ModelSensitivityAnalyzer initialized for project: {self.project_id}")
 

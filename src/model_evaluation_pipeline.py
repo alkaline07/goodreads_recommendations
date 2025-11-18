@@ -20,8 +20,16 @@ import json
 import pandas as pd
 from google.cloud import bigquery
 import mlflow
-from .model_sensitivity_analysis import ModelSensitivityAnalyzer
+from pathlib import Path
+from dotenv import load_dotenv
 
+from .model_sensitivity_analysis import ModelSensitivityAnalyzer
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "model_analysis")
+os.makedirs(DOCS_DIR, exist_ok=True)
+root_env = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(root_env)
+print("Loaded .env from:", root_env)
 
 def safe_mlflow_log(func, *args, **kwargs):
     """Safely log to MLflow, continue if it fails."""
@@ -47,10 +55,11 @@ class ModelEvaluationPipeline:
         self.project_id = self.client.project
         self.dataset_id = "books"
         self.sensitivity_analyzer = ModelSensitivityAnalyzer(project_id=project_id)
+        mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI", "file:///app/mlruns")
 
         # Initialize MLflow
         try:
-            mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+            mlflow.set_tracking_uri(mlflow_uri)
             mlflow.set_experiment("bigquery_ml_training")
             print("MLflow tracking initialized")
         except Exception as e:
@@ -249,7 +258,8 @@ class ModelEvaluationPipeline:
 
     def _save_evaluation_report(self, evaluation_results: Dict, model_name: str) -> str:
         """Save evaluation report to JSON."""
-        output_dir = "../docs/model_analysis/evaluation"
+        output_dir = os.path.join(DOCS_DIR, "evaluation")
+
         os.makedirs(output_dir, exist_ok=True)
 
         report_path = os.path.join(output_dir, f"{model_name}_evaluation_report.json")
