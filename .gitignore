@@ -2,6 +2,9 @@ venv/
 **/gcp_credentials.json
 *pycache*
 
+tests/__pycache__/
+tests/mlruns/
+tests/test_output/
 
 # Ignore Airflow logs and generated password file
 config/simple_auth_manager_passwords.json.generated
