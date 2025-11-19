@@ -271,7 +271,7 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 
 **Next Workflow:** Automatically triggers "2. Model Training" on success
 
-## Code for Training Model and Selecting Best Model
+## Code for Training Model
 
 ### Model Training
 
@@ -283,6 +283,7 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 - Trains models using BigQuery ML
 - Supports multiple model types (Boosted Tree Regressor, Matrix Factorization, etc.)
 - Logs metrics, parameters, and artifacts to MLflow
+- Registers trained models to Vertex AI Model Registry with version control
 - Saves model artifacts
 - Handles concurrent model training
 
@@ -306,6 +307,7 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
    - Executes `src.bq_model_training` which:
      - Trains models using BigQuery ML
      - Logs metrics, parameters, and artifacts to MLflow
+     - Registers trained models to Vertex AI Model Registry with version control
      - Saves model artifacts
    - Automatically cleans up MLflow server on exit
 8. **Commit and push new files** - Commits generated artifacts to `artifacts_bot` branch:
@@ -316,11 +318,13 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 
 **Key Features:**
 - **MLflow Integration**: Automatic MLflow server management with health checks
+- **Vertex AI Model Registry**: Automatic model registration with version control during training
 - **Artifact Persistence**: All model artifacts are committed to a dedicated branch
 - **BigQuery ML**: Leverages Google Cloud's managed ML service for scalable training
 
 **Output Artifacts:**
 - Trained models in BigQuery
+- Models registered in Vertex AI Model Registry
 - MLflow tracking data
 - Model artifacts committed to `artifacts_bot` branch
 
@@ -328,14 +332,6 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 
 ### Hyperparameter Tuning
 
-Hyperparameter tuning is critical for optimizing model performance. Our training pipeline includes comprehensive hyperparameter tuning capabilities.
-
-**Hyperparameter Tuning Methodology:**
-
-- **Grid Search**: Systematic exploration of hyperparameter space
-- **Cross-Validation**: Used to evaluate hyperparameter combinations
-- **Performance Metrics**: RMSE and MAE used as primary evaluation metrics
-- **Computational Efficiency**: Balanced thoroughness with training time constraints
 
 **Key Hyperparameters Tuned:**
 
@@ -431,44 +427,24 @@ The Matrix Factorization model's performance depends on factorization parameters
 
 These sensitivity analyses informed our final hyperparameter selections, ensuring optimal model performance while maintaining computational efficiency.
 
-### Model Selection
+## Code for Generating Predictions
 
-**Module:** [`src/model_selector.py`](src/model_selector.py)
+**Module:** [`src/generate_prediction_tables.py`](src/generate_prediction_tables.py)
 
-**Purpose:** Balances validation accuracy with fairness scores to pick the best candidate model.
-
-**Functionality:**
-- Compares multiple candidate models based on both performance metrics and fairness scores
-- Uses weighted scoring with configurable weights for performance vs. fairness
-- Enforces minimum fairness requirements
-- Generates model selection reports
-
-**Selection Criteria:**
-- **Performance Metrics**: RMSE, MAE, and R² scores
-- **Fairness Scores**: Equity indices across all dimensions
-- **Weighted Scoring**: Configurable weights for performance vs. fairness
-- **Threshold Enforcement**: Minimum fairness requirements
-
-The selected model balances accuracy with fairness, ensuring both high-quality recommendations and equitable treatment across all user and book segments.
-
-## Code for Model Validation
-
-**Module:** [`src/model_validation.py`](src/model_validation.py)
-
-**Purpose:** Validates trained models against performance thresholds and ensures they meet deployment criteria.
+**Purpose:** Generates bias-ready prediction tables with all features needed for bias detection and evaluation.
 
 **Functionality:**
-- Runs ML.EVALUATE on train/val/test splits
-- Checks RMSE thresholds
-- Validates performance metrics meet requirements
-- Persists validation reports in JSON format
-- Enforces quality gates before deployment
+- Finds the latest trained models in BigQuery
+- Generates predictions using ML.PREDICT for all trained models
+- Creates BigQuery tables optimized for bias analysis
+- Includes slicing features (popularity, era, length, author gender, user activity, etc.)
+- Prepares prediction tables for downstream evaluation and bias detection
 
 ### GitHub Actions Workflow
 
-**Workflow:** [`6_model_validation.yml`](.github/workflows/6_model_validation.yml)
+**Workflow:** [`3_generate_prediction_table.yml`](.github/workflows/3_generate_prediction_table.yml)
 
-**Trigger:** Automatically runs after "5. Bias Detection & Mitigation Pipeline" completes successfully
+**Trigger:** Automatically runs after "2. Model Training" workflow completes successfully
 
 **Steps:**
 
@@ -476,47 +452,91 @@ The selected model balances accuracy with fairness, ensuring both high-quality r
 2. **Set up Python 3.11** - Configures environment
 3. **Authenticate to Google Cloud** - Sets up GCP access
 4. **Install dependencies** - Installs required packages
-5. **Validate model** - This step:
-   - Starts MLflow UI server in the background
-   - Waits for MLflow server readiness
-   - Executes `src.model_validation` which:
-     - Runs ML.EVALUATE on train/val/test splits
-     - Checks RMSE thresholds
-     - Validates performance metrics meet requirements
-     - Persists validation reports in JSON format
-     - Enforces quality gates before deployment
-   - Cleans up MLflow server
-6. **Commit and push new files** - Commits validation reports to `artifacts_bot` branch
-7. **Notifications** - Sends success/failure notifications
+5. **Run Prediction Generator** - Executes `src.generate_prediction_tables` which:
+   - Finds latest trained models in BigQuery
+   - Generates predictions for each model type (Boosted Tree, Matrix Factorization)
+   - Creates prediction tables with all features needed for bias detection
+   - Includes slicing dimensions for bias analysis
+6. **Commit and push new files** - Commits prediction tables to `artifacts_bot` branch
+7. **Notifications** - Sends success/failure email notifications
 
 **Key Features:**
-- **Quality Gates**: Enforces minimum performance thresholds
-- **Multi-Split Validation**: Validates on train, validation, and test sets
-- **Automated Blocking**: Prevents deployment if validation fails
+- **Bias-Ready Tables**: Prediction tables include all slicing features needed for bias detection
+- **Multi-Model Support**: Generates predictions for all trained model types
+- **BigQuery Integration**: Leverages BigQuery ML.PREDICT for efficient prediction generation
 
 **Output Artifacts:**
-- Validation reports (JSON)
-- MLflow logged validation metrics
+- Prediction tables in BigQuery (e.g., `boosted_tree_rating_predictions`, `matrix_factorization_rating_predictions`)
 - Artifacts committed to `artifacts_bot` branch
 
-**Validation Criteria:**
-- RMSE must be below threshold
-- MAE must meet requirements
-- Performance must be consistent across splits
+**Next Workflow:** Automatically triggers "4. Evaluate Model" on success
 
-**Next Workflow:** Automatically triggers "7. Model Manager" on success
+## Code for Evaluating Model
 
-## Code for Bias Checking
+**Module:** [`src/model_evaluation_pipeline.py`](src/model_evaluation_pipeline.py)
 
-**Module:** [`src/bias_detection.py`](src/bias_detection.py)
+**Purpose:** Evaluates model performance, computes metrics, and performs feature importance analysis.
 
-**Purpose:** Computes slice-aware performance metrics, disparity summaries, and mitigation recommendations.
+**Functionality:**
+- Loads trained model predictions from BigQuery
+- Computes performance metrics (MAE, RMSE, R², accuracy within thresholds)
+- Performs SHAP-based feature importance analysis
+- Generates evaluation reports and visualizations
+- Logs metrics to MLflow for experiment tracking
+
+### GitHub Actions Workflow
+
+**Workflow:** [`4_evaluate_model.yml`](.github/workflows/4_evaluate_model.yml)
+
+**Trigger:** Automatically runs after "3. Generate Predictions" workflow completes successfully
+
+**Steps:**
+
+1. **Checkout repository** - Retrieves code
+2. **Set up Python 3.11** - Configures environment
+3. **Authenticate to Google Cloud** - Sets up GCP access
+4. **Install dependencies** - Installs required packages
+5. **Run Model Evaluation** - This step:
+   - Starts MLflow UI server in the background
+   - Waits for MLflow server readiness
+   - Executes `src.model_evaluation_pipeline` which:
+     - Loads predictions from BigQuery
+     - Computes performance metrics (MAE, RMSE, R²)
+     - Performs SHAP-based feature importance analysis
+     - Generates evaluation reports
+     - Logs metrics to MLflow
+   - Cleans up MLflow server
+6. **Commit and push new files** - Commits evaluation reports to `artifacts_bot` branch
+7. **Notifications** - Sends success/failure email notifications
+
+**Key Features:**
+- **Comprehensive Metrics**: Computes multiple performance metrics
+- **Feature Importance**: SHAP analysis for model interpretability
+- **MLflow Integration**: Automatic logging of evaluation metrics
+- **Report Generation**: JSON reports for downstream analysis
+
+**Output Artifacts:**
+- Evaluation reports in `docs/model_analysis/evaluation/`
+- Feature importance analysis in `docs/model_analysis/sensitivity/`
+- MLflow logged evaluation metrics
+- Artifacts committed to `artifacts_bot` branch
+
+**Next Workflow:** Automatically triggers "5. Bias Detection & Mitigation Pipeline" on success
+
+## Code for Bias Detection and Mitigation
+
+**Module:** [`src/bias_detection.py`](src/bias_detection.py), [`src/bias_mitigation.py`](src/bias_mitigation.py), [`src/bias_pipeline.py`](src/bias_pipeline.py)
+
+**Purpose:** Detects bias across multiple dimensions, applies mitigation techniques, and generates comprehensive fairness reports.
 
 **Functionality:**
 - Analyzes model predictions across multiple demographic slices
 - Computes performance metrics (MAE, RMSE) per slice
 - Identifies performance disparities
-- Generates bias detection reports
+- Applies mitigation techniques when bias is detected
+- Generates comprehensive bias detection and mitigation reports
+- Creates visualizations for stakeholder review
+- Selects best model based on performance and fairness
 
 ### Bias Detection Process
 
@@ -576,6 +596,48 @@ The system analyzes bias across **8 key dimensions** to ensure fair recommendati
 - Applies mitigation techniques if needed
 - Generates comprehensive reports and visualizations
 - Validates mitigation effectiveness
+- Selects best model based on performance and fairness
+
+### Model Selection
+
+**Module:** [`src/model_selector.py`](src/model_selector.py)
+
+**Purpose:** Balances evaluation accuracy with fairness scores to pick the best candidate model after bias checking and mitigation.
+
+**Functionality:**
+- Compares multiple candidate models based on both performance metrics and fairness scores
+- Uses weighted scoring with configurable weights for performance vs. fairness
+- Enforces minimum fairness requirements
+- Generates model selection reports
+
+**Selection Criteria:**
+
+- **Performance Metrics**: RMSE, MAE, and R² scores
+- **Fairness Scores**: Equity indices across all dimensions
+- **Weighted Scoring**: Configurable weights for performance vs. fairness
+- **Threshold Enforcement**: Minimum fairness requirements
+
+The selected model balances accuracy with fairness, ensuring both high-quality recommendations and equitable treatment across all user and book segments.
+
+**Model Selection Report:**
+
+The detailed selection decision is documented in [`model_selection_report.json`](docs/bias_reports/model_selection_report.json), which includes:
+- Candidate model scores
+- Selection rationale
+- Performance and fairness trade-offs
+- Final model recommendation
+
+### Model Selection Comparison
+
+The model selection process compares multiple candidate models based on both performance metrics and fairness scores. The comparison chart visualizes the trade-offs between accuracy and fairness:
+
+<div>
+  <p align="center">
+    <img src="docs/bias_reports/model_selection/model_comparison.png" alt="Model Selection Comparison Chart" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Selection Comparison - Performance vs. Fairness Trade-offs</em>
+  </p>
+</div>
 
 ### GitHub Actions Workflow
 
@@ -666,60 +728,60 @@ When bias is detected, the system applies appropriate mitigation techniques:
 - For severe bias requiring retraining
 - When multiple dimensions show significant disparities
 
-## Code for Model Selection after Bias Checking
+## Code for Model Validation
 
-**Module:** [`src/model_selector.py`](src/model_selector.py)
+**Module:** [`src/model_validation.py`](src/model_validation.py)
 
-**Purpose:** Balances validation accuracy with fairness scores to pick the best candidate model after bias checking and mitigation.
-
-**Functionality:**
-- Compares multiple candidate models based on both performance metrics and fairness scores
-- Uses weighted scoring with configurable weights for performance vs. fairness
-- Enforces minimum fairness requirements
-- Generates model selection reports
-
-**Selection Criteria:**
-
-- **Performance Metrics**: RMSE, MAE, and R² scores
-- **Fairness Scores**: Equity indices across all dimensions
-- **Weighted Scoring**: Configurable weights for performance vs. fairness
-- **Threshold Enforcement**: Minimum fairness requirements
-
-The selected model balances accuracy with fairness, ensuring both high-quality recommendations and equitable treatment across all user and book segments.
-
-**Model Selection Report:**
-
-The detailed selection decision is documented in [`model_selection_report.json`](docs/bias_reports/model_selection_report.json), which includes:
-- Candidate model scores
-- Selection rationale
-- Performance and fairness trade-offs
-- Final model recommendation
-
-### Model Selection Comparison
-
-The model selection process compares multiple candidate models based on both performance metrics and fairness scores. The comparison chart visualizes the trade-offs between accuracy and fairness:
-
-<div>
-  <p align="center">
-    <img src="docs/bias_reports/model_selection/model_comparison.png" alt="Model Selection Comparison Chart" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>Model Selection Comparison - Performance vs. Fairness Trade-offs</em>
-  </p>
-</div>
-
-## Code to Push Model to Artifact Registry/Model Registry
-
-### Model Registration
-
-**Module:** [`src/register_bqml_models.py`](src/register_bqml_models.py)
-
-**Purpose:** Uploads the latest BQML artifacts into the Vertex AI Model Registry with version control.
+**Purpose:** Validates trained models against performance thresholds and ensures they meet deployment criteria.
 
 **Functionality:**
-- Registers trained models in Vertex AI Model Registry
-- Manages model versioning
-- Stores model metadata
-- Enables model deployment tracking
+- Runs ML.EVALUATE on train/val/test splits
+- Checks RMSE thresholds
+- Validates performance metrics meet requirements
+- Persists validation reports in JSON format
+- Enforces quality gates before deployment
+
+### GitHub Actions Workflow
+
+**Workflow:** [`6_model_validation.yml`](.github/workflows/6_model_validation.yml)
+
+**Trigger:** Automatically runs after "5. Bias Detection & Mitigation Pipeline" completes successfully
+
+**Steps:**
+
+1. **Checkout repository** - Retrieves code
+2. **Set up Python 3.11** - Configures environment
+3. **Authenticate to Google Cloud** - Sets up GCP access
+4. **Install dependencies** - Installs required packages
+5. **Validate model** - This step:
+   - Starts MLflow UI server in the background
+   - Waits for MLflow server readiness
+   - Executes `src.model_validation` which:
+     - Runs ML.EVALUATE on train/val/test splits
+     - Checks RMSE thresholds
+     - Validates performance metrics meet requirements
+     - Persists validation reports in JSON format
+     - Enforces quality gates before deployment
+   - Cleans up MLflow server
+6. **Commit and push new files** - Commits validation reports to `artifacts_bot` branch
+7. **Notifications** - Sends success/failure notifications
+
+**Key Features:**
+- **Quality Gates**: Enforces minimum performance thresholds
+- **Multi-Split Validation**: Validates on train, validation, and test sets
+- **Automated Blocking**: Prevents deployment if validation fails
+
+**Output Artifacts:**
+- Validation reports (JSON)
+- MLflow logged validation metrics
+- Artifacts committed to `artifacts_bot` branch
+
+**Validation Criteria:**
+- RMSE must be below threshold
+- MAE must meet requirements
+- Performance must be consistent across splits
+
+**Next Workflow:** Automatically triggers "7. Model Manager" on success
 
 ### Model Management
 
