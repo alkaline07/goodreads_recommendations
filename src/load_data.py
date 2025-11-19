@@ -48,18 +48,18 @@ class DataLoader:
         """
         return bpd.read_gbq(query)
 
-    def load_to_pandas(self) -> pd.DataFrame:
-        """
-        Convenience helper for callers that prefer an in-memory pandas DataFrame.
+    # def load_to_pandas(self) -> pd.DataFrame:
+    #     """
+    #     Convenience helper for callers that prefer an in-memory pandas DataFrame.
 
-        Returns:
-            pandas.DataFrame: Fully materialized copy of the train split.
-        """
-        query = f"""
-        SELECT *
-        FROM `{self.project_id}.{self.dataset_id}.goodreads_train_set`
-        """
-        return pandas_gbq.read_gbq(query, project_id=self.project_id)
+    #     Returns:
+    #         pandas.DataFrame: Fully materialized copy of the train split.
+    #     """
+    #     query = f"""
+    #     SELECT *
+    #     FROM `{self.project_id}.{self.dataset_id}.goodreads_train_set`
+    #     """
+    #     return pandas_gbq.read_gbq(query, project_id=self.project_id)
 
 
 if __name__ == "__main__":
