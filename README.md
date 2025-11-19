@@ -52,6 +52,14 @@ This command automatically handles the image pull and container execution with t
 
 <div>
   <p align="center">
+    <img src="assets/Docker_Image_On_GitHub.png" alt="Docker Sample" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Docker Container Image on Github</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
     <img src="assets/docker_sample.png" alt="Docker Sample" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
     <em>Docker Container Execution Example</em>
@@ -155,33 +163,9 @@ PR Test Suite
 
 <div>
   <p align="center">
-    <img src="assets/PR_workflow_screenshot.png" alt="PR Workflow Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>Pull Request Workflow Execution</em>
-  </p>
-</div>
-
-<div>
-  <p align="center">
-    <img src="assets/PR-Workflow.png" alt="PR Workflow Overview" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>PR Workflow Overview</em>
-  </p>
-</div>
-
-<div>
-  <p align="center">
-    <img src="assets/PR-Workflow-ii.png" alt="PR Workflow II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>PR Workflow - Detailed View</em>
-  </p>
-</div>
-
-<div>
-  <p align="center">
     <img src="assets/PR-worflow-iii.png" alt="PR Workflow III" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>PR Workflow - Job Execution</em>
+    <em>Workflow - Job Execution</em>
   </p>
 </div>
 
@@ -189,7 +173,7 @@ PR Test Suite
   <p align="center">
     <img src="assets/PR-worflow-iv.png" alt="PR Workflow IV" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>PR Workflow - Test Execution</em>
+    <em>Workflow Execution with MLFlow</em>
   </p>
 </div>
 
@@ -197,7 +181,7 @@ PR Test Suite
   <p align="center">
     <img src="assets/PR-worflows-V.png" alt="PR Workflow V" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>PR Workflow - Pipeline Steps</em>
+    <em>Pipeline Steps</em>
   </p>
 </div>
 
@@ -205,7 +189,15 @@ PR Test Suite
   <p align="center">
     <img src="assets/PR-worflows-VI.png" alt="PR Workflow VI" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>PR Workflow - Complete Pipeline</em>
+    <em>Complete Pipeline</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/artifacts_bot_branches.png" alt="Matrix Factorization Metrics" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Artifact Bot Branches</em>
   </p>
 </div>
 
@@ -261,6 +253,22 @@ All generated artifacts (models, reports, visualizations) are committed to the `
 - Unit tests for bias detection and mitigation
 - Unit tests for model training and evaluation
 - Integration tests where applicable
+
+<div>
+  <p align="center">
+    <img src="assets/PR_workflow_screenshot.png" alt="PR Workflow Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Pull Request Workflow Execution</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-Workflow.png" alt="PR Workflow Overview" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>PR Workflow Overview</em>
+  </p>
+</div>
 
 #### Send Email Notification (`send_email.yml`)
 
@@ -363,6 +371,14 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 **Output Artifacts:**
 - `goodreads-train-data` artifact containing `data/train_data.parquet`
 
+<div>
+  <p align="center">
+    <img src="assets/PR-Workflow-ii.png" alt="PR Workflow II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Load Data Stage</em>
+  </p>
+</div>
+
 **Next Workflow:** Automatically triggers "2. Model Training" on success
 
 ## Code for Training Model
@@ -426,17 +442,25 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 
 <div>
   <p align="center">
-    <img src="assets/boosted_tree_models.png" alt="Boosted Tree Models in BigQuery" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <img src="assets/models_dashboard.png" alt="Models Dashboard" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>Boosted Tree Models in BigQuery</em>
+    <em>Models Dashboard in BigQuery</em>
   </p>
 </div>
 
 <div>
   <p align="center">
-    <img src="assets/mf_models.png" alt="Matrix Factorization Models in BigQuery" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <img src="assets/boosted_tree_registry.png" alt="Boosted Tree Model Registry" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>Matrix Factorization Models in BigQuery</em>
+    <em>Boosted Tree Model in Vertex AI Model Registry</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_registry_screenshot.png" alt="Matrix Factorization Registry Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model in Vertex AI Model Registry</em>
   </p>
 </div>
 
@@ -637,14 +661,6 @@ These sensitivity analyses informed our final hyperparameter selections, ensurin
 
 <div>
   <p align="center">
-    <img src="assets/model_metrics.png" alt="Model Evaluation Metrics" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>Model Evaluation Metrics Dashboard</em>
-  </p>
-</div>
-
-<div>
-  <p align="center">
     <img src="assets/bt_graph.png" alt="Boosted Tree Model Performance Graph" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
     <br/>
     <em>Boosted Tree Model Performance Graph</em>
@@ -674,6 +690,133 @@ These sensitivity analyses informed our final hyperparameter selections, ensurin
     <em>Matrix Factorization Model Metrics - Additional Analysis</em>
   </p>
 </div>
+
+<div>
+  <p align="center">
+    <img src="assets/bt_metrics.png" alt="Matrix Factorization Metrics" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Model Metrics</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/bt_metrics_ii.png" alt="Matrix Factorization Metrics II" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Model Metrics - Additional Analysis</em>
+  </p>
+</div>
+
+**Next Workflow:** Automatically triggers "5. Bias Detection & Mitigation Pipeline" on success
+
+## Feature Sensitivity Analysis
+
+**Module:** [`src/model_sensitivity_analysis.py`](src/model_sensitivity_analysis.py)
+
+**Purpose:** Performs SHAP-based feature importance analysis to understand which features have the most impact on model predictions and how feature values affect predictions.
+
+**Location:** `docs/model_analysis/sensitivity/`
+
+### Overview
+
+Feature sensitivity analysis uses SHAP (SHapley Additive exPlanations) values to provide model interpretability by:
+
+1. **Identifying Key Features**: Determining which features have the most impact on predictions
+2. **Understanding Feature Effects**: Analyzing how feature values affect predictions (positive/negative impact)
+3. **Feature Interactions**: Revealing feature dependencies and interactions
+4. **Model Comparison**: Comparing feature importance across different models
+
+### Features Analyzed
+
+The sensitivity analysis examines the following features across all models:
+
+**Book Features:**
+- `book_popularity_normalized` - Normalized popularity score
+- `num_genres` - Number of genres associated with the book
+- `average_rating` - Average rating of the book
+- `ratings_count` - Total number of ratings
+- `num_pages` - Book length in pages
+- `publication_year` - Year the book was published
+- `book_era` - Publication era category (categorical)
+- `book_length_category` - Book length category (Short/Medium/Long)
+- `author_gender_group` - Author gender grouping (categorical)
+
+**User Features:**
+- `user_activity_count` - User's activity level
+- `reading_pace_category` - User's reading pace category (Fast/Medium/Slow)
+
+### Analysis Process
+
+The sensitivity analysis pipeline:
+
+1. **Data Loading**: Samples predictions and features from BigQuery prediction tables
+2. **Feature Preparation**: Encodes categorical variables and prepares feature matrix
+3. **SHAP Computation**: Uses SHAP KernelExplainer to compute feature importance values
+4. **Visualization Generation**: Creates multiple visualization types:
+   - SHAP summary plots showing feature importance and value effects
+   - Bar charts displaying mean absolute SHAP values
+   - Custom importance charts for stakeholder presentations
+5. **Results Persistence**: Saves JSON reports with feature importance scores and metadata
+
+### Output Artifacts
+
+**Location:** `docs/model_analysis/sensitivity/`
+
+The sensitivity analysis generates the following artifacts:
+
+| Artifact Type | Description | Example Filename |
+|--------------|-------------|------------------|
+| **JSON Reports** | Feature importance scores, categorical mappings, and metadata | `{model_name}_feature_importance.json` |
+| **SHAP Summary Plots** | Comprehensive visualization showing feature importance and value effects | `{model_name}_shap_summary.png` |
+| **Importance Bar Charts** | Bar charts displaying mean absolute SHAP values | `{model_name}_importance_bar.png` |
+| **Custom Importance Charts** | Custom-formatted charts for presentations | `{model_name}_custom_importance.png` |
+| **Model Comparison Charts** | Side-by-side comparison of feature importance across models | `model_comparison_features.png` |
+
+### JSON Report
+
+<div>
+  <p align="center">
+    <img src="assets/sensitivity_analysis.png" alt="Matrix Factorization Metrics II" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Sensitivity Analysis</em>
+  </p>
+</div>
+
+### Integration with Evaluation Pipeline
+
+The sensitivity analysis is automatically integrated into the model evaluation workflow:
+
+- **Automatic Execution**: Runs as part of `model_evaluation_pipeline.py` during model evaluation
+- **MLflow Logging**: Top feature importances are logged to MLflow for experiment tracking
+- **Report Linking**: Evaluation reports include references to sensitivity analysis artifacts
+- **Configurable**: Can be enabled/disabled via `run_sensitivity_analysis` parameter
+
+### Interpreting Results
+
+**Feature Importance Scores:**
+- Higher importance values indicate features with greater impact on predictions
+- Scores are normalized mean absolute SHAP values
+- Features are ranked from highest to lowest importance
+
+**SHAP Summary Plots:**
+- **Color coding**: Red indicates high feature values, blue indicates low values
+- **Horizontal position**: Shows positive (right) or negative (left) impact on predictions
+- **Vertical position**: Features ordered by importance (top = most important)
+
+**Use Cases:**
+- **Feature Engineering**: Identify which features to prioritize or engineer
+- **Model Debugging**: Understand unexpected predictions by examining feature contributions
+- **Stakeholder Communication**: Explain model behavior in business terms
+- **Model Comparison**: Compare which features are important across different model types
+
+### Key Features
+
+- **SHAP-Based Analysis**: Uses state-of-the-art SHAP values for model interpretability
+- **Model-Agnostic**: Works with any model type (Boosted Trees, Matrix Factorization, etc.)
+- **Comprehensive Visualizations**: Multiple chart types for different audiences
+- **Efficient Sampling**: Uses configurable sample sizes for computational efficiency
+- **Categorical Support**: Properly handles categorical features with encoding mappings
+- **Automated Integration**: Seamlessly integrated into CI/CD pipeline
 
 **Next Workflow:** Automatically triggers "5. Bias Detection & Mitigation Pipeline" on success
 
@@ -790,22 +933,6 @@ The model selection process compares multiple candidate models based on both per
     <img src="docs/bias_reports/model_selection/model_comparison.png" alt="Model Selection Comparison Chart" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
     <br/>
     <em>Model Selection Comparison - Performance vs. Fairness Trade-offs</em>
-  </p>
-</div>
-
-<div>
-  <p align="center">
-    <img src="assets/Model_Comparison_Chart_I.png" alt="Model Comparison Chart I" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>Model Comparison Chart - Performance Analysis</em>
-  </p>
-</div>
-
-<div>
-  <p align="center">
-    <img src="assets/Model_Comparison_Chart_II.png" alt="Model Comparison Chart II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>Model Comparison Chart - Fairness Analysis</em>
   </p>
 </div>
 
@@ -1011,25 +1138,9 @@ When bias is detected, the system applies appropriate mitigation techniques:
 
 <div>
   <p align="center">
-    <img src="assets/boosted_tree_registry.png" alt="Boosted Tree Model Registry" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <img src="assets/model_metrics.png" alt="Model Evaluation Metrics" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>Boosted Tree Models in Vertex AI Model Registry</em>
-  </p>
-</div>
-
-<div>
-  <p align="center">
-    <img src="assets/mf_registry.png" alt="Matrix Factorization Model Registry" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>Matrix Factorization Models in Vertex AI Model Registry</em>
-  </p>
-</div>
-
-<div>
-  <p align="center">
-    <img src="assets/mf_registry_screenshot.png" alt="Matrix Factorization Registry Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>Matrix Factorization Model Registry - Detailed View</em>
+    <em>Model Manager Selection</em>
   </p>
 </div>
 
@@ -1043,17 +1154,33 @@ When bias is detected, the system applies appropriate mitigation techniques:
 
 <div>
   <p align="center">
-    <img src="assets/model_versions.png" alt="Model Versions" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <img src="assets/boosted_tree_models.png" alt="Boosted Tree Models in BigQuery" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>Model Version Management</em>
+    <em>Boosted Tree Models in Vertex AI Registry with Versions</em>
   </p>
 </div>
 
 <div>
   <p align="center">
-    <img src="assets/models_dashboard.png" alt="Models Dashboard" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <img src="assets/mf_registry.png" alt="Matrix Factorization Model Registry" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
-    <em>Models Dashboard in Vertex AI</em>
+    <em>Matrix Factorization Models in Vertex AI Model Registry</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/model_versions.png" alt="Model Versions" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Evaluations of Boosted Tree Models in Vertex AI Registry</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_models.png" alt="Matrix Factorization Models in BigQuery" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Evaluations of Matrix Factorization Models in Vertex AI Registry</em>
   </p>
 </div>
 
@@ -1116,6 +1243,22 @@ Our pipeline uses MLflow for comprehensive experiment tracking:
     <img src="assets/mlflow_runs_iii.png" alt="MLflow Runs III" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
     <br/>
     <em>MLflow Runs - Experiment Comparison</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/Model_Comparison_Chart_I.png" alt="Model Comparison Chart I" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Comparison Chart - Performance Analysis</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/Model_Comparison_Chart_II.png" alt="Model Comparison Chart II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Comparison Chart - Fairness Analysis</em>
   </p>
 </div>
 
