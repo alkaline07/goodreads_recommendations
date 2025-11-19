@@ -48,6 +48,16 @@ This command automatically handles the image pull and container execution with t
 
 > **Note:** Ensure that your `config/gcp_credentials.json` file is present before running the Docker container.
 
+**Docker Container Example:**
+
+<div>
+  <p align="center">
+    <img src="assets/docker_sample.png" alt="Docker Sample" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Docker Container Execution Example</em>
+  </p>
+</div>
+
 ## GitHub Actions
 
 Our project uses GitHub Actions to automate the complete ML pipeline from data loading to model deployment. The workflows are orchestrated in a sequential pipeline that ensures data quality, model training, evaluation, bias detection, validation, and version management.
@@ -141,6 +151,64 @@ PR Test Suite
 7. **Bias Detection**: Comprehensive bias analysis before deployment
 8. **Automated Versioning**: Model version management integrated into pipeline
 
+**GitHub Actions Workflow Screenshots:**
+
+<div>
+  <p align="center">
+    <img src="assets/PR_workflow_screenshot.png" alt="PR Workflow Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Pull Request Workflow Execution</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-Workflow.png" alt="PR Workflow Overview" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>PR Workflow Overview</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-Workflow-ii.png" alt="PR Workflow II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>PR Workflow - Detailed View</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-worflow-iii.png" alt="PR Workflow III" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>PR Workflow - Job Execution</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-worflow-iv.png" alt="PR Workflow IV" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>PR Workflow - Test Execution</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-worflows-V.png" alt="PR Workflow V" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>PR Workflow - Pipeline Steps</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-worflows-VI.png" alt="PR Workflow VI" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>PR Workflow - Complete Pipeline</em>
+  </p>
+</div>
+
 ### Required GitHub Secrets
 
 The workflows require the following secrets to be configured in GitHub:
@@ -224,6 +292,32 @@ All generated artifacts (models, reports, visualizations) are committed to the `
 **Configuration:**
 - `SMTP_EMAIL`: Gmail address for sending notifications
 - `SMTP_PASSWORD`: Gmail app password (stored in GitHub secrets)
+
+**Email Notification Examples:**
+
+<div>
+  <p align="center">
+    <img src="assets/worflow_emails.png" alt="Workflow Email Notifications" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Workflow Email Notifications</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/worflow_emails-ii.png" alt="Workflow Email Notifications II" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Workflow Email Notifications - Detailed View</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/workflow_emails_iii.png" alt="Workflow Email Notifications III" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Workflow Email Notifications - Success/Failure Status</em>
+  </p>
+</div>
 
 ## Code for Loading Data from Data Pipeline
 
@@ -327,6 +421,24 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 - Models registered in Vertex AI Model Registry
 - MLflow tracking data
 - Model artifacts committed to `artifacts_bot` branch
+
+**Trained Models in BigQuery:**
+
+<div>
+  <p align="center">
+    <img src="assets/boosted_tree_models.png" alt="Boosted Tree Models in BigQuery" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Models in BigQuery</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_models.png" alt="Matrix Factorization Models in BigQuery" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Models in BigQuery</em>
+  </p>
+</div>
 
 **Next Workflow:** Automatically triggers "3. Generate Predictions" on success
 
@@ -521,6 +633,48 @@ These sensitivity analyses informed our final hyperparameter selections, ensurin
 - MLflow logged evaluation metrics
 - Artifacts committed to `artifacts_bot` branch
 
+**Model Evaluation Metrics:**
+
+<div>
+  <p align="center">
+    <img src="assets/model_metrics.png" alt="Model Evaluation Metrics" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Evaluation Metrics Dashboard</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/bt_graph.png" alt="Boosted Tree Model Performance Graph" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Model Performance Graph</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_graph.png" alt="Matrix Factorization Model Performance Graph" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model Performance Graph</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_metrics.png" alt="Matrix Factorization Metrics" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model Metrics</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_metrics_ii.png" alt="Matrix Factorization Metrics II" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model Metrics - Additional Analysis</em>
+  </p>
+</div>
+
 **Next Workflow:** Automatically triggers "5. Bias Detection & Mitigation Pipeline" on success
 
 ## Code for Bias Detection and Mitigation
@@ -636,6 +790,22 @@ The model selection process compares multiple candidate models based on both per
     <img src="docs/bias_reports/model_selection/model_comparison.png" alt="Model Selection Comparison Chart" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
     <br/>
     <em>Model Selection Comparison - Performance vs. Fairness Trade-offs</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/Model_Comparison_Chart_I.png" alt="Model Comparison Chart I" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Comparison Chart - Performance Analysis</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/Model_Comparison_Chart_II.png" alt="Model Comparison Chart II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Comparison Chart - Fairness Analysis</em>
   </p>
 </div>
 
@@ -837,6 +1007,56 @@ When bias is detected, the system applies appropriate mitigation techniques:
 - Fairness scores must meet minimum requirements
 - Validation must have passed in previous step
 
+**Vertex AI Model Registry:**
+
+<div>
+  <p align="center">
+    <img src="assets/boosted_tree_registry.png" alt="Boosted Tree Model Registry" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Models in Vertex AI Model Registry</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_registry.png" alt="Matrix Factorization Model Registry" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Models in Vertex AI Model Registry</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_registry_screenshot.png" alt="Matrix Factorization Registry Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model Registry - Detailed View</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/registry_screenshot.png" alt="Model Registry Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Vertex AI Model Registry Overview</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/model_versions.png" alt="Model Versions" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Version Management</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/models_dashboard.png" alt="Models Dashboard" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Models Dashboard in Vertex AI</em>
+  </p>
+</div>
+
 ## Experiment Tracking and Results
 
 ### MLflow Integration
@@ -848,6 +1068,56 @@ Our pipeline uses MLflow for comprehensive experiment tracking:
 - **Parameter Tracking**: Hyperparameters and model configurations are tracked
 - **Artifact Storage**: Model artifacts and evaluation reports are stored in MLflow
 - **Experiment Comparison**: Easy comparison of different model runs and hyperparameter configurations
+
+**MLflow Experiment Tracking:**
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_experiments.png" alt="MLflow Experiments" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Experiments Dashboard</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs.png" alt="MLflow Runs" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs Overview</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs_graph_i.png" alt="MLflow Runs Graph I" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs - Metrics Comparison</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs_graph_ii.png" alt="MLflow Runs Graph II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs - Performance Metrics</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs_ii.png" alt="MLflow Runs II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs - Detailed Metrics View</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs_iii.png" alt="MLflow Runs III" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs - Experiment Comparison</em>
+  </p>
+</div>
 
 ### Model Analysis Artifacts
 
