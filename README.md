@@ -48,6 +48,24 @@ This command automatically handles the image pull and container execution with t
 
 > **Note:** Ensure that your `config/gcp_credentials.json` file is present before running the Docker container.
 
+**Docker Container Example:**
+
+<div>
+  <p align="center">
+    <img src="assets/Docker_Image_On_GitHub.png" alt="Docker Sample" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Docker Container Image on Github</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/docker_sample.png" alt="Docker Sample" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Docker Container Execution Example</em>
+  </p>
+</div>
+
 ## GitHub Actions
 
 Our project uses GitHub Actions to automate the complete ML pipeline from data loading to model deployment. The workflows are orchestrated in a sequential pipeline that ensures data quality, model training, evaluation, bias detection, validation, and version management.
@@ -141,6 +159,48 @@ PR Test Suite
 7. **Bias Detection**: Comprehensive bias analysis before deployment
 8. **Automated Versioning**: Model version management integrated into pipeline
 
+**GitHub Actions Workflow Screenshots:**
+
+<div>
+  <p align="center">
+    <img src="assets/PR-worflow-iii.png" alt="PR Workflow III" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Workflow - Job Execution</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-worflow-iv.png" alt="PR Workflow IV" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Workflow Execution with MLFlow</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-worflows-V.png" alt="PR Workflow V" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Pipeline Steps</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-worflows-VI.png" alt="PR Workflow VI" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Complete Pipeline</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/artifacts_bot_branches.png" alt="Matrix Factorization Metrics" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Artifact Bot Branches</em>
+  </p>
+</div>
+
 ### Required GitHub Secrets
 
 The workflows require the following secrets to be configured in GitHub:
@@ -194,6 +254,22 @@ All generated artifacts (models, reports, visualizations) are committed to the `
 - Unit tests for model training and evaluation
 - Integration tests where applicable
 
+<div>
+  <p align="center">
+    <img src="assets/PR_workflow_screenshot.png" alt="PR Workflow Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Pull Request Workflow Execution</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/PR-Workflow.png" alt="PR Workflow Overview" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>PR Workflow Overview</em>
+  </p>
+</div>
+
 #### Send Email Notification (`send_email.yml`)
 
 **Purpose:** Reusable workflow for sending email notifications about workflow status.
@@ -224,6 +300,32 @@ All generated artifacts (models, reports, visualizations) are committed to the `
 **Configuration:**
 - `SMTP_EMAIL`: Gmail address for sending notifications
 - `SMTP_PASSWORD`: Gmail app password (stored in GitHub secrets)
+
+**Email Notification Examples:**
+
+<div>
+  <p align="center">
+    <img src="assets/worflow_emails.png" alt="Workflow Email Notifications" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Workflow Email Notifications</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/worflow_emails-ii.png" alt="Workflow Email Notifications II" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Workflow Email Notifications - Detailed View</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/workflow_emails_iii.png" alt="Workflow Email Notifications III" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Workflow Email Notifications - Success/Failure Status</em>
+  </p>
+</div>
 
 ## Code for Loading Data from Data Pipeline
 
@@ -269,9 +371,17 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 **Output Artifacts:**
 - `goodreads-train-data` artifact containing `data/train_data.parquet`
 
+<div>
+  <p align="center">
+    <img src="assets/PR-Workflow-ii.png" alt="PR Workflow II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Load Data Stage</em>
+  </p>
+</div>
+
 **Next Workflow:** Automatically triggers "2. Model Training" on success
 
-## Code for Training Model and Selecting Best Model
+## Code for Training Model
 
 ### Model Training
 
@@ -283,6 +393,7 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 - Trains models using BigQuery ML
 - Supports multiple model types (Boosted Tree Regressor, Matrix Factorization, etc.)
 - Logs metrics, parameters, and artifacts to MLflow
+- Registers trained models to Vertex AI Model Registry with version control
 - Saves model artifacts
 - Handles concurrent model training
 
@@ -306,6 +417,7 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
    - Executes `src.bq_model_training` which:
      - Trains models using BigQuery ML
      - Logs metrics, parameters, and artifacts to MLflow
+     - Registers trained models to Vertex AI Model Registry with version control
      - Saves model artifacts
    - Automatically cleans up MLflow server on exit
 8. **Commit and push new files** - Commits generated artifacts to `artifacts_bot` branch:
@@ -316,26 +428,46 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 
 **Key Features:**
 - **MLflow Integration**: Automatic MLflow server management with health checks
+- **Vertex AI Model Registry**: Automatic model registration with version control during training
 - **Artifact Persistence**: All model artifacts are committed to a dedicated branch
 - **BigQuery ML**: Leverages Google Cloud's managed ML service for scalable training
 
 **Output Artifacts:**
 - Trained models in BigQuery
+- Models registered in Vertex AI Model Registry
 - MLflow tracking data
 - Model artifacts committed to `artifacts_bot` branch
+
+**Trained Models in BigQuery:**
+
+<div>
+  <p align="center">
+    <img src="assets/models_dashboard.png" alt="Models Dashboard" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Models Dashboard in BigQuery</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/boosted_tree_registry.png" alt="Boosted Tree Model Registry" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Model in Vertex AI Model Registry</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_registry_screenshot.png" alt="Matrix Factorization Registry Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model in Vertex AI Model Registry</em>
+  </p>
+</div>
 
 **Next Workflow:** Automatically triggers "3. Generate Predictions" on success
 
 ### Hyperparameter Tuning
 
-Hyperparameter tuning is critical for optimizing model performance. Our training pipeline includes comprehensive hyperparameter tuning capabilities.
-
-**Hyperparameter Tuning Methodology:**
-
-- **Grid Search**: Systematic exploration of hyperparameter space
-- **Cross-Validation**: Used to evaluate hyperparameter combinations
-- **Performance Metrics**: RMSE and MAE used as primary evaluation metrics
-- **Computational Efficiency**: Balanced thoroughness with training time constraints
 
 **Key Hyperparameters Tuned:**
 
@@ -431,44 +563,24 @@ The Matrix Factorization model's performance depends on factorization parameters
 
 These sensitivity analyses informed our final hyperparameter selections, ensuring optimal model performance while maintaining computational efficiency.
 
-### Model Selection
+## Code for Generating Predictions
 
-**Module:** [`src/model_selector.py`](src/model_selector.py)
+**Module:** [`src/generate_prediction_tables.py`](src/generate_prediction_tables.py)
 
-**Purpose:** Balances validation accuracy with fairness scores to pick the best candidate model.
-
-**Functionality:**
-- Compares multiple candidate models based on both performance metrics and fairness scores
-- Uses weighted scoring with configurable weights for performance vs. fairness
-- Enforces minimum fairness requirements
-- Generates model selection reports
-
-**Selection Criteria:**
-- **Performance Metrics**: RMSE, MAE, and R² scores
-- **Fairness Scores**: Equity indices across all dimensions
-- **Weighted Scoring**: Configurable weights for performance vs. fairness
-- **Threshold Enforcement**: Minimum fairness requirements
-
-The selected model balances accuracy with fairness, ensuring both high-quality recommendations and equitable treatment across all user and book segments.
-
-## Code for Model Validation
-
-**Module:** [`src/model_validation.py`](src/model_validation.py)
-
-**Purpose:** Validates trained models against performance thresholds and ensures they meet deployment criteria.
+**Purpose:** Generates bias-ready prediction tables with all features needed for bias detection and evaluation.
 
 **Functionality:**
-- Runs ML.EVALUATE on train/val/test splits
-- Checks RMSE thresholds
-- Validates performance metrics meet requirements
-- Persists validation reports in JSON format
-- Enforces quality gates before deployment
+- Finds the latest trained models in BigQuery
+- Generates predictions using ML.PREDICT for all trained models
+- Creates BigQuery tables optimized for bias analysis
+- Includes slicing features (popularity, era, length, author gender, user activity, etc.)
+- Prepares prediction tables for downstream evaluation and bias detection
 
 ### GitHub Actions Workflow
 
-**Workflow:** [`6_model_validation.yml`](.github/workflows/6_model_validation.yml)
+**Workflow:** [`3_generate_prediction_table.yml`](.github/workflows/3_generate_prediction_table.yml)
 
-**Trigger:** Automatically runs after "5. Bias Detection & Mitigation Pipeline" completes successfully
+**Trigger:** Automatically runs after "2. Model Training" workflow completes successfully
 
 **Steps:**
 
@@ -476,47 +588,252 @@ The selected model balances accuracy with fairness, ensuring both high-quality r
 2. **Set up Python 3.11** - Configures environment
 3. **Authenticate to Google Cloud** - Sets up GCP access
 4. **Install dependencies** - Installs required packages
-5. **Validate model** - This step:
-   - Starts MLflow UI server in the background
-   - Waits for MLflow server readiness
-   - Executes `src.model_validation` which:
-     - Runs ML.EVALUATE on train/val/test splits
-     - Checks RMSE thresholds
-     - Validates performance metrics meet requirements
-     - Persists validation reports in JSON format
-     - Enforces quality gates before deployment
-   - Cleans up MLflow server
-6. **Commit and push new files** - Commits validation reports to `artifacts_bot` branch
-7. **Notifications** - Sends success/failure notifications
+5. **Run Prediction Generator** - Executes `src.generate_prediction_tables` which:
+   - Finds latest trained models in BigQuery
+   - Generates predictions for each model type (Boosted Tree, Matrix Factorization)
+   - Creates prediction tables with all features needed for bias detection
+   - Includes slicing dimensions for bias analysis
+6. **Commit and push new files** - Commits prediction tables to `artifacts_bot` branch
+7. **Notifications** - Sends success/failure email notifications
 
 **Key Features:**
-- **Quality Gates**: Enforces minimum performance thresholds
-- **Multi-Split Validation**: Validates on train, validation, and test sets
-- **Automated Blocking**: Prevents deployment if validation fails
+- **Bias-Ready Tables**: Prediction tables include all slicing features needed for bias detection
+- **Multi-Model Support**: Generates predictions for all trained model types
+- **BigQuery Integration**: Leverages BigQuery ML.PREDICT for efficient prediction generation
 
 **Output Artifacts:**
-- Validation reports (JSON)
-- MLflow logged validation metrics
+- Prediction tables in BigQuery (e.g., `boosted_tree_rating_predictions`, `matrix_factorization_rating_predictions`)
 - Artifacts committed to `artifacts_bot` branch
 
-**Validation Criteria:**
-- RMSE must be below threshold
-- MAE must meet requirements
-- Performance must be consistent across splits
+**Next Workflow:** Automatically triggers "4. Evaluate Model" on success
 
-**Next Workflow:** Automatically triggers "7. Model Manager" on success
+## Code for Evaluating Model
 
-## Code for Bias Checking
+**Module:** [`src/model_evaluation_pipeline.py`](src/model_evaluation_pipeline.py)
 
-**Module:** [`src/bias_detection.py`](src/bias_detection.py)
+**Purpose:** Evaluates model performance, computes metrics, and performs feature importance analysis.
 
-**Purpose:** Computes slice-aware performance metrics, disparity summaries, and mitigation recommendations.
+**Functionality:**
+- Loads trained model predictions from BigQuery
+- Computes performance metrics (MAE, RMSE, R², accuracy within thresholds)
+- Performs SHAP-based feature importance analysis
+- Generates evaluation reports and visualizations
+- Logs metrics to MLflow for experiment tracking
+
+### GitHub Actions Workflow
+
+**Workflow:** [`4_evaluate_model.yml`](.github/workflows/4_evaluate_model.yml)
+
+**Trigger:** Automatically runs after "3. Generate Predictions" workflow completes successfully
+
+**Steps:**
+
+1. **Checkout repository** - Retrieves code
+2. **Set up Python 3.11** - Configures environment
+3. **Authenticate to Google Cloud** - Sets up GCP access
+4. **Install dependencies** - Installs required packages
+5. **Run Model Evaluation** - This step:
+   - Starts MLflow UI server in the background
+   - Waits for MLflow server readiness
+   - Executes `src.model_evaluation_pipeline` which:
+     - Loads predictions from BigQuery
+     - Computes performance metrics (MAE, RMSE, R²)
+     - Performs SHAP-based feature importance analysis
+     - Generates evaluation reports
+     - Logs metrics to MLflow
+   - Cleans up MLflow server
+6. **Commit and push new files** - Commits evaluation reports to `artifacts_bot` branch
+7. **Notifications** - Sends success/failure email notifications
+
+**Key Features:**
+- **Comprehensive Metrics**: Computes multiple performance metrics
+- **Feature Importance**: SHAP analysis for model interpretability
+- **MLflow Integration**: Automatic logging of evaluation metrics
+- **Report Generation**: JSON reports for downstream analysis
+
+**Output Artifacts:**
+- Evaluation reports in `docs/model_analysis/evaluation/`
+- Feature importance analysis in `docs/model_analysis/sensitivity/`
+- MLflow logged evaluation metrics
+- Artifacts committed to `artifacts_bot` branch
+
+**Model Evaluation Metrics:**
+
+<div>
+  <p align="center">
+    <img src="assets/bt_graph.png" alt="Boosted Tree Model Performance Graph" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Model Performance Graph</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_graph.png" alt="Matrix Factorization Model Performance Graph" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model Performance Graph</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_metrics.png" alt="Matrix Factorization Metrics" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model Metrics</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_metrics_ii.png" alt="Matrix Factorization Metrics II" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Model Metrics - Additional Analysis</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/bt_metrics.png" alt="Matrix Factorization Metrics" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Model Metrics</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/bt_metrics_ii.png" alt="Matrix Factorization Metrics II" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Model Metrics - Additional Analysis</em>
+  </p>
+</div>
+
+**Next Workflow:** Automatically triggers "5. Bias Detection & Mitigation Pipeline" on success
+
+## Feature Sensitivity Analysis
+
+**Module:** [`src/model_sensitivity_analysis.py`](src/model_sensitivity_analysis.py)
+
+**Purpose:** Performs SHAP-based feature importance analysis to understand which features have the most impact on model predictions and how feature values affect predictions.
+
+**Location:** `docs/model_analysis/sensitivity/`
+
+### Overview
+
+Feature sensitivity analysis uses SHAP (SHapley Additive exPlanations) values to provide model interpretability by:
+
+1. **Identifying Key Features**: Determining which features have the most impact on predictions
+2. **Understanding Feature Effects**: Analyzing how feature values affect predictions (positive/negative impact)
+3. **Feature Interactions**: Revealing feature dependencies and interactions
+4. **Model Comparison**: Comparing feature importance across different models
+
+### Features Analyzed
+
+The sensitivity analysis examines the following features across all models:
+
+**Book Features:**
+- `book_popularity_normalized` - Normalized popularity score
+- `num_genres` - Number of genres associated with the book
+- `average_rating` - Average rating of the book
+- `ratings_count` - Total number of ratings
+- `num_pages` - Book length in pages
+- `publication_year` - Year the book was published
+- `book_era` - Publication era category (categorical)
+- `book_length_category` - Book length category (Short/Medium/Long)
+- `author_gender_group` - Author gender grouping (categorical)
+
+**User Features:**
+- `user_activity_count` - User's activity level
+- `reading_pace_category` - User's reading pace category (Fast/Medium/Slow)
+
+### Analysis Process
+
+The sensitivity analysis pipeline:
+
+1. **Data Loading**: Samples predictions and features from BigQuery prediction tables
+2. **Feature Preparation**: Encodes categorical variables and prepares feature matrix
+3. **SHAP Computation**: Uses SHAP KernelExplainer to compute feature importance values
+4. **Visualization Generation**: Creates multiple visualization types:
+   - SHAP summary plots showing feature importance and value effects
+   - Bar charts displaying mean absolute SHAP values
+   - Custom importance charts for stakeholder presentations
+5. **Results Persistence**: Saves JSON reports with feature importance scores and metadata
+
+### Output Artifacts
+
+**Location:** `docs/model_analysis/sensitivity/`
+
+The sensitivity analysis generates the following artifacts:
+
+| Artifact Type | Description | Example Filename |
+|--------------|-------------|------------------|
+| **JSON Reports** | Feature importance scores, categorical mappings, and metadata | `{model_name}_feature_importance.json` |
+| **SHAP Summary Plots** | Comprehensive visualization showing feature importance and value effects | `{model_name}_shap_summary.png` |
+| **Importance Bar Charts** | Bar charts displaying mean absolute SHAP values | `{model_name}_importance_bar.png` |
+| **Custom Importance Charts** | Custom-formatted charts for presentations | `{model_name}_custom_importance.png` |
+| **Model Comparison Charts** | Side-by-side comparison of feature importance across models | `model_comparison_features.png` |
+
+### JSON Report
+
+<div>
+  <p align="center">
+    <img src="assets/sensitivity_analysis.png" alt="Matrix Factorization Metrics II" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Sensitivity Analysis</em>
+  </p>
+</div>
+
+### Integration with Evaluation Pipeline
+
+The sensitivity analysis is automatically integrated into the model evaluation workflow:
+
+- **Automatic Execution**: Runs as part of `model_evaluation_pipeline.py` during model evaluation
+- **MLflow Logging**: Top feature importances are logged to MLflow for experiment tracking
+- **Report Linking**: Evaluation reports include references to sensitivity analysis artifacts
+- **Configurable**: Can be enabled/disabled via `run_sensitivity_analysis` parameter
+
+### Interpreting Results
+
+**Feature Importance Scores:**
+- Higher importance values indicate features with greater impact on predictions
+- Scores are normalized mean absolute SHAP values
+- Features are ranked from highest to lowest importance
+
+**SHAP Summary Plots:**
+- **Color coding**: Red indicates high feature values, blue indicates low values
+- **Horizontal position**: Shows positive (right) or negative (left) impact on predictions
+- **Vertical position**: Features ordered by importance (top = most important)
+
+**Use Cases:**
+- **Feature Engineering**: Identify which features to prioritize or engineer
+- **Model Debugging**: Understand unexpected predictions by examining feature contributions
+- **Stakeholder Communication**: Explain model behavior in business terms
+- **Model Comparison**: Compare which features are important across different model types
+
+### Key Features
+
+- **SHAP-Based Analysis**: Uses state-of-the-art SHAP values for model interpretability
+- **Model-Agnostic**: Works with any model type (Boosted Trees, Matrix Factorization, etc.)
+- **Comprehensive Visualizations**: Multiple chart types for different audiences
+- **Efficient Sampling**: Uses configurable sample sizes for computational efficiency
+- **Categorical Support**: Properly handles categorical features with encoding mappings
+- **Automated Integration**: Seamlessly integrated into CI/CD pipeline
+
+**Next Workflow:** Automatically triggers "5. Bias Detection & Mitigation Pipeline" on success
+
+## Code for Bias Detection and Mitigation
+
+**Module:** [`src/bias_detection.py`](src/bias_detection.py), [`src/bias_mitigation.py`](src/bias_mitigation.py), [`src/bias_pipeline.py`](src/bias_pipeline.py)
+
+**Purpose:** Detects bias across multiple dimensions, applies mitigation techniques, and generates comprehensive fairness reports.
 
 **Functionality:**
 - Analyzes model predictions across multiple demographic slices
 - Computes performance metrics (MAE, RMSE) per slice
 - Identifies performance disparities
-- Generates bias detection reports
+- Applies mitigation techniques when bias is detected
+- Generates comprehensive bias detection and mitigation reports
+- Creates visualizations for stakeholder review
+- Selects best model based on performance and fairness
 
 ### Bias Detection Process
 
@@ -576,6 +893,48 @@ The system analyzes bias across **8 key dimensions** to ensure fair recommendati
 - Applies mitigation techniques if needed
 - Generates comprehensive reports and visualizations
 - Validates mitigation effectiveness
+- Selects best model based on performance and fairness
+
+### Model Selection
+
+**Module:** [`src/model_selector.py`](src/model_selector.py)
+
+**Purpose:** Balances evaluation accuracy with fairness scores to pick the best candidate model after bias checking and mitigation.
+
+**Functionality:**
+- Compares multiple candidate models based on both performance metrics and fairness scores
+- Uses weighted scoring with configurable weights for performance vs. fairness
+- Enforces minimum fairness requirements
+- Generates model selection reports
+
+**Selection Criteria:**
+
+- **Performance Metrics**: RMSE, MAE, and R² scores
+- **Fairness Scores**: Equity indices across all dimensions
+- **Weighted Scoring**: Configurable weights for performance vs. fairness
+- **Threshold Enforcement**: Minimum fairness requirements
+
+The selected model balances accuracy with fairness, ensuring both high-quality recommendations and equitable treatment across all user and book segments.
+
+**Model Selection Report:**
+
+The detailed selection decision is documented in [`model_selection_report.json`](docs/bias_reports/model_selection_report.json), which includes:
+- Candidate model scores
+- Selection rationale
+- Performance and fairness trade-offs
+- Final model recommendation
+
+### Model Selection Comparison
+
+The model selection process compares multiple candidate models based on both performance metrics and fairness scores. The comparison chart visualizes the trade-offs between accuracy and fairness:
+
+<div>
+  <p align="center">
+    <img src="docs/bias_reports/model_selection/model_comparison.png" alt="Model Selection Comparison Chart" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Selection Comparison - Performance vs. Fairness Trade-offs</em>
+  </p>
+</div>
 
 ### GitHub Actions Workflow
 
@@ -666,60 +1025,60 @@ When bias is detected, the system applies appropriate mitigation techniques:
 - For severe bias requiring retraining
 - When multiple dimensions show significant disparities
 
-## Code for Model Selection after Bias Checking
+## Code for Model Validation
 
-**Module:** [`src/model_selector.py`](src/model_selector.py)
+**Module:** [`src/model_validation.py`](src/model_validation.py)
 
-**Purpose:** Balances validation accuracy with fairness scores to pick the best candidate model after bias checking and mitigation.
-
-**Functionality:**
-- Compares multiple candidate models based on both performance metrics and fairness scores
-- Uses weighted scoring with configurable weights for performance vs. fairness
-- Enforces minimum fairness requirements
-- Generates model selection reports
-
-**Selection Criteria:**
-
-- **Performance Metrics**: RMSE, MAE, and R² scores
-- **Fairness Scores**: Equity indices across all dimensions
-- **Weighted Scoring**: Configurable weights for performance vs. fairness
-- **Threshold Enforcement**: Minimum fairness requirements
-
-The selected model balances accuracy with fairness, ensuring both high-quality recommendations and equitable treatment across all user and book segments.
-
-**Model Selection Report:**
-
-The detailed selection decision is documented in [`model_selection_report.json`](docs/bias_reports/model_selection_report.json), which includes:
-- Candidate model scores
-- Selection rationale
-- Performance and fairness trade-offs
-- Final model recommendation
-
-### Model Selection Comparison
-
-The model selection process compares multiple candidate models based on both performance metrics and fairness scores. The comparison chart visualizes the trade-offs between accuracy and fairness:
-
-<div>
-  <p align="center">
-    <img src="docs/bias_reports/model_selection/model_comparison.png" alt="Model Selection Comparison Chart" style="max-width:800px; width:100%; height:auto; border-radius:8px;" />
-    <br/>
-    <em>Model Selection Comparison - Performance vs. Fairness Trade-offs</em>
-  </p>
-</div>
-
-## Code to Push Model to Artifact Registry/Model Registry
-
-### Model Registration
-
-**Module:** [`src/register_bqml_models.py`](src/register_bqml_models.py)
-
-**Purpose:** Uploads the latest BQML artifacts into the Vertex AI Model Registry with version control.
+**Purpose:** Validates trained models against performance thresholds and ensures they meet deployment criteria.
 
 **Functionality:**
-- Registers trained models in Vertex AI Model Registry
-- Manages model versioning
-- Stores model metadata
-- Enables model deployment tracking
+- Runs ML.EVALUATE on train/val/test splits
+- Checks RMSE thresholds
+- Validates performance metrics meet requirements
+- Persists validation reports in JSON format
+- Enforces quality gates before deployment
+
+### GitHub Actions Workflow
+
+**Workflow:** [`6_model_validation.yml`](.github/workflows/6_model_validation.yml)
+
+**Trigger:** Automatically runs after "5. Bias Detection & Mitigation Pipeline" completes successfully
+
+**Steps:**
+
+1. **Checkout repository** - Retrieves code
+2. **Set up Python 3.11** - Configures environment
+3. **Authenticate to Google Cloud** - Sets up GCP access
+4. **Install dependencies** - Installs required packages
+5. **Validate model** - This step:
+   - Starts MLflow UI server in the background
+   - Waits for MLflow server readiness
+   - Executes `src.model_validation` which:
+     - Runs ML.EVALUATE on train/val/test splits
+     - Checks RMSE thresholds
+     - Validates performance metrics meet requirements
+     - Persists validation reports in JSON format
+     - Enforces quality gates before deployment
+   - Cleans up MLflow server
+6. **Commit and push new files** - Commits validation reports to `artifacts_bot` branch
+7. **Notifications** - Sends success/failure notifications
+
+**Key Features:**
+- **Quality Gates**: Enforces minimum performance thresholds
+- **Multi-Split Validation**: Validates on train, validation, and test sets
+- **Automated Blocking**: Prevents deployment if validation fails
+
+**Output Artifacts:**
+- Validation reports (JSON)
+- MLflow logged validation metrics
+- Artifacts committed to `artifacts_bot` branch
+
+**Validation Criteria:**
+- RMSE must be below threshold
+- MAE must meet requirements
+- Performance must be consistent across splits
+
+**Next Workflow:** Automatically triggers "7. Model Manager" on success
 
 ### Model Management
 
@@ -775,6 +1134,56 @@ The model selection process compares multiple candidate models based on both per
 - Fairness scores must meet minimum requirements
 - Validation must have passed in previous step
 
+**Vertex AI Model Registry:**
+
+<div>
+  <p align="center">
+    <img src="assets/model_metrics.png" alt="Model Evaluation Metrics" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Manager Selection</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/registry_screenshot.png" alt="Model Registry Screenshot" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Vertex AI Model Registry Overview</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/boosted_tree_models.png" alt="Boosted Tree Models in BigQuery" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Boosted Tree Models in Vertex AI Registry with Versions</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_registry.png" alt="Matrix Factorization Model Registry" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Matrix Factorization Models in Vertex AI Model Registry</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/model_versions.png" alt="Model Versions" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Evaluations of Boosted Tree Models in Vertex AI Registry</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mf_models.png" alt="Matrix Factorization Models in BigQuery" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Evaluations of Matrix Factorization Models in Vertex AI Registry</em>
+  </p>
+</div>
+
 ## Experiment Tracking and Results
 
 ### MLflow Integration
@@ -786,6 +1195,72 @@ Our pipeline uses MLflow for comprehensive experiment tracking:
 - **Parameter Tracking**: Hyperparameters and model configurations are tracked
 - **Artifact Storage**: Model artifacts and evaluation reports are stored in MLflow
 - **Experiment Comparison**: Easy comparison of different model runs and hyperparameter configurations
+
+**MLflow Experiment Tracking:**
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_experiments.png" alt="MLflow Experiments" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Experiments Dashboard</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs.png" alt="MLflow Runs" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs Overview</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs_graph_i.png" alt="MLflow Runs Graph I" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs - Metrics Comparison</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs_graph_ii.png" alt="MLflow Runs Graph II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs - Performance Metrics</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs_ii.png" alt="MLflow Runs II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs - Detailed Metrics View</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/mlflow_runs_iii.png" alt="MLflow Runs III" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>MLflow Runs - Experiment Comparison</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/Model_Comparison_Chart_I.png" alt="Model Comparison Chart I" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Comparison Chart - Performance Analysis</em>
+  </p>
+</div>
+
+<div>
+  <p align="center">
+    <img src="assets/Model_Comparison_Chart_II.png" alt="Model Comparison Chart II" style="max-width:900px; width:100%; height:auto; border-radius:8px;" />
+    <br/>
+    <em>Model Comparison Chart - Fairness Analysis</em>
+  </p>
+</div>
 
 ### Model Analysis Artifacts
 
