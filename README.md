@@ -12,6 +12,42 @@ For basic setup instructions (cloning repository, Python environment setup), ple
 
 > **Note:** For instructions on running the data pre-processing pipeline without Docker, please refer to [README_data.md](README_data.md#3-run-training-pipeline).
 
+### Running with Docker
+
+To run the ML pipeline using Docker, you have two options:
+
+#### Option 1: Manual Docker Steps
+
+1. **Pull the Docker image** from GitHub Container Registry:
+
+   ```bash
+   docker pull ghcr.io/purva-agarwal/goodreads-model:latest
+   ```
+
+   The image is available at: <https://github.com/purva-agarwal/goodreads_recommendations/pkgs/container/goodreads-model>
+
+2. **Run the Docker container** with the required volume mounts and environment variables:
+
+   ```bash
+   docker run --rm \
+     -v $(pwd)/config:/app/config \
+     -v $(pwd)/docs:/app/docs \
+     -e GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json \
+     ghcr.io/purva-agarwal/goodreads-model:latest
+   ```
+
+#### Option 2: Using Make (Recommended)
+
+Simply run:
+
+```bash
+make run-ghcr
+```
+
+This command automatically handles the image pull and container execution with the correct configuration.
+
+> **Note:** Ensure that your `config/gcp_credentials.json` file is present before running the Docker container.
+
 ## GitHub Actions
 
 Our project uses GitHub Actions to automate the complete ML pipeline from data loading to model deployment. The workflows are orchestrated in a sequential pipeline that ensures data quality, model training, evaluation, bias detection, validation, and version management.
