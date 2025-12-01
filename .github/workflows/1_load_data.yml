@@ -2,6 +2,8 @@ name: 1. Load Data
 run-name: Load Data
 
 on:
+  schedule:
+    - cron: '0 2 * * 0'
   workflow_dispatch:
 
 jobs:
