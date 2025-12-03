@@ -15,17 +15,17 @@ output "endpoint_predict_url" {
 
 output "deployer_service_account" {
   description = "Service account email for model deployment"
-  value       = google_service_account.model_deployer.email
+  value       = var.create_service_accounts ? google_service_account.model_deployer[0].email : "not_created"
 }
 
 output "serving_service_account" {
   description = "Service account email for model serving"
-  value       = google_service_account.model_serving.email
+  value       = var.create_service_accounts ? google_service_account.model_serving[0].email : "not_created"
 }
 
 output "monitoring_dashboard_url" {
   description = "URL to the Cloud Monitoring dashboard"
-  value       = "https://console.cloud.google.com/monitoring/dashboards/builder/${google_monitoring_dashboard.model_dashboard.id}?project=${var.project_id}"
+  value       = var.enable_monitoring ? "https://console.cloud.google.com/monitoring/dashboards/builder/${google_monitoring_dashboard.model_dashboard[0].id}?project=${var.project_id}" : "not_created"
 }
 
 output "project_id" {

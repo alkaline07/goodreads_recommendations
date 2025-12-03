@@ -13,7 +13,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "goodreads-terraform-state"
+    bucket = "recommendation-system-475301-terraform-state"
     prefix = "model-deployment"
   }
 }
