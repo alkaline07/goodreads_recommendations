@@ -3,8 +3,11 @@ bigframes
 mlflow
 google-cloud-aiplatform
 google-cloud-bigquery
+google-cloud-logging
+google-cloud-monitoring
 numpy
 scipy
 cython
 shap
 seaborn
+python-dotenv

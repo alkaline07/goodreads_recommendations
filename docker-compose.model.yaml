@@ -137,6 +137,28 @@ services:
       mlflow:
         condition: service_healthy
 
+  model-deploy:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+    image: goodreads-model:latest
+    container_name: goodreads-model-deploy
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./src:/app/src
+      - ./datapipeline:/app/datapipeline
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./mlartifacts:/app/mlartifacts
+      - ./docs:/app/docs
+    command: python -m src.model_deployment
+    depends_on:
+      mlflow:
+        condition: service_healthy
 
   # Interactive shell for development/debugging
   model-dev:
