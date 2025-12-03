@@ -2,11 +2,6 @@ name: 2. Model Training
 run-name: Model Retraining
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'src/**'
-      - 'model_requirements.txt'
   workflow_dispatch:
   workflow_run:
     workflows: ["1. Load Data"]
@@ -20,10 +15,7 @@ jobs:
       contents: write
       actions: read
     
-    if: |
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout code
@@ -42,8 +34,7 @@ jobs:
       with:
         credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-    - name: Download data artifact via GH CLI (if triggered by load_data)
-      if: github.event_name == 'workflow_run'
+    - name: Download data artifact via GH CLI
       env:
         GH_TOKEN: ${{ github.token }}
         REPO: ${{ github.repository }}
@@ -51,8 +42,7 @@ jobs:
       run: |
         gh run download $RUN_ID -R $REPO -n goodreads-train-data
 
-    - name: Move data to correct location (if artifact downloaded)
-      if: github.event_name == 'workflow_run'
+    - name: Move data to correct location
       run: |
         mv train_data.parquet data/.
 

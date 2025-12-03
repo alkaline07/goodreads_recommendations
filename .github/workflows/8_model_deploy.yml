@@ -1,0 +1,361 @@
+name: 8. Deploy Model
+run-name: Deploy model to Vertex AI Endpoint
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Deployment environment (dev, staging, prod)'
+        required: false
+        type: string
+        default: 'prod'
+      traffic_split:
+        description: 'Traffic percentage for the new model (0-100)'
+        required: false
+        type: number
+        default: 100
+      dry_run:
+        description: 'Perform a dry run without actual deployment'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      GCP_CREDENTIALS:
+        required: true
+      CALLER_GITHUB_TOKEN:
+        required: true
+      SMTP_EMAIL:
+        required: false
+      SMTP_PASSWORD:
+        required: false
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      traffic_split:
+        description: 'Traffic percentage for the new model (0-100)'
+        required: false
+        default: '100'
+      model_display_name:
+        description: 'Model display name (leave empty for auto-detect)'
+        required: false
+        default: ''
+      model_version:
+        description: 'Specific model version to deploy (leave empty for default)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Perform a dry run without actual deployment'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  VERTEX_AI_REGION: us-central1
+  ENDPOINT_DISPLAY_NAME: goodreads-recommendation-endpoint
+  DEFAULT_MACHINE_TYPE: n1-standard-2
+  MIN_REPLICAS: 1
+  MAX_REPLICAS: 3
+
+jobs:
+  validate:
+    name: Validate Deployment Requirements
+    runs-on: ubuntu-latest
+    outputs:
+      model_ready: ${{ steps.check_model.outputs.ready }}
+      model_display_name: ${{ steps.check_model.outputs.display_name }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Install dependencies
+        run: |
+          pip install google-cloud-aiplatform google-cloud-bigquery
+
+      - name: Check model availability
+        id: check_model
+        run: |
+          python << 'EOF'
+          import os
+          import json
+          from google.cloud import aiplatform
+
+          aiplatform.init(location="us-central1")
+
+          # Try to read model selection report
+          model_display_name = "${{ inputs.model_display_name }}" or None
+          
+          if not model_display_name:
+              try:
+                  with open("docs/bias_reports/model_selection_report.json", "r") as f:
+                      report = json.load(f)
+                  model_name = report.get("selected_model", {}).get("model_name", "boosted_tree_regressor")
+                  model_display_name = f"goodreads_{model_name}"
+              except:
+                  model_display_name = "goodreads_boosted_tree_regressor"
+
+          print(f"Checking for model: {model_display_name}")
+
+          models = aiplatform.Model.list(filter=f'display_name="{model_display_name}"')
+          
+          if models:
+              print(f"✓ Model found: {models[0].resource_name}")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write(f"ready=true\n")
+                  f.write(f"display_name={model_display_name}\n")
+          else:
+              print(f"✗ Model not found: {model_display_name}")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write(f"ready=false\n")
+                  f.write(f"display_name={model_display_name}\n")
+          EOF
+
+      - name: Fail if model not ready
+        if: steps.check_model.outputs.ready != 'true'
+        run: |
+          echo "::error::Model not found in Vertex AI Registry"
+          exit 1
+
+  deploy:
+    name: Deploy Model to Endpoint
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'prod' }}
+    
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r model_requirements.txt
+          pip install google-cloud-logging
+
+      - name: Run deployment
+        id: deploy
+        env:
+          MLFLOW_TRACKING_URI: file:///tmp/mlruns
+          DEPLOYMENT_ENV: ${{ inputs.environment || 'prod' }}
+        run: |
+          echo "Starting model deployment..."
+          echo "Environment: $DEPLOYMENT_ENV"
+          echo "Model: ${{ needs.validate.outputs.model_display_name }}"
+          echo "Traffic Split: ${{ inputs.traffic_split || 100 }}%"
+          
+          DEPLOY_ARGS="--region ${{ env.VERTEX_AI_REGION }} \
+                       --endpoint-name ${{ env.ENDPOINT_DISPLAY_NAME }} \
+                       --machine-type ${{ env.DEFAULT_MACHINE_TYPE }} \
+                       --min-replicas ${{ env.MIN_REPLICAS }} \
+                       --max-replicas ${{ env.MAX_REPLICAS }} \
+                       --traffic-split ${{ inputs.traffic_split || 100 }} \
+                       --model-display-name ${{ needs.validate.outputs.model_display_name }}"
+          
+          if [ -n "${{ inputs.model_version }}" ]; then
+            DEPLOY_ARGS="$DEPLOY_ARGS --model-version ${{ inputs.model_version }}"
+          fi
+          
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            DEPLOY_ARGS="$DEPLOY_ARGS --dry-run"
+            echo "Running in DRY RUN mode"
+          fi
+          
+          python -m src.model_deployment $DEPLOY_ARGS
+          
+          echo "deployment_status=success" >> $GITHUB_OUTPUT
+
+      - name: Upload deployment logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployment-logs-${{ github.run_id }}
+          path: docs/deployment_logs/
+          retention-days: 30
+
+      - name: Generate deployment summary
+        if: success() && inputs.dry_run != true
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Model** | ${{ needs.validate.outputs.model_display_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Endpoint** | ${{ env.ENDPOINT_DISPLAY_NAME }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Region** | ${{ env.VERTEX_AI_REGION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | ${{ inputs.environment || 'prod' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Traffic Split** | ${{ inputs.traffic_split || 100 }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Machine Type** | ${{ env.DEFAULT_MACHINE_TYPE }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Min Replicas** | ${{ env.MIN_REPLICAS }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Max Replicas** | ${{ env.MAX_REPLICAS }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployment completed successfully at $(date -u)" >> $GITHUB_STEP_SUMMARY
+
+  monitor:
+    name: Verify Deployment Health
+    needs: [validate, deploy]
+    runs-on: ubuntu-latest
+    if: inputs.dry_run != true
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Install dependencies
+        run: pip install google-cloud-aiplatform google-cloud-monitoring
+
+      - name: Check endpoint health
+        id: health_check
+        run: |
+          python << 'EOF'
+          import os
+          import json
+          import time
+          from google.cloud import aiplatform
+
+          aiplatform.init(location="us-central1")
+
+          endpoint_name = "${{ env.ENDPOINT_DISPLAY_NAME }}"
+          max_retries = 5
+          retry_delay = 30
+
+          print(f"Checking health of endpoint: {endpoint_name}")
+
+          for attempt in range(max_retries):
+              try:
+                  endpoints = aiplatform.Endpoint.list(filter=f'display_name="{endpoint_name}"')
+                  
+                  if endpoints:
+                      endpoint = endpoints[0]
+                      deployed_models = endpoint.list_models()
+                      
+                      if deployed_models:
+                          print(f"✓ Endpoint healthy with {len(deployed_models)} deployed model(s)")
+                          for dm in deployed_models:
+                              print(f"  - {dm.display_name}")
+                          
+                          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                              f.write("health=healthy\n")
+                          exit(0)
+                      else:
+                          print(f"⚠ No deployed models found (attempt {attempt + 1}/{max_retries})")
+                  else:
+                      print(f"⚠ Endpoint not found (attempt {attempt + 1}/{max_retries})")
+                      
+              except Exception as e:
+                  print(f"⚠ Health check failed: {e} (attempt {attempt + 1}/{max_retries})")
+              
+              if attempt < max_retries - 1:
+                  print(f"Retrying in {retry_delay} seconds...")
+                  time.sleep(retry_delay)
+
+          print("✗ Health check failed after all retries")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write("health=unhealthy\n")
+          exit(1)
+          EOF
+
+      - name: Log deployment metrics
+        if: always()
+        run: |
+          python << 'EOF'
+          import json
+          from datetime import datetime
+          from google.cloud import aiplatform
+
+          aiplatform.init(location="us-central1")
+
+          endpoint_name = "${{ env.ENDPOINT_DISPLAY_NAME }}"
+          
+          try:
+              endpoints = aiplatform.Endpoint.list(filter=f'display_name="{endpoint_name}"')
+              
+              if endpoints:
+                  endpoint = endpoints[0]
+                  deployed_models = endpoint.list_models()
+                  traffic = endpoint.traffic_split or {}
+                  
+                  status = {
+                      "timestamp": datetime.now().isoformat(),
+                      "endpoint": endpoint.display_name,
+                      "endpoint_id": endpoint.resource_name,
+                      "deployed_models": [
+                          {
+                              "id": dm.id,
+                              "name": dm.display_name,
+                              "traffic": traffic.get(dm.id, 0)
+                          }
+                          for dm in deployed_models
+                      ],
+                      "health": "${{ steps.health_check.outputs.health }}"
+                  }
+                  
+                  print("Deployment Status:")
+                  print(json.dumps(status, indent=2))
+              else:
+                  print("Endpoint not found")
+          except Exception as e:
+              print(f"Error getting deployment status: {e}")
+          EOF
+
+      - name: Create health status badge
+        if: success()
+        run: |
+          echo "## Deployment Health" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.health_check.outputs.health }}" == "healthy" ]; then
+            echo "![Health](https://img.shields.io/badge/Status-Healthy-brightgreen)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "![Health](https://img.shields.io/badge/Status-Unhealthy-red)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  notify:
+    name: Send Notifications
+    needs: [validate, deploy, monitor]
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.deploy.result }}
+      workflow_name: "Model Deployment"
+    secrets: inherit

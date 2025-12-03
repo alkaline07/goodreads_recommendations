@@ -1,0 +1,150 @@
+steps:
+  - id: 'fetch-model-info'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Fetching model information from Vertex AI Registry..."
+        
+        # Get the selected model from the model selection report if available
+        if [ -f "docs/bias_reports/model_selection_report.json" ]; then
+          MODEL_NAME=$(cat docs/bias_reports/model_selection_report.json | jq -r '.selected_model.model_name // "boosted_tree_regressor"')
+        else
+          MODEL_NAME="boosted_tree_regressor"
+        fi
+        
+        MODEL_DISPLAY_NAME="goodreads_${MODEL_NAME}"
+        echo "Target model: ${MODEL_DISPLAY_NAME}"
+        
+        # Check if model exists in Vertex AI
+        gcloud ai models list \
+          --region=${_REGION} \
+          --filter="displayName=${MODEL_DISPLAY_NAME}" \
+          --format="value(name)" > /workspace/model_id.txt
+        
+        if [ -s /workspace/model_id.txt ]; then
+          echo "Model found in registry"
+          echo "${MODEL_DISPLAY_NAME}" > /workspace/model_display_name.txt
+        else
+          echo "ERROR: Model not found in Vertex AI Registry"
+          exit 1
+        fi
+
+  - id: 'check-endpoint'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Checking for existing endpoint..."
+        
+        ENDPOINT_ID=$(gcloud ai endpoints list \
+          --region=${_REGION} \
+          --filter="displayName=${_ENDPOINT_NAME}" \
+          --format="value(name)" | head -1)
+        
+        if [ -n "${ENDPOINT_ID}" ]; then
+          echo "Found existing endpoint: ${ENDPOINT_ID}"
+          echo "${ENDPOINT_ID}" > /workspace/endpoint_id.txt
+        else
+          echo "Creating new endpoint..."
+          gcloud ai endpoints create \
+            --region=${_REGION} \
+            --display-name=${_ENDPOINT_NAME} \
+            --description="Goodreads book recommendation model endpoint" \
+            --labels=project=goodreads-recommendations,managed_by=cloudbuild \
+            --format="value(name)" > /workspace/endpoint_id.txt
+          echo "Created endpoint: $(cat /workspace/endpoint_id.txt)"
+        fi
+
+  - id: 'deploy-model'
+    name: 'python:3.11-slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Installing dependencies..."
+        pip install --quiet google-cloud-aiplatform google-cloud-bigquery google-cloud-logging python-dotenv
+        
+        echo "Running model deployment..."
+        python -m src.model_deployment \
+          --region=${_REGION} \
+          --endpoint-name=${_ENDPOINT_NAME} \
+          --machine-type=${_MACHINE_TYPE} \
+          --min-replicas=${_MIN_REPLICAS} \
+          --max-replicas=${_MAX_REPLICAS} \
+          --traffic-split=${_TRAFFIC_SPLIT}
+    env:
+      - 'PYTHONPATH=/workspace'
+
+  - id: 'verify-deployment'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Verifying deployment health..."
+        
+        ENDPOINT_ID=$(cat /workspace/endpoint_id.txt)
+        
+        MAX_RETRIES=5
+        RETRY_DELAY=30
+        
+        for i in $(seq 1 $MAX_RETRIES); do
+          echo "Health check attempt $i of $MAX_RETRIES..."
+          
+          DEPLOYED_MODELS=$(gcloud ai endpoints describe ${ENDPOINT_ID} \
+            --region=${_REGION} \
+            --format="value(deployedModels[].displayName)")
+          
+          if [ -n "${DEPLOYED_MODELS}" ]; then
+            echo "Deployment verified successfully!"
+            echo "Deployed models: ${DEPLOYED_MODELS}"
+            exit 0
+          fi
+          
+          if [ $i -lt $MAX_RETRIES ]; then
+            echo "Waiting ${RETRY_DELAY} seconds before retry..."
+            sleep ${RETRY_DELAY}
+          fi
+        done
+        
+        echo "ERROR: Deployment verification failed"
+        exit 1
+
+  - id: 'log-deployment'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Logging deployment status..."
+        
+        MODEL_DISPLAY_NAME=$(cat /workspace/model_display_name.txt)
+        ENDPOINT_ID=$(cat /workspace/endpoint_id.txt)
+        
+        # Create structured log entry
+        gcloud logging write model-deployment \
+          "{\"event_type\": \"DEPLOYMENT_COMPLETED\", \"model_name\": \"${MODEL_DISPLAY_NAME}\", \"endpoint_id\": \"${ENDPOINT_ID}\", \"status\": \"SUCCESS\", \"build_id\": \"${BUILD_ID}\", \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" \
+          --severity=INFO \
+          --payload-type=json
+
+substitutions:
+  _REGION: 'us-central1'
+  _ENDPOINT_NAME: 'goodreads-recommendation-endpoint'
+  _MACHINE_TYPE: 'n1-standard-2'
+  _MIN_REPLICAS: '1'
+  _MAX_REPLICAS: '3'
+  _TRAFFIC_SPLIT: '100'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+timeout: '1800s'
+
+tags:
+  - 'model-deployment'
+  - 'goodreads-recommendations'
+  - 'vertex-ai'
