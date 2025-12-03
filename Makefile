@@ -1,8 +1,9 @@
-.PHONY: help build up down clean logs shell test pipeline-all
+.PHONY: help build up down clean logs shell test pipeline-all deploy deploy-dry-run terraform-init terraform-plan terraform-apply
 .DEFAULT_GOAL := help
 
 IMAGE_NAME := goodreads-model:latest
 COMPOSE_FILE := docker-compose.model.yaml
+TERRAFORM_DIR := terraform
 
 
 DOCKER_COMPOSE := $(shell if command -v docker-compose > /dev/null 2>&1; then echo "docker-compose"; elif docker compose version > /dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi)
@@ -23,6 +24,8 @@ help:
 	@echo "  make bias               Run bias detection & mitigation"
 	@echo "  make validate           Validate trained models"
 	@echo "  make rollback           Rollback model"
+	@echo "  make deploy             Deploy model to Vertex AI Endpoint"
+	@echo "  make deploy-dry-run     Dry run deployment (no changes)"
 	@echo ""
 	@echo "Run Pipeline:"
 	@echo "  make pipeline-all       Run complete pipeline (all steps)"
@@ -42,6 +45,11 @@ help:
 	@echo "Info Commands:"
 	@echo "  make check-setup        Check if prerequisites are met"
 	@echo "  make version            Show Docker and tool versions"
+	@echo ""
+	@echo "Infrastructure Commands:"
+	@echo "  make terraform-init     Initialize Terraform"
+	@echo "  make terraform-plan     Plan infrastructure changes"
+	@echo "  make terraform-apply    Apply infrastructure changes"
 	@echo ""
 	@echo "════════════════════════════════════════════════════════════════"
 
@@ -87,6 +95,38 @@ rollback:
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-rollback
 	@echo "Rollback manager complete!"
 
+deploy:
+	@echo "Deploying model to Vertex AI Endpoint"
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up model-deploy
+	@echo "Model deployment complete!"
+
+deploy-dry-run:
+	@echo "Running deployment dry run"
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) run --rm \
+		-e GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json \
+		model-deploy python -m src.model_deployment --dry-run
+	@echo "Dry run complete!"
+
+terraform-init:
+	@echo "Initializing Terraform"
+	cd $(TERRAFORM_DIR) && terraform init
+	@echo "Terraform initialized!"
+
+terraform-plan:
+	@echo "Planning Terraform changes"
+	cd $(TERRAFORM_DIR) && terraform plan -out=tfplan
+	@echo "Terraform plan complete!"
+
+terraform-apply:
+	@echo "Applying Terraform changes"
+	@read -p "Are you sure you want to apply? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		cd $(TERRAFORM_DIR) && terraform apply tfplan; \
+		echo "Terraform apply complete!"; \
+	else \
+		echo "Cancelled."; \
+	fi
 
 pipeline-all:
 	@echo "Running complete pipeline"
@@ -108,6 +148,9 @@ pipeline-all:
 	@echo ""
 	@echo "Step 6/6: Rollback models"
 	@make rollback
+	@echo ""
+	@echo "Step 7/7: Deploy model"
+	@make deploy
 	@echo ""
 	@echo "Complete pipeline finished!"
 

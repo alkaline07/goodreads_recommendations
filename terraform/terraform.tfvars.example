@@ -1,0 +1,11 @@
+project_id            = "your-gcp-project-id"
+region                = "us-central1"
+environment           = "prod"
+model_display_name    = "goodreads_boosted_tree_regressor"
+endpoint_display_name = "goodreads-recommendation-endpoint"
+min_replica_count     = 1
+max_replica_count     = 3
+machine_type          = "n1-standard-2"
+enable_logging        = true
+enable_monitoring     = true
+traffic_split_percentage = 100
