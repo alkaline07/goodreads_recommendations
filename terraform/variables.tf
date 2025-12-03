@@ -74,6 +74,18 @@ variable "enable_monitoring" {
   default     = true
 }
 
+variable "create_service_accounts" {
+  description = "Create dedicated service accounts (requires iam.serviceAccounts.create permission)"
+  type        = bool
+  default     = true
+}
+
+variable "create_logging_metrics" {
+  description = "Create logging metrics (requires logging.logMetrics.create permission)"
+  type        = bool
+  default     = true
+}
+
 variable "traffic_split_percentage" {
   description = "Percentage of traffic to route to the deployed model (0-100)"
   type        = number
