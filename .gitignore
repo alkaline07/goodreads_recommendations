@@ -31,3 +31,15 @@ webserver_config.py
 gcp_credentials.json
 
 gha-creds-*.json
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/*.tfplan
+terraform/terraform.tfvars
+
+# Deployment logs
+docs/deployment_logs/*.log
+docs/deployment_logs/*.json
