@@ -1,3 +1,9 @@
 fastapi
 pydantic
-google-cloud-bigquery
+uvicorn[standard]
+google-auth
+google-api-core
+google-cloud-core
+uvloop
+httptools
+orjson
