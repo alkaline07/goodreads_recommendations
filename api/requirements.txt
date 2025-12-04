@@ -1,0 +1,9 @@
+fastapi
+pydantic
+uvicorn[standard]
+google-auth
+google-api-core
+google-cloud-core
+uvloop
+httptools
+orjson
