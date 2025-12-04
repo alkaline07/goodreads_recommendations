@@ -234,6 +234,41 @@ def test_query_contains_expected_features():
                     assert 'book_age_years' in query
                     assert 'reading_pace_category' in query
                     assert 'book_era' in query
+                    assert 'interaction_weight' in query
+
+def test_interaction_weight_logic_in_sql():
+    """
+    Test that the interaction_weight CASE statement is correctly generated in the SQL.
+    Verifies the specific weights for read (5), like (4), add_to_list (3), and click (1).
+    """
+    with patch.dict(os.environ, {'AIRFLOW_HOME': '/tmp/test'}):
+        with patch('os.path.exists', return_value=True):
+            with patch('datapipeline.scripts.feature_engineering.bigquery.Client') as mock_client:
+                mock_client.return_value.project = 'test-project'
+                
+                fe = FeatureEngineering()
+                
+                # Mock query job to prevent actual execution
+                mock_query_job = Mock()
+                mock_query_job.result.return_value = None
+                fe.client.query.return_value = mock_query_job
+                
+                with patch('datapipeline.scripts.feature_engineering.bigquery.QueryJobConfig'):
+                    # Trigger the method that builds the SQL
+                    fe.create_features()
+                    
+                    # Capture the query string passed to the client
+                    call_args = fe.client.query.call_args
+                    generated_sql = call_args[0][0]
+                    
+                    # Validate the hierarchy logic exists exactly as defined
+                    assert "WHEN interaction_type = 'read' THEN 5" in generated_sql
+                    assert "WHEN interaction_type = 'like' THEN 4" in generated_sql
+                    assert "WHEN interaction_type = 'add_to_list' THEN 3" in generated_sql
+                    assert "WHEN interaction_type = 'click' THEN 1" in generated_sql
+                    
+                    # Validate the column is aliased correctly
+                    assert "END as interaction_weight" in generated_sql
 
 def test_environment_variables():
     """Test environment variable handling"""
@@ -265,4 +300,4 @@ def test_main_function():
         main()
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__, "-q"])

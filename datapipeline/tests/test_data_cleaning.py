@@ -147,6 +147,40 @@ def test_clean_books_table_creates_expected_sql(data_cleaning_instance, mock_bq_
         assert "SELECT DISTINCT" in query_call
         assert "WITH" not in query_call 
 
+def test_clean_interactions_table_excludes_views(data_cleaning_instance, mock_bq_client):
+    """
+    Test that clean_interactions_table applies the filter to exclude 'view' interaction types.
+    """
+    # 1. Mock the schema response so the column loop functions correctly
+    mock_df = MagicMock()
+    mock_df.iterrows.return_value = iter([
+        (0, {'column_name': 'interaction_type', 'data_type': 'STRING'}),
+        (1, {'column_name': 'book_id', 'data_type': 'INT64'}),
+        (2, {'column_name': 'user_id', 'data_type': 'INT64'})
+    ])
+    mock_df.__len__.return_value = 3
+    
+    # The first query call is to INFORMATION_SCHEMA
+    mock_bq_client.query.return_value.to_dataframe.return_value = mock_df
+
+    # 2. Run the method
+    with patch("datapipeline.scripts.data_cleaning.bigquery.QueryJobConfig"):
+        data_cleaning_instance.clean_interactions_table(
+            interactions_table_name="goodreads_interactions",
+            interactions_destination="test_project.books.cleaned_interactions",
+            books_destination="test_project.books.cleaned_books"
+        )
+
+    # 3. Retrieve the generated SQL
+    # Call 0: Information Schema
+    # Call 1: The cleaning query (This is the one we want to check)
+    # Call 2: The JOIN/Filter query
+    cleaning_query_call = mock_bq_client.query.call_args_list[1][0][0]
+
+    # 4. Assert the filter clause exists
+    assert "WHERE interaction_type != 'view'" in cleaning_query_call
+    assert "SELECT DISTINCT" in cleaning_query_call
+    assert "test_project.books.goodreads_interactions" in cleaning_query_call
 
 def test_clean_interactions_table_filters_against_books(data_cleaning_instance, mock_bq_client):
     """
@@ -176,7 +210,6 @@ def test_clean_interactions_table_filters_against_books(data_cleaning_instance, 
     # Check the second query (generic clean)
     query_call_1 = mock_bq_client.query.call_args_list[1][0][0]
     assert "goodreads_interactions" in query_call_1
-    assert "WHERE" not in query_call_1 
 
     # Check the third query (filtering join)
     query_call_2 = mock_bq_client.query.call_args_list[2][0][0]
