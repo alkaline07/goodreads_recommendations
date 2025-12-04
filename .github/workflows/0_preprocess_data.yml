@@ -276,6 +276,14 @@ jobs:
         run: |
           mkdir -p config
           echo '${{ secrets.GCP_CREDENTIALS }}' > config/gcp_credentials.json
+          
+          if [ -f config/gcp_credentials.json ]; then
+            echo "GCP credentials file created successfully"
+            echo "File size: $(wc -c < config/gcp_credentials.json) bytes"
+          else
+            echo "ERROR: Failed to create GCP credentials file"
+            exit 1
+          fi
 
       - name: Build and start Airflow services
         run: |
