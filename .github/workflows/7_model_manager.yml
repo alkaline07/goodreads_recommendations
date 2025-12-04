@@ -87,7 +87,7 @@ jobs:
     name: Trigger Model Deployment
     needs: model-manager
     if: needs.model-manager.result == 'success'
-    uses: ./.github/workflows/8_model_deploy.yml
+    uses: ./.github/workflows/8_model_deploy_endpoint.yml
     with:
       environment: prod
       traffic_split: 100
