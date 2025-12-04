@@ -14,7 +14,7 @@ env:
   REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || 'recommendation-system-475301' }}
   TF_WORKING_DIR: terraform
-  AR_REPO_NAME: reco-backend # Artifact Registry repo name
+  AR_REPO_NAME: goodreads-api-backend
 
 jobs:
   build-and-deploy:
@@ -39,7 +39,6 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      # OPTIONAL: create Artifact Registry repo if it doesn't exist
       - name: Ensure Artifact Registry repo exists
         run: |
           gcloud artifacts repositories describe "${AR_REPO_NAME}" \
@@ -51,7 +50,6 @@ jobs:
             --description="Goodreads recommendation service images" \
             --project="${PROJECT_ID}"
 
-      # Configure Docker to use gcloud as auth helper for Artifact Registry
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
