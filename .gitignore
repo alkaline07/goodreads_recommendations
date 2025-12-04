@@ -8,6 +8,7 @@ tests/test_output/
 
 
 
+
 # Ignore Airflow logs and generated password file
 config/simple_auth_manager_passwords.json.generated
 
