@@ -1,0 +1,5149 @@
+[{
+  "book_id": "764453",
+  "title_clean": "\"...officer down, code three.\"",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":403174}"],
+  "average_rating": "4.31",
+  "isbn_clean": "0916070018"
+}, {
+  "book_id": "22007198",
+  "title_clean": "\"A\" IS FOR THE ALCHEMIST",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8180666}"],
+  "average_rating": "4.33",
+  "isbn_clean": "0615963307"
+}, {
+  "book_id": "26037620",
+  "title_clean": "\"A\" is for Actress (Malibu Mystery, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2525338}", "{\"role\":\"\",\"author_id\":2892163}"],
+  "average_rating": "3.81",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "2651738",
+  "title_clean": "\"A\" is for Apple (Sophie Green Mystery #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":847247}"],
+  "average_rating": "4.0",
+  "isbn_clean": "1599986582"
+}, {
+  "book_id": "7695552",
+  "title_clean": "\"A\" is for Apple (Sophie Green Mystery #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":847247}"],
+  "average_rating": "4.0",
+  "isbn_clean": "1599986051"
+}, {
+  "book_id": "27393525",
+  "title_clean": "\"A\" is for Asshat",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2525338}"],
+  "average_rating": "3.81",
+  "isbn_clean": "1518676561"
+}, {
+  "book_id": "31119384",
+  "title_clean": "\"A\" is for Asshat (Malibu Mystery, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2525338}"],
+  "average_rating": "3.81",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20572389",
+  "title_clean": "\"Bertramo\" viešbutis (Agata, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"translator\",\"author_id\":7777153}"],
+  "average_rating": "3.7",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13454436",
+  "title_clean": "\"C\" de Cadáver",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9559}", "{\"role\":\"Tradutora\",\"author_id\":2877844}"],
+  "average_rating": "3.87",
+  "isbn_clean": "9726117097"
+}, {
+  "book_id": "12049219",
+  "title_clean": "\"D\" Is for Deadbeat (Kinsey Millhone, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9559}"],
+  "average_rating": "3.85",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12049131",
+  "title_clean": "\"E\" Is for Evidence (Kinsey Millhone, #5)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9559}"],
+  "average_rating": "3.88",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12048985",
+  "title_clean": "\"F\" is for Fugitive (Kinsey Millhone, #6)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9559}"],
+  "average_rating": "3.9",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "824349",
+  "title_clean": "\"G\" is for Grafton: The World of Kinsey Millhone... Revised and Updated through \"O\" IS FOR OUTLAW",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":357881}", "{\"role\":\"\",\"author_id\":429724}"],
+  "average_rating": "3.81",
+  "isbn_clean": "0805065075"
+}, {
+  "book_id": "9722538",
+  "title_clean": "\"G\" is for Gumshoe  (Kinsey Millhone, #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9559}"],
+  "average_rating": "3.9",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17818338",
+  "title_clean": "\"He Killed Our Janny:\" A Family\u0027s Search for the Truth",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5231070}"],
+  "average_rating": "3.7",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "934378",
+  "title_clean": "\"I Heard You Paint Houses\": Frank \"The Irishman\" Sheeran \u0026 Closing the Case on Jimmy Hoffa",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":144064}"],
+  "average_rating": "4.08",
+  "isbn_clean": "1586420895"
+}, {
+  "book_id": "8459618",
+  "title_clean": "\"I Heard You Paint Houses\": Frank \"The Irishman\" Sheeran \u0026 Closing the Case on Jimmy Hoffa",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":144064}"],
+  "average_rating": "4.08",
+  "isbn_clean": "1586421557"
+}, {
+  "book_id": "26815292",
+  "title_clean": "\"Il cuore del male\" (Krewe of Hunters, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":30819}"],
+  "average_rating": "3.98",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11511347",
+  "title_clean": "\"N\" is for Noose",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9559}"],
+  "average_rating": "3.97",
+  "isbn_clean": "125000649X"
+}, {
+  "book_id": "1975128",
+  "title_clean": "\"Q\" Clearance",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":59542}"],
+  "average_rating": "3.59",
+  "isbn_clean": "0394553608"
+}, {
+  "book_id": "17183702",
+  "title_clean": "\"Shadows: A Jake Somers Novel\"",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4561707}"],
+  "average_rating": "4.0",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20706323",
+  "title_clean": "\"Shouldn\u0027t You Be in School?\" (All the Wrong Questions, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":36746}", "{\"role\":\"Illustrations\",\"author_id\":5120}"],
+  "average_rating": "4.17",
+  "isbn_clean": "0316409685"
+}, {
+  "book_id": "6368304",
+  "title_clean": "\"The King of Swords\"",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":495679}"],
+  "average_rating": "3.86",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17557564",
+  "title_clean": "\"When Did You See Her Last?\" (All The Wrong Questions, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":36746}", "{\"role\":\"Illustrations\",\"author_id\":5120}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0316225037"
+}, {
+  "book_id": "16146829",
+  "title_clean": "\"Who Could That Be at This Hour?\"",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":36746}"],
+  "average_rating": "3.83",
+  "isbn_clean": "1443401927"
+}, {
+  "book_id": "27270945",
+  "title_clean": "\"Why Is This Night Different from All Other Nights?\" (All The Wrong Questions, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":36746}"],
+  "average_rating": "4.12",
+  "isbn_clean": "1742972993"
+}, {
+  "book_id": "25118040",
+  "title_clean": "\"Why Is This Night Different from All Other Nights?\" (All the Wrong Questions, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":36746}", "{\"role\":\"Illustrator\",\"author_id\":5120}"],
+  "average_rating": "4.12",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "251538",
+  "title_clean": "\"Wicked\" Women Whodunit",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1429808}", "{\"role\":\"\",\"author_id\":146986}", "{\"role\":\"\",\"author_id\":146987}", "{\"role\":\"\",\"author_id\":91508}"],
+  "average_rating": "3.36",
+  "isbn_clean": "0758210264"
+}, {
+  "book_id": "8232205",
+  "title_clean": "\"Yellow Kid\" Weil: The Autobiography of America\u0027s Master Swindler",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4017712}", "{\"role\":\"Foreword\",\"author_id\":4017713}", "{\"role\":\"Contributor\",\"author_id\":159609}"],
+  "average_rating": "3.74",
+  "isbn_clean": "1849350213"
+}, {
+  "book_id": "11257411",
+  "title_clean": "\"Левиафан\"",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":34589}"],
+  "average_rating": "3.99",
+  "isbn_clean": "581590970X"
+}, {
+  "book_id": "15735805",
+  "title_clean": "#37: A Picker Mystery",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5989157}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1475186819"
+}, {
+  "book_id": "34521785",
+  "title_clean": "#MURDERTRENDING",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4145664}"],
+  "average_rating": "4.88",
+  "isbn_clean": "1368010024"
+}, {
+  "book_id": "29613867",
+  "title_clean": "#Prettyboy Must Die",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3139880}"],
+  "average_rating": "4.2",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25588367",
+  "title_clean": "#iAm16iCan",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14016223}"],
+  "average_rating": "4.35",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "26156207",
+  "title_clean": "#iAm16iCan",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14016223}"],
+  "average_rating": "4.35",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12056332",
+  "title_clean": "$10,000 in Small, Unmarked Puzzles (Puzzle Lady #13)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":107322}"],
+  "average_rating": "3.47",
+  "isbn_clean": "0312602472"
+}, {
+  "book_id": "11915425",
+  "title_clean": "$100 Is Too Cheap",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5005305}"],
+  "average_rating": "2.91",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23562546",
+  "title_clean": "$20 Lust",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":17613}", "{\"role\":\"\",\"author_id\":453152}"],
+  "average_rating": "2.92",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22377797",
+  "title_clean": "\u0027Cause She\u0027s a Good Girl",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7014495}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "35388144",
+  "title_clean": "\u0027Cause She\u0027s a Good Girl",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7014495}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "2233981",
+  "title_clean": "\u0027Elizabeth Is Missing\u0027 Or, Truth Triumphant: An Eighteenth Century Mystery",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":20517}"],
+  "average_rating": "3.69",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6624281",
+  "title_clean": "\u0027Life\u0027s a Bitch. So Am I.\u0027 (Rachel Cord, PI: A Confidential Investigations Mystery #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2989081}"],
+  "average_rating": "2.9",
+  "isbn_clean": "1432731432"
+}, {
+  "book_id": "17661944",
+  "title_clean": "\u0027Penunggu Rimba\u0027 Tombiruo (Tombiruo, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":569001}"],
+  "average_rating": "4.31",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "32018941",
+  "title_clean": "\u0027Poisoned Rock\u0027 A Sullivan and Broderick Murder Investigation (The Rock Murder Mysteries Book 2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2604777}"],
+  "average_rating": "4.44",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "30111928",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "5414",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}", "{\"role\":\"Narrator\",\"author_id\":45978}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0743536967"
+}, {
+  "book_id": "3234984",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}", "{\"role\":\"Narrator\",\"author_id\":45978}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1402593791"
+}, {
+  "book_id": "5420",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0340770538"
+}, {
+  "book_id": "2992373",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0881037206"
+}, {
+  "book_id": "5415",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0965772411"
+}, {
+  "book_id": "26108135",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "3094103",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1856953084"
+}, {
+  "book_id": "13480263",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "5418",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451150651"
+}, {
+  "book_id": "419305",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0450039544"
+}, {
+  "book_id": "5419",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451092317"
+}, {
+  "book_id": "367638",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451165888"
+}, {
+  "book_id": "11743019",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1444708147"
+}, {
+  "book_id": "33808719",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "924763",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0450028607"
+}, {
+  "book_id": "13631178",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "35680407",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "15741030",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "419313",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1417718153"
+}, {
+  "book_id": "419314",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451071123"
+}, {
+  "book_id": "155585",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451080009"
+}, {
+  "book_id": "155743",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451121589"
+}, {
+  "book_id": "437133",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451168089"
+}, {
+  "book_id": "924762",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}", "{\"role\":\"Photographer\",\"author_id\":540202}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0340951477"
+}, {
+  "book_id": "17288638",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0345806794"
+}, {
+  "book_id": "11590",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0450031063"
+}, {
+  "book_id": "13451484",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0450053040"
+}, {
+  "book_id": "19137",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451098277"
+}, {
+  "book_id": "155597",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0451125452"
+}, {
+  "book_id": "1883846",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}", "{\"role\":\"Introduction\",\"author_id\":10366}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0452267218"
+}, {
+  "book_id": "924765",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "067103975X"
+}, {
+  "book_id": "9668519",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13451092",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13451157",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18744083",
+  "title_clean": "\u0027Salem\u0027s Lot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1848940815"
+}, {
+  "book_id": "1147617",
+  "title_clean": "\u0027Scuse Me While I Kill This Guy (Bombay Assassins, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":562364}"],
+  "average_rating": "3.7",
+  "isbn_clean": "0843959339"
+}, {
+  "book_id": "10864779",
+  "title_clean": "\u0027Scuse Me While I Kill This Guy (Bombay Assassins, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":562364}"],
+  "average_rating": "3.7",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "950165",
+  "title_clean": "\u0027Til Death (87th Precinct, #9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":21318}"],
+  "average_rating": "3.85",
+  "isbn_clean": "0451158911"
+}, {
+  "book_id": "13403176",
+  "title_clean": "\u0027Til Death (87th Precinct, #9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":21318}"],
+  "average_rating": "3.85",
+  "isbn_clean": "1612181872"
+}, {
+  "book_id": "17228622",
+  "title_clean": "\u0027Til Death (87th Precinct, #9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":21318}"],
+  "average_rating": "3.85",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17788662",
+  "title_clean": "\u0027Til Death (87th Precinct, #9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":21318}"],
+  "average_rating": "3.85",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "493159",
+  "title_clean": "\u0027Til Death (87th Precinct, #9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":21318}"],
+  "average_rating": "3.85",
+  "isbn_clean": "0140021647"
+}, {
+  "book_id": "12258493",
+  "title_clean": "\u0027Til Death Do Us Part",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":87506}"],
+  "average_rating": "3.89",
+  "isbn_clean": "1459213890"
+}, {
+  "book_id": "341389",
+  "title_clean": "\u0027Til Death Do Us Part (Bailey Weggins Mystery, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":59972}"],
+  "average_rating": "3.67",
+  "isbn_clean": "0446614939"
+}, {
+  "book_id": "6421117",
+  "title_clean": "\u0027Til Death Do Us Part - Sampai Maut Memisahkan Kita",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":59972}"],
+  "average_rating": "3.67",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11407675",
+  "title_clean": "\u0027Til Death Do Us Part: Blackwood\u0027s Woman\\Roarke\u0027s Wife",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":87506}"],
+  "average_rating": "3.89",
+  "isbn_clean": "0373775997"
+}, {
+  "book_id": "7094648",
+  "title_clean": "\u0027Til Dice Do Us Part (Bunco Babes Mystery, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2953912}"],
+  "average_rating": "3.58",
+  "isbn_clean": "0451229428"
+}, {
+  "book_id": "18371393",
+  "title_clean": "\u0027Til Dirt Do Us Part (Local Foods Mystery, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5826191}"],
+  "average_rating": "3.9",
+  "isbn_clean": "0758284640"
+}, {
+  "book_id": "264471",
+  "title_clean": "\u0027Till Death Do Us Part: Love, Marriage, and the Mind of the Killer Spouse",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":154467}", "{\"role\":\"\",\"author_id\":6938783}"],
+  "average_rating": "3.13",
+  "isbn_clean": "0743275098"
+}, {
+  "book_id": "2739154",
+  "title_clean": "\u0027Tis the Season to Be Murdered (Susan Henshaw, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":60404}"],
+  "average_rating": "3.82",
+  "isbn_clean": "044914920X"
+}, {
+  "book_id": "18144244",
+  "title_clean": "\u0027orrible Murder: An Anthology of Victorian Crime and Passion Compiled from the Illustrated Police News",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":551050}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6803862",
+  "title_clean": "\u0027ジョジョの奇妙な冒険 35 岸辺露伴の冒険 [JoJo no Kimyō na Bōken 35: Kishibe Rohan no Bōken] (Jojo\u0027s Bizarre Adventure, #35; Part 4: Diamond is Unbreakable, #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8452}"],
+  "average_rating": "4.4",
+  "isbn_clean": "408851405X"
+}, {
+  "book_id": "17625174",
+  "title_clean": "(Dis)Comfort Food",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5762920}"],
+  "average_rating": "3.82",
+  "isbn_clean": "0615753795"
+}, {
+  "book_id": "36179977",
+  "title_clean": "(M)učednice",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":13832217}"],
+  "average_rating": "4.02",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22020454",
+  "title_clean": "(Pijn)³",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":807588}"],
+  "average_rating": "3.67",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23163329",
+  "title_clean": "(Watch Me) Break You (Run This Town, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4623203}"],
+  "average_rating": "4.12",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23002894",
+  "title_clean": "(Watch Me) Break You (Run This Town, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4623203}"],
+  "average_rating": "4.12",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13304556",
+  "title_clean": "(un)DEAD (Detective Saussure Mysteries)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5409431}"],
+  "average_rating": "3.83",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "8569364",
+  "title_clean": "*69",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":442240}"],
+  "average_rating": "3.74",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "24426537",
+  "title_clean": "... heeft een meisje weggehaald",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":99044}", "{\"role\":\"Translator\",\"author_id\":3005248}"],
+  "average_rating": "3.94",
+  "isbn_clean": "9021011069"
+}, {
+  "book_id": "13578839",
+  "title_clean": "... ma il terrore rimane",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":131375}", "{\"role\":\"translator\",\"author_id\":5757375}"],
+  "average_rating": "3.35",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "804897",
+  "title_clean": "...And the Dying is Easy",
+  "authors_flat": ["{\"role\":\"Editor\",\"author_id\":2044461}", "{\"role\":\"\",\"author_id\":132862}", "{\"role\":\"\",\"author_id\":5185}", "{\"role\":\"\",\"author_id\":317435}", "{\"role\":\"\",\"author_id\":478665}", "{\"role\":\"\",\"author_id\":110519}", "{\"role\":\"\",\"author_id\":158170}", "{\"role\":\"\",\"author_id\":558166}", "{\"role\":\"\",\"author_id\":128487}", "{\"role\":\"\",\"author_id\":16291}", "{\"role\":\"\",\"author_id\":66311}", "{\"role\":\"\",\"author_id\":379662}", "{\"role\":\"\",\"author_id\":206833}", "{\"role\":\"\",\"author_id\":847346}", "{\"role\":\"Editor\",\"author_id\":597416}", "{\"role\":\"\",\"author_id\":5095}", "{\"role\":\"\",\"author_id\":101822}", "{\"role\":\"\",\"author_id\":306918}", "{\"role\":\"\",\"author_id\":169992}", "{\"role\":\"\",\"author_id\":20981}", "{\"role\":\"\",\"author_id\":12014}", "{\"role\":\"\",\"author_id\":76329}"],
+  "average_rating": "3.61",
+  "isbn_clean": "0451203291"
+}, {
+  "book_id": "11269861",
+  "title_clean": "...E poi non rimase nessuno",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"translator\",\"author_id\":3415408}"],
+  "average_rating": "4.23",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "35268979",
+  "title_clean": "...all five... a true story",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16145563}"],
+  "average_rating": "4.07",
+  "isbn_clean": "1521216622"
+}, {
+  "book_id": "35061054",
+  "title_clean": "...all five... a true story",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16145563}"],
+  "average_rating": "4.07",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7274755",
+  "title_clean": "...and Night Falls",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3020838}"],
+  "average_rating": "3.9",
+  "isbn_clean": "1441484302"
+}, {
+  "book_id": "1095744",
+  "title_clean": ".44",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":53424}", "{\"role\":\"co-author\",\"author_id\":19656}"],
+  "average_rating": "3.06",
+  "isbn_clean": "0451084594"
+}, {
+  "book_id": "18302079",
+  "title_clean": "0 Monstro De Florença",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12577}", "{\"role\":\"\",\"author_id\":1620230}"],
+  "average_rating": "3.72",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17290017",
+  "title_clean": "0 の奏香師 [0 no Soukoushi]",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":42508}", "{\"role\":\"\",\"author_id\":1676112}"],
+  "average_rating": "3.5",
+  "isbn_clean": "4592187644"
+}, {
+  "book_id": "18463867",
+  "title_clean": "007 James Bond und sein gefährlichster Auftrag",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2565}", "{\"role\":\"Translator\",\"author_id\":7258272}"],
+  "average_rating": "3.94",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7832216",
+  "title_clean": "007 James Bond: A Report",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":998394}"],
+  "average_rating": "3.47",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22036255",
+  "title_clean": "007 ser rött (James Bond, #5)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2565}", "{\"role\":\"Translator\",\"author_id\":6571947}"],
+  "average_rating": "3.88",
+  "isbn_clean": "9100463124"
+}, {
+  "book_id": "264055",
+  "title_clean": "01-01-00",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":32091}"],
+  "average_rating": "3.46",
+  "isbn_clean": "0812568710"
+}, {
+  "book_id": "30759201",
+  "title_clean": "03:02",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":756556}"],
+  "average_rating": "3.96",
+  "isbn_clean": "9385152963"
+}, {
+  "book_id": "553855",
+  "title_clean": "053803: Life at Fifteen",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":304134}"],
+  "average_rating": "3.57",
+  "isbn_clean": "0977866203"
+}, {
+  "book_id": "10940439",
+  "title_clean": "1 Ghost Diamond!",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":498090}"],
+  "average_rating": "3.9",
+  "isbn_clean": "0761380566"
+}, {
+  "book_id": "7081231",
+  "title_clean": "1 Ragged Ridge Road",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":280442}", "{\"role\":\"\",\"author_id\":13400497}"],
+  "average_rating": "3.74",
+  "isbn_clean": "0671003542"
+}, {
+  "book_id": "4111637",
+  "title_clean": "1-900-Dead (Margo Fortier, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":815548}"],
+  "average_rating": "3.67",
+  "isbn_clean": "0312142676"
+}, {
+  "book_id": "31841806",
+  "title_clean": "1. ženská detektívna kancelária  (No. 1 Ladies\u0027 Detective Agency, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4738}"],
+  "average_rating": "3.76",
+  "isbn_clean": "8055111073"
+}, {
+  "book_id": "13564526",
+  "title_clean": "1. žrtva (Women\u0027s Murder Club, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"Translator\",\"author_id\":5785618}"],
+  "average_rating": "4.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "10951748",
+  "title_clean": "1.280 almas",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7621}"],
+  "average_rating": "4.07",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "35834132",
+  "title_clean": "10 Numaralı Kamara",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9013543}", "{\"role\":\"Translator\",\"author_id\":7308490}"],
+  "average_rating": "3.66",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "8542",
+  "title_clean": "10 lb Penalty",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5561}"],
+  "average_rating": "3.86",
+  "isbn_clean": "042519745X"
+}, {
+  "book_id": "1689077",
+  "title_clean": "10 lb. Penalty",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5561}"],
+  "average_rating": "3.86",
+  "isbn_clean": "0330370014"
+}, {
+  "book_id": "12396581",
+  "title_clean": "10 rad nájemného vraha, jak vyčistit kvartýr",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":242981}", "{\"role\":\"Translator\",\"author_id\":5447522}"],
+  "average_rating": "3.27",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "1689069",
+  "title_clean": "10-lb. Penalty",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5561}"],
+  "average_rating": "3.86",
+  "isbn_clean": "0399143025"
+}, {
+  "book_id": "2523010",
+  "title_clean": "10-lb. Penalty",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5561}"],
+  "average_rating": "3.86",
+  "isbn_clean": "0515123471"
+}, {
+  "book_id": "894602",
+  "title_clean": "100 Crooked Little Crime Stories",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6436872}", "{\"role\":\"\",\"author_id\":2844604}", "{\"role\":\"\",\"author_id\":59151}"],
+  "average_rating": "3.3",
+  "isbn_clean": "156619556X"
+}, {
+  "book_id": "111826",
+  "title_clean": "100 Crooked Little Crime Stories",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2844604}", "{\"role\":\"\",\"author_id\":59151}", "{\"role\":\"\",\"author_id\":6436872}"],
+  "average_rating": "3.3",
+  "isbn_clean": "140271100X"
+}, {
+  "book_id": "584882",
+  "title_clean": "100 Dastardly Little Detective Stories",
+  "authors_flat": ["{\"role\":\"Selections\",\"author_id\":2844604}", "{\"role\":\"\",\"author_id\":59151}", "{\"role\":\"\",\"author_id\":6436872}"],
+  "average_rating": "3.52",
+  "isbn_clean": "1402709749"
+}, {
+  "book_id": "608325",
+  "title_clean": "100 Dastardly Little Detective Stories",
+  "authors_flat": ["{\"role\":\"Editor\",\"author_id\":6436872}", "{\"role\":\"Editor\",\"author_id\":59151}", "{\"role\":\"Editor\",\"author_id\":2844604}"],
+  "average_rating": "3.52",
+  "isbn_clean": "1566191076"
+}, {
+  "book_id": "30653906",
+  "title_clean": "100 Hours (100 Hours, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":415967}"],
+  "average_rating": "3.37",
+  "isbn_clean": "006241156X"
+}, {
+  "book_id": "31285637",
+  "title_clean": "100 Hours (100 Hours, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":415967}"],
+  "average_rating": "3.37",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "602654",
+  "title_clean": "100 Malicious Little Mysteries",
+  "authors_flat": ["{\"role\":\"Selections\",\"author_id\":16667}", "{\"role\":\"\",\"author_id\":6436872}", "{\"role\":\"\",\"author_id\":1947587}"],
+  "average_rating": "3.83",
+  "isbn_clean": "1402711018"
+}, {
+  "book_id": "6402286",
+  "title_clean": "100 Malicious Little Mysteries",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16667}", "{\"role\":\"\",\"author_id\":1947587}", "{\"role\":\"Contributor\",\"author_id\":744002}", "{\"role\":\"Contributor\",\"author_id\":142623}", "{\"role\":\"Contributor\",\"author_id\":248431}", "{\"role\":\"Contributor\",\"author_id\":28053}", "{\"role\":\"Contributor\",\"author_id\":1369598}", "{\"role\":\"Contributor\",\"author_id\":100512}", "{\"role\":\"Contributor\",\"author_id\":891493}", "{\"role\":\"Contributor\",\"author_id\":419242}", "{\"role\":\"Contributor\",\"author_id\":13731}", "{\"role\":\"Contributor\",\"author_id\":298019}", "{\"role\":\"Contributor\",\"author_id\":99538}", "{\"role\":\"Contributor\",\"author_id\":1290359}", "{\"role\":\"Contributor\",\"author_id\":300141}", "{\"role\":\"Contributor\",\"author_id\":35028}", "{\"role\":\"Contributor\",\"author_id\":1043577}", "{\"role\":\"Contributor\",\"author_id\":41749}", "{\"role\":\"Contributor\",\"author_id\":53515}", "{\"role\":\"Contributor\",\"author_id\":1905866}", "{\"role\":\"Contributor\",\"author_id\":534641}", "{\"role\":\"Contributor\",\"author_id\":22880}", "{\"role\":\"Contributor\",\"author_id\":52129}", "{\"role\":\"Contributor\",\"author_id\":952809}", "{\"role\":\"Contributor\",\"author_id\":4622441}", "{\"role\":\"Contributor\",\"author_id\":245715}", "{\"role\":\"Contributor\",\"author_id\":50319}", "{\"role\":\"Contributor\",\"author_id\":632153}", "{\"role\":\"Contributor\",\"author_id\":917317}", "{\"role\":\"Contributor\",\"author_id\":546699}", "{\"role\":\"Contributor\",\"author_id\":76288}", "{\"role\":\"Contributor\",\"author_id\":12539}", "{\"role\":\"Contributor\",\"author_id\":207043}", "{\"role\":\"Contributor\",\"author_id\":1361282}", "{\"role\":\"Contributor\",\"author_id\":361420}", "{\"role\":\"Contributor\",\"author_id\":146739}", "{\"role\":\"\",\"author_id\":15224805}"],
+  "average_rating": "3.83",
+  "isbn_clean": "1566199220"
+}, {
+  "book_id": "2920824",
+  "title_clean": "100 Most Infamous Criminals",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":349459}"],
+  "average_rating": "3.59",
+  "isbn_clean": "0760748497"
+}, {
+  "book_id": "22059376",
+  "title_clean": "100 Proof Stud (The Darcy Walker Series #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6576193}"],
+  "average_rating": "4.71",
+  "isbn_clean": "1499305230"
+}, {
+  "book_id": "18459567",
+  "title_clean": "1000 Yards (John Milton #0.5)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6533843}"],
+  "average_rating": "3.79",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18260597",
+  "title_clean": "1000 Yards (John Milton #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6533843}"],
+  "average_rating": "3.79",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23279629",
+  "title_clean": "1001 Knights 01",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":166674}", "{\"role\":\"Translator\",\"author_id\":2861002}"],
+  "average_rating": "3.77",
+  "isbn_clean": "3842010745"
+}, {
+  "book_id": "21488064",
+  "title_clean": "101 Amazing Facts about Jack the Ripper",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":174946}", "{\"role\":\"\",\"author_id\":6696947}"],
+  "average_rating": "3.08",
+  "isbn_clean": "1783336854"
+}, {
+  "book_id": "7498002",
+  "title_clean": "101 Years\u0027 Entertainment: The Great Detective Stories, 1841-1941",
+  "authors_flat": ["{\"role\":\"Editor; Introduction\",\"author_id\":41015}"],
+  "average_rating": "4.3",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "9692059",
+  "title_clean": "10th Anniversary (Women\u0027s Murder Club #10)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "1846054788"
+}, {
+  "book_id": "11024667",
+  "title_clean": "10th Anniversary (Women\u0027s Murder Club #10)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0446585165"
+}, {
+  "book_id": "9674401",
+  "title_clean": "10th Anniversary (Women\u0027s Murder Club #10)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0316178039"
+}, {
+  "book_id": "15789397",
+  "title_clean": "10th Anniversary (Women\u0027s Murder Club #10)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "1455511463"
+}, {
+  "book_id": "9436746",
+  "title_clean": "10th Anniversary (Women\u0027s Murder Club, #10)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0316036269"
+}, {
+  "book_id": "10423770",
+  "title_clean": "10th Anniversary (Women\u0027s Murder Club, #10)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0316126942"
+}, {
+  "book_id": "17185687",
+  "title_clean": "10th Anniversary (Women\u0027s Murder Club, #10)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "1407071602"
+}, {
+  "book_id": "10328031",
+  "title_clean": "10th Anniversary: (Women\u0027s Murder Club, #10)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "1846054796"
+}, {
+  "book_id": "2837108",
+  "title_clean": "11 Harrowhouse",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":301341}"],
+  "average_rating": "3.83",
+  "isbn_clean": "0330238760"
+}, {
+  "book_id": "31946291",
+  "title_clean": "11 Harrowhouse Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":301341}"],
+  "average_rating": "3.83",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25243524",
+  "title_clean": "11/9",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":13714047}"],
+  "average_rating": "4.1",
+  "isbn_clean": "9780993192"
+}, {
+  "book_id": "13555560",
+  "title_clean": "110 - Ein Bulle hört zu: Aus der Notrufzentrale der Polizei",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5781404}"],
+  "average_rating": "4.22",
+  "isbn_clean": "3864930014"
+}, {
+  "book_id": "29858321",
+  "title_clean": "113 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":15102079}"],
+  "average_rating": "3.76",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "29467269",
+  "title_clean": "113 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":15102079}"],
+  "average_rating": "3.76",
+  "isbn_clean": "0316317187"
+}, {
+  "book_id": "29605497",
+  "title_clean": "113 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":15102079}"],
+  "average_rating": "3.76",
+  "isbn_clean": "1786530414"
+}, {
+  "book_id": "35673905",
+  "title_clean": "113 minuti. So chi ha ucciso mio figlio",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":17021979}", "{\"role\":\"Translator\",\"author_id\":4719091}"],
+  "average_rating": "3.76",
+  "isbn_clean": "8850248105"
+}, {
+  "book_id": "16280477",
+  "title_clean": "11th Hour (Women\u0027s Murder Club #11)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.02",
+  "isbn_clean": "0446571830"
+}, {
+  "book_id": "12870487",
+  "title_clean": "11th Hour (Women\u0027s Murder Club #11)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.02",
+  "isbn_clean": "0316208086"
+}, {
+  "book_id": "11872242",
+  "title_clean": "11th Hour (Women\u0027s Murder Club, #11)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.02",
+  "isbn_clean": "1846057914"
+}, {
+  "book_id": "17307838",
+  "title_clean": "11th Hour (Women\u0027s Murder Club, #11)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.02",
+  "isbn_clean": "0099550199"
+}, {
+  "book_id": "13647666",
+  "title_clean": "11th Hour (Women\u0027s Murder Club, #11)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.02",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12870486",
+  "title_clean": "11th Hour (Women\u0027s Murder Club, #11)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.02",
+  "isbn_clean": "0316097497"
+}, {
+  "book_id": "14889819",
+  "title_clean": "11th Hour (Women\u0027s Murder Club, #11)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.02",
+  "isbn_clean": "0446571822"
+}, {
+  "book_id": "13505096",
+  "title_clean": "11th Hour (Women\u0027s Murder Club, #11)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.02",
+  "isbn_clean": "1846057922"
+}, {
+  "book_id": "16041118",
+  "title_clean": "11th Hour - Free Preview",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "16051111",
+  "title_clean": "12 Best Stories of Sherlock Holmes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2448}"],
+  "average_rating": "4.11",
+  "isbn_clean": "9790651481"
+}, {
+  "book_id": "41050",
+  "title_clean": "12 Bliss Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":23092}"],
+  "average_rating": "3.57",
+  "isbn_clean": "0312315430"
+}, {
+  "book_id": "11389876",
+  "title_clean": "12 Days",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4859837}", "{\"role\":\"Editor\",\"author_id\":81617}"],
+  "average_rating": "3.89",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "19546308",
+  "title_clean": "12 Days Of Darkness",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":205589}"],
+  "average_rating": "3.82",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22544484",
+  "title_clean": "12 Rose Street (A Joanne Kilbourn Mystery, #15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":269242}"],
+  "average_rating": "3.69",
+  "isbn_clean": "0771024002"
+}, {
+  "book_id": "485526",
+  "title_clean": "12 Stories They Wouldn\u0027t Let Me Do on TV",
+  "authors_flat": ["{\"role\":\"Editor\",\"author_id\":50291}", "{\"role\":\"Editor\",\"author_id\":9420}", "{\"role\":\"Contributor\",\"author_id\":10234}", "{\"role\":\"Contributor\",\"author_id\":2966658}", "{\"role\":\"Contributor\",\"author_id\":6076026}", "{\"role\":\"Contributor\",\"author_id\":188906}", "{\"role\":\"Contributor\",\"author_id\":3352}", "{\"role\":\"Contributor\",\"author_id\":2995925}", "{\"role\":\"Contributor\",\"author_id\":51422}", "{\"role\":\"Contributor\",\"author_id\":14346487}", "{\"role\":\"Contributor\",\"author_id\":83666}", "{\"role\":\"Contributor\",\"author_id\":422441}", "{\"role\":\"Contributor\",\"author_id\":117500}", "{\"role\":\"Contributor\",\"author_id\":242857}"],
+  "average_rating": "3.75",
+  "isbn_clean": "0440136458"
+}, {
+  "book_id": "7277689",
+  "title_clean": "12 Stunden Angst",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":19696}"],
+  "average_rating": "3.82",
+  "isbn_clean": "3404164083"
+}, {
+  "book_id": "13568431",
+  "title_clean": "12-21",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":11110}"],
+  "average_rating": "3.4",
+  "isbn_clean": "0718193954"
+}, {
+  "book_id": "31563346",
+  "title_clean": "12.12.",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8335778}"],
+  "average_rating": "3.89",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13572864",
+  "title_clean": "12.21",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":11110}", "{\"role\":\"narrator\",\"author_id\":607528}", "{\"role\":\"narrator\",\"author_id\":6697318}"],
+  "average_rating": "3.4",
+  "isbn_clean": "0449011593"
+}, {
+  "book_id": "16076997",
+  "title_clean": "12.21",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":11110}"],
+  "average_rating": "3.4",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13572813",
+  "title_clean": "12.21",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":11110}"],
+  "average_rating": "3.4",
+  "isbn_clean": "0385341407"
+}, {
+  "book_id": "28016377",
+  "title_clean": "12.21",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":11110}"],
+  "average_rating": "3.4",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13080993",
+  "title_clean": "12.21.12",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4389465}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12368700",
+  "title_clean": "12.21.12",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4389465}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12873087",
+  "title_clean": "12.21.12",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4389465}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "16044794",
+  "title_clean": "12.21.12",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4389465}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20580382",
+  "title_clean": "12.21.12: The Vessel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4389465}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20368413",
+  "title_clean": "12.21.12: The Vessel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4389465}"],
+  "average_rating": "3.59",
+  "isbn_clean": "1494766787"
+}, {
+  "book_id": "16162541",
+  "title_clean": "12.21: A Novel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":11110}"],
+  "average_rating": "3.4",
+  "isbn_clean": "0718159586"
+}, {
+  "book_id": "13145882",
+  "title_clean": "120, rue de la Gare. Un caso per Nestor Burma",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":238151}", "{\"role\":\"Editor\",\"author_id\":4798848}"],
+  "average_rating": "3.73",
+  "isbn_clean": "8835941245"
+}, {
+  "book_id": "29457248",
+  "title_clean": "122 Rules (122 Series #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14674203}"],
+  "average_rating": "4.5",
+  "isbn_clean": "0990870995"
+}, {
+  "book_id": "10089852",
+  "title_clean": "1222",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}"],
+  "average_rating": "3.34",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13547835",
+  "title_clean": "1222",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}"],
+  "average_rating": "3.34",
+  "isbn_clean": "1451634722"
+}, {
+  "book_id": "11530660",
+  "title_clean": "1222",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}"],
+  "average_rating": "3.34",
+  "isbn_clean": "1848876092"
+}, {
+  "book_id": "17737584",
+  "title_clean": "1222",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}"],
+  "average_rating": "3.34",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13614070",
+  "title_clean": "1222",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}", "{\"role\":\"Translator\",\"author_id\":917421}"],
+  "average_rating": "3.34",
+  "isbn_clean": "0857892515"
+}, {
+  "book_id": "12818154",
+  "title_clean": "1222",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}", "{\"role\":\"narrator\",\"author_id\":494654}"],
+  "average_rating": "3.34",
+  "isbn_clean": "1455128813"
+}, {
+  "book_id": "17452247",
+  "title_clean": "1222",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}"],
+  "average_rating": "3.34",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22236614",
+  "title_clean": "1222 metrov nad morom (Hanne Wilhelmsen, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}", "{\"role\":\"Translator\",\"author_id\":6869831}"],
+  "average_rating": "3.34",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13515509",
+  "title_clean": "1222 över havet (Hanne Wilhelmsen #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}"],
+  "average_rating": "3.34",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11913730",
+  "title_clean": "1222: Hanne Wilhelmsen Book Eight",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":218707}"],
+  "average_rating": "3.34",
+  "isbn_clean": "1451634889"
+}, {
+  "book_id": "10474638",
+  "title_clean": "1280 Almas",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7621}", "{\"role\":\"translator\",\"author_id\":953621}"],
+  "average_rating": "4.07",
+  "isbn_clean": "9726956706"
+}, {
+  "book_id": "16128210",
+  "title_clean": "1280 Almas",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7621}"],
+  "average_rating": "4.07",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "595536",
+  "title_clean": "1280 Almas",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7621}"],
+  "average_rating": "4.07",
+  "isbn_clean": "8466317244"
+}, {
+  "book_id": "17728211",
+  "title_clean": "1280 almas",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7621}", "{\"role\":\"Illustrator\",\"author_id\":6448312}"],
+  "average_rating": "4.07",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22040138",
+  "title_clean": "1280 жители",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7621}", "{\"role\":\"\",\"author_id\":8187872}", "{\"role\":\"Translator\",\"author_id\":8187873}", "{\"role\":\"Illustrator\",\"author_id\":8187874}"],
+  "average_rating": "4.07",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "19162688",
+  "title_clean": "12th of Never (Women\u0027s Murder Club #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1455515787"
+}, {
+  "book_id": "17909056",
+  "title_clean": "12th of Never (Women\u0027s Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "009957425X"
+}, {
+  "book_id": "17899677",
+  "title_clean": "12th of Never (Women\u0027s Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1455515795"
+}, {
+  "book_id": "17430947",
+  "title_clean": "12th of Never (Women\u0027s Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1448108527"
+}, {
+  "book_id": "15790871",
+  "title_clean": "12th of Never (Women\u0027s Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "031621082X"
+}, {
+  "book_id": "15790872",
+  "title_clean": "12th of Never (Women\u0027s Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0316210870"
+}, {
+  "book_id": "17452547",
+  "title_clean": "12th of Never (Women\u0027s Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "15734464",
+  "title_clean": "12th of Never (Women\u0027s Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17276163",
+  "title_clean": "12th of Never (Women\u0027s Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1780890303"
+}, {
+  "book_id": "16926357",
+  "title_clean": "12th of Never (Womens Murder Club, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "3.99",
+  "isbn_clean": "178089029X"
+}, {
+  "book_id": "16147257",
+  "title_clean": "12th of Never [Excerpt: First 17 Chapters]",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.09",
+  "isbn_clean": "0316252492"
+}, {
+  "book_id": "17383101",
+  "title_clean": "13",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1349023}"],
+  "average_rating": "4.24",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17693140",
+  "title_clean": "13 1/ 2",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":43613}"],
+  "average_rating": "3.33",
+  "isbn_clean": "2298035792"
+}, {
+  "book_id": "14760426",
+  "title_clean": "13 Club Vol. 01 (13 Club, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6997867}"],
+  "average_rating": "3.54",
+  "isbn_clean": "4088777131"
+}, {
+  "book_id": "119958",
+  "title_clean": "13 Days: The Pythagoras Conspiracy",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":69577}"],
+  "average_rating": "3.84",
+  "isbn_clean": "1933285451"
+}, {
+  "book_id": "26807449",
+  "title_clean": "13 Days: The Pythagoras Conspiracy",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":69577}"],
+  "average_rating": "3.84",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "10748352",
+  "title_clean": "13 Drops of Blood",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1967515}"],
+  "average_rating": "3.31",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18042136",
+  "title_clean": "13 Días (Alice Madison, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7011369}", "{\"role\":\"Translator\",\"author_id\":6423811}"],
+  "average_rating": "3.64",
+  "isbn_clean": "8415433263"
+}, {
+  "book_id": "1782725",
+  "title_clean": "13 For Luck",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.98",
+  "isbn_clean": "0001848062"
+}, {
+  "book_id": "12750295",
+  "title_clean": "13 Hangmen",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":734198}"],
+  "average_rating": "3.81",
+  "isbn_clean": "1419701592"
+}, {
+  "book_id": "17290219",
+  "title_clean": "13 Hangmen",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":734198}"],
+  "average_rating": "3.81",
+  "isbn_clean": "1419707884"
+}, {
+  "book_id": "26457448",
+  "title_clean": "13 Hodin (Benny Griessel, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":283304}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22747270",
+  "title_clean": "13 Hollywood Apes (Layla Remington #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":99306}"],
+  "average_rating": "3.98",
+  "isbn_clean": "055339505X"
+}, {
+  "book_id": "20839664",
+  "title_clean": "13 Jours (Alice Madison, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7011369}"],
+  "average_rating": "3.64",
+  "isbn_clean": "2226254331"
+}, {
+  "book_id": "29995364",
+  "title_clean": "13 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":457300}", "{\"role\":\"Narrator\",\"author_id\":1508525}"],
+  "average_rating": "3.96",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "32768519",
+  "title_clean": "13 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":457300}"],
+  "average_rating": "3.96",
+  "isbn_clean": "1250123852"
+}, {
+  "book_id": "26842622",
+  "title_clean": "13 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":457300}"],
+  "average_rating": "3.96",
+  "isbn_clean": "1473214033"
+}, {
+  "book_id": "27802575",
+  "title_clean": "13 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":457300}"],
+  "average_rating": "3.96",
+  "isbn_clean": "057509737X"
+}, {
+  "book_id": "26866364",
+  "title_clean": "13 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":457300}"],
+  "average_rating": "3.96",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "35235986",
+  "title_clean": "13 Minutos",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":457300}"],
+  "average_rating": "3.96",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13085604",
+  "title_clean": "13 Shots of Noir",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4449941}"],
+  "average_rating": "4.44",
+  "isbn_clean": "1611871808"
+}, {
+  "book_id": "83413",
+  "title_clean": "13 Steps Down",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":10890}"],
+  "average_rating": "3.57",
+  "isbn_clean": "1400095905"
+}, {
+  "book_id": "15924420",
+  "title_clean": "13 Steps Down. Ruth Rendell",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":10890}"],
+  "average_rating": "3.57",
+  "isbn_clean": "0099580039"
+}, {
+  "book_id": "23256133",
+  "title_clean": "13 Stolen Girls (Layla Remington #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":99306}"],
+  "average_rating": "3.86",
+  "isbn_clean": "0553395068"
+}, {
+  "book_id": "25241334",
+  "title_clean": "13 Under the Wire (Layla Remington #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":99306}"],
+  "average_rating": "3.74",
+  "isbn_clean": "0553395076"
+}, {
+  "book_id": "5331499",
+  "title_clean": "13 Uur (Bennie Griessel, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":283304}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0798150106"
+}, {
+  "book_id": "24100758",
+  "title_clean": "13 at Dinner",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.88",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "30523093",
+  "title_clean": "13 at Dinner",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.88",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "24991509",
+  "title_clean": "13 at Dinner",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.88",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "34741267",
+  "title_clean": "13 minuten",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":457300}"],
+  "average_rating": "3.96",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13640697",
+  "title_clean": "13 uur (Benny Griessel, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":283304}", "{\"role\":\"translator\",\"author_id\":3387541}", "{\"role\":\"translator\",\"author_id\":3053575}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "27864520",
+  "title_clean": "13 μέρες για να βρεις το δολοφόνο (Alice Madison, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7011369}", "{\"role\":\"Translator\",\"author_id\":14684943}"],
+  "average_rating": "3.64",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13540260",
+  "title_clean": "13. sat",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":136944}", "{\"role\":\"translator\",\"author_id\":5774131}"],
+  "average_rating": "3.83",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "31915564",
+  "title_clean": "13: An Anthology of Horror and Dark Fiction",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14429769}", "{\"role\":\"\",\"author_id\":11204582}", "{\"role\":\"\",\"author_id\":7732685}", "{\"role\":\"\",\"author_id\":6880131}", "{\"role\":\"\",\"author_id\":13994843}", "{\"role\":\"\",\"author_id\":3268117}", "{\"role\":\"\",\"author_id\":6429729}", "{\"role\":\"\",\"author_id\":4052252}", "{\"role\":\"\",\"author_id\":8102183}", "{\"role\":\"\",\"author_id\":9790618}", "{\"role\":\"\",\"author_id\":15745198}", "{\"role\":\"\",\"author_id\":9885214}", "{\"role\":\"\",\"author_id\":9537035}"],
+  "average_rating": "4.12",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25736886",
+  "title_clean": "13: Kumpulan Cerpen Horor",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":621891}", "{\"role\":\"\",\"author_id\":4096547}"],
+  "average_rating": "3.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20623689",
+  "title_clean": "13:24",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7790947}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0991106601"
+}, {
+  "book_id": "8489851",
+  "title_clean": "13½",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":43613}"],
+  "average_rating": "3.33",
+  "isbn_clean": "1593155913"
+}, {
+  "book_id": "6384124",
+  "title_clean": "13½",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":43613}"],
+  "average_rating": "3.33",
+  "isbn_clean": "1593155530"
+}, {
+  "book_id": "9367297",
+  "title_clean": "13½",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":43613}"],
+  "average_rating": "3.33",
+  "isbn_clean": "1458774147"
+}, {
+  "book_id": "18170804",
+  "title_clean": "14",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3396842}", "{\"role\":\"Narrator\",\"author_id\":144425}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "15796303",
+  "title_clean": "14",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3396842}"],
+  "average_rating": "3.93",
+  "isbn_clean": "1618680528"
+}, {
+  "book_id": "21562651",
+  "title_clean": "14",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3396842}"],
+  "average_rating": "3.93",
+  "isbn_clean": "1618684981"
+}, {
+  "book_id": "17404713",
+  "title_clean": "14",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3396842}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17404710",
+  "title_clean": "14",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3396842}"],
+  "average_rating": "3.93",
+  "isbn_clean": "1618680536"
+}, {
+  "book_id": "15737884",
+  "title_clean": "14",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3396842}", "{\"role\":\"Narrator\",\"author_id\":144425}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "15062217",
+  "title_clean": "14",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3396842}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23515924",
+  "title_clean": "14",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3396842}"],
+  "average_rating": "3.93",
+  "isbn_clean": "886355255X"
+}, {
+  "book_id": "8116098",
+  "title_clean": "14 (Taylor Jackson, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1311949}"],
+  "average_rating": "4.07",
+  "isbn_clean": "0778329097"
+}, {
+  "book_id": "16702750",
+  "title_clean": "14 (Taylor Jackson, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1311949}"],
+  "average_rating": "4.07",
+  "isbn_clean": "146030473X"
+}, {
+  "book_id": "3254113",
+  "title_clean": "14 (Taylor Jackson, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1311949}"],
+  "average_rating": "4.07",
+  "isbn_clean": "0778325563"
+}, {
+  "book_id": "28419715",
+  "title_clean": "14 Days to Die",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6573508}"],
+  "average_rating": "3.45",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "26262230",
+  "title_clean": "14 Days to Die",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6573508}"],
+  "average_rating": "3.45",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "891025",
+  "title_clean": "14 Degrees Below Zero",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":35729}"],
+  "average_rating": "3.02",
+  "isbn_clean": "0345465431"
+}, {
+  "book_id": "7010614",
+  "title_clean": "14 Degrees Below Zero: A Novel of Psychological Suspense",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":35729}"],
+  "average_rating": "3.02",
+  "isbn_clean": "1588364623"
+}, {
+  "book_id": "1918863",
+  "title_clean": "14 Peck Slip (Ryan \u0026 Gregory, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":604266}"],
+  "average_rating": "3.45",
+  "isbn_clean": "0446602388"
+}, {
+  "book_id": "34974790",
+  "title_clean": "1408",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}", "{\"role\":\"Translator\",\"author_id\":2996478}"],
+  "average_rating": "3.94",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "30750532",
+  "title_clean": "1408 وقصص أخرى",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}", "{\"role\":\"\",\"author_id\":4588366}", "{\"role\":\"Translator\",\"author_id\":2996478}"],
+  "average_rating": "3.94",
+  "isbn_clean": "9774882652"
+}, {
+  "book_id": "20957235",
+  "title_clean": "1408 وقصص أخرى",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}", "{\"role\":\"\",\"author_id\":4588366}", "{\"role\":\"Translator\",\"author_id\":2996478}"],
+  "average_rating": "3.94",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23590504",
+  "title_clean": "14th Deadly Sin (Women\u0027s Murder Club #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0099594579"
+}, {
+  "book_id": "26031230",
+  "title_clean": "14th Deadly Sin (Women\u0027s Murder Club #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1455584983"
+}, {
+  "book_id": "25319229",
+  "title_clean": "14th Deadly Sin (Women\u0027s Murder Club #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1455584991"
+}, {
+  "book_id": "23197339",
+  "title_clean": "14th Deadly Sin (Women\u0027s Murder Club, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0316408751"
+}, {
+  "book_id": "23197337",
+  "title_clean": "14th Deadly Sin (Women\u0027s Murder Club, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "031640702X"
+}, {
+  "book_id": "25791857",
+  "title_clean": "14th Deadly Sin (Women’s Murder Club, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23346918",
+  "title_clean": "14th Deadly Sin (Women’s Murder Club, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1780892888"
+}, {
+  "book_id": "23590486",
+  "title_clean": "14th Deadly Sin: (Women’s Murder Club 14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0099594560"
+}, {
+  "book_id": "23346917",
+  "title_clean": "14th Deadly Sin: (Women’s Murder Club 14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "3.99",
+  "isbn_clean": "178089287X"
+}, {
+  "book_id": "30723695",
+  "title_clean": "15 Celebrities Who Have Killed: From the Limelight to the Court Room",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":15109064}"],
+  "average_rating": "2.95",
+  "isbn_clean": "153470244X"
+}, {
+  "book_id": "8108515",
+  "title_clean": "15 Miles",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3092644}"],
+  "average_rating": "3.43",
+  "isbn_clean": "0575093862"
+}, {
+  "book_id": "33211005",
+  "title_clean": "15 Minutes (A Maizie Albright Star Detective Mystery, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5806614}"],
+  "average_rating": "4.49",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "33210956",
+  "title_clean": "15 Minutes (A Maizie Albright Star Detective Mystery, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5806614}"],
+  "average_rating": "4.49",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "33211090",
+  "title_clean": "15 Minutes (A Maizie Albright Star Detective Mystery, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5806614}"],
+  "average_rating": "4.49",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23000645",
+  "title_clean": "15 Saniye",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "3.72",
+  "isbn_clean": "9759997311"
+}, {
+  "book_id": "15760934",
+  "title_clean": "15 Seconds",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "3.72",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13649715",
+  "title_clean": "15 Seconds",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "3.72",
+  "isbn_clean": "0007296908"
+}, {
+  "book_id": "13625751",
+  "title_clean": "15 Seconds",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "3.72",
+  "isbn_clean": "0007384270"
+}, {
+  "book_id": "13044811",
+  "title_clean": "15 Seconds",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "3.72",
+  "isbn_clean": "006165597X"
+}, {
+  "book_id": "15818072",
+  "title_clean": "15 Seconds",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "3.72",
+  "isbn_clean": "0061656038"
+}, {
+  "book_id": "12509045",
+  "title_clean": "15 minus",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5173011}"],
+  "average_rating": "4.41",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "30809734",
+  "title_clean": "15 sekundes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":15417218}", "{\"role\":\"Translator\",\"author_id\":7233878}"],
+  "average_rating": "3.72",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "29467969",
+  "title_clean": "15th Affair (Women\u0027s Murder Club #15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1455585270"
+}, {
+  "book_id": "25613604",
+  "title_clean": "15th Affair (Women\u0027s Murder Club #15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "178089290X"
+}, {
+  "book_id": "25613617",
+  "title_clean": "15th Affair (Women\u0027s Murder Club #15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1784751995"
+}, {
+  "book_id": "29342004",
+  "title_clean": "15th Affair (Women\u0027s Murder Club #15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.04",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "26245041",
+  "title_clean": "15th Affair (Women\u0027s Murder Club #15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0316290033"
+}, {
+  "book_id": "26012215",
+  "title_clean": "15th Affair (Women\u0027s Murder Club, #15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0316407070"
+}, {
+  "book_id": "25613603",
+  "title_clean": "15th Affair (Women\u0027s Murder Club, #15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1780892896"
+}, {
+  "book_id": "27384081",
+  "title_clean": "15th Affair: (Women’s Murder Club 15)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0099594587"
+}, {
+  "book_id": "31121551",
+  "title_clean": "16 Ans Après",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4490971}", "{\"role\":\"Translator\",\"author_id\":7424781}"],
+  "average_rating": "3.75",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "36048318",
+  "title_clean": "16 Millimeters (Maizie Albright Star Detective, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5806614}"],
+  "average_rating": "4.66",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "36048299",
+  "title_clean": "16 Millimeters (Maizie Albright Star Detective, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5806614}"],
+  "average_rating": "4.66",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23149536",
+  "title_clean": "16 Uhr 50 ab Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"translator\",\"author_id\":675508}"],
+  "average_rating": "3.93",
+  "isbn_clean": "3596904978"
+}, {
+  "book_id": "24902512",
+  "title_clean": "16 Uhr 50 ab Paddington (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "3455650066"
+}, {
+  "book_id": "3305146",
+  "title_clean": "16 Uhr 50 ab Paddington (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"Ubersetzer\",\"author_id\":675508}"],
+  "average_rating": "3.93",
+  "isbn_clean": "3596171407"
+}, {
+  "book_id": "15829381",
+  "title_clean": "16.50 Treni",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13639677",
+  "title_clean": "16:50 Treni (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"Translator\",\"author_id\":4974236}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "30630817",
+  "title_clean": "16th Seduction (Women\u0027s Murder Club #16)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1473536170"
+}, {
+  "book_id": "31933144",
+  "title_clean": "16th Seduction (Women\u0027s Murder Club #16)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "031655345X"
+}, {
+  "book_id": "30079418",
+  "title_clean": "16th Seduction (Women\u0027s Murder Club, #16)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1780895194"
+}, {
+  "book_id": "31933978",
+  "title_clean": "16th Seduction (Women\u0027s Murder Club, #16)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0316274038"
+}, {
+  "book_id": "31934075",
+  "title_clean": "16th Seduction (Women\u0027s Murder Club, #16)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "031655118X"
+}, {
+  "book_id": "15839946",
+  "title_clean": "17 \u0026 Gone",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2741432}"],
+  "average_rating": "3.66",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13132403",
+  "title_clean": "17 \u0026 Gone",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2741432}"],
+  "average_rating": "3.66",
+  "isbn_clean": "0525423400"
+}, {
+  "book_id": "18079592",
+  "title_clean": "17 \u0026 Gone",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2741432}"],
+  "average_rating": "3.66",
+  "isbn_clean": "014242532X"
+}, {
+  "book_id": "15839958",
+  "title_clean": "17 \u0026 Gone",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2741432}"],
+  "average_rating": "3.66",
+  "isbn_clean": "1101592524"
+}, {
+  "book_id": "13555532",
+  "title_clean": "17 Degrees North",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4112864}"],
+  "average_rating": "4.42",
+  "isbn_clean": "1617506737"
+}, {
+  "book_id": "13517530",
+  "title_clean": "17 Degrees North",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4112864}"],
+  "average_rating": "4.42",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18528366",
+  "title_clean": "17 Stone Angels",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":879515}"],
+  "average_rating": "3.3",
+  "isbn_clean": "1940423058"
+}, {
+  "book_id": "17931008",
+  "title_clean": "18 1/2 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5225603}"],
+  "average_rating": "3.23",
+  "isbn_clean": "0615807054"
+}, {
+  "book_id": "29502586",
+  "title_clean": "18 Months",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5022961}"],
+  "average_rating": "3.52",
+  "isbn_clean": "1626398046"
+}, {
+  "book_id": "187042",
+  "title_clean": "18 Seconds (Sherry Moore, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":84183}"],
+  "average_rating": "3.6",
+  "isbn_clean": "0743277163"
+}, {
+  "book_id": "187043",
+  "title_clean": "18 Seconds (Sherry Moore, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":84183}"],
+  "average_rating": "3.6",
+  "isbn_clean": "0743277171"
+}, {
+  "book_id": "13258221",
+  "title_clean": "18 Seconds (Sherry Moore, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":84183}"],
+  "average_rating": "3.6",
+  "isbn_clean": "1847375871"
+}, {
+  "book_id": "12857477",
+  "title_clean": "18 Seconds - 18 Detik",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":84183}", "{\"role\":\"Translator\",\"author_id\":2487517}"],
+  "average_rating": "3.6",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "3824902",
+  "title_clean": "18 Wheels Of Justice",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":63065}"],
+  "average_rating": "3.67",
+  "isbn_clean": "0786004487"
+}, {
+  "book_id": "34405182",
+  "title_clean": "18 graden onder nul",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8266206}"],
+  "average_rating": "3.96",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "9894897",
+  "title_clean": "18 segundos (Sherry Moore #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":84183}"],
+  "average_rating": "3.6",
+  "isbn_clean": "9722336401"
+}, {
+  "book_id": "15931984",
+  "title_clean": "1888: London Murders in the Year of the Ripper",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":973408}"],
+  "average_rating": "3.69",
+  "isbn_clean": "0752465430"
+}, {
+  "book_id": "1621680",
+  "title_clean": "18mm Blues",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":301341}"],
+  "average_rating": "3.72",
+  "isbn_clean": "0446516619"
+}, {
+  "book_id": "13558657",
+  "title_clean": "19 Purchase Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":301341}"],
+  "average_rating": "3.89",
+  "isbn_clean": "0670907677"
+}, {
+  "book_id": "4289116",
+  "title_clean": "19 Purchase Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":301341}"],
+  "average_rating": "3.89",
+  "isbn_clean": "042506154X"
+}, {
+  "book_id": "35260163",
+  "title_clean": "19 Souls (Sin City Investigation, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16116914}"],
+  "average_rating": "3.62",
+  "isbn_clean": "073875403X"
+}, {
+  "book_id": "816150",
+  "title_clean": "1920s Omnibus",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "4.22",
+  "isbn_clean": "0007208626"
+}, {
+  "book_id": "22844166",
+  "title_clean": "1922",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.84",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "36313051",
+  "title_clean": "1922",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3389}"],
+  "average_rating": "3.84",
+  "isbn_clean": "1501194569"
+}, {
+  "book_id": "18943004",
+  "title_clean": "1939 (RJ \u0026 Sandringham, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1470782}"],
+  "average_rating": "4.12",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "612479",
+  "title_clean": "1960s Omnibus",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "4.24",
+  "isbn_clean": "0007208669"
+}, {
+  "book_id": "1568061",
+  "title_clean": "1974",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}", "{\"role\":\"\",\"author_id\":21402}"],
+  "average_rating": "3.61",
+  "isbn_clean": "2743608781"
+}, {
+  "book_id": "1809482",
+  "title_clean": "1974",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}", "{\"role\":\"Translator\",\"author_id\":21402}"],
+  "average_rating": "3.61",
+  "isbn_clean": "2743612479"
+}, {
+  "book_id": "13483789",
+  "title_clean": "1974",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}", "{\"role\":\"Translator\",\"author_id\":4603603}"],
+  "average_rating": "3.61",
+  "isbn_clean": "8882371182"
+}, {
+  "book_id": "17789430",
+  "title_clean": "1974",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}"],
+  "average_rating": "3.61",
+  "isbn_clean": "8882370801"
+}, {
+  "book_id": "9643298",
+  "title_clean": "1974 (Red Riding Quartet, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}"],
+  "average_rating": "3.61",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "921375",
+  "title_clean": "1974 (Red Riding Quartet, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}", "{\"role\":\"Translator\",\"author_id\":84360}"],
+  "average_rating": "3.61",
+  "isbn_clean": "3453675088"
+}, {
+  "book_id": "18240687",
+  "title_clean": "1974 (Red Riding, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}", "{\"role\":\"translator\",\"author_id\":4603603}"],
+  "average_rating": "3.61",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "846215",
+  "title_clean": "1977",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}", "{\"role\":\"\",\"author_id\":21402}"],
+  "average_rating": "3.85",
+  "isbn_clean": "2743610700"
+}, {
+  "book_id": "9793976",
+  "title_clean": "1977",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}"],
+  "average_rating": "3.85",
+  "isbn_clean": "8882370429"
+}, {
+  "book_id": "921374",
+  "title_clean": "1977",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161893}"],
+  "average_rating": "3.85",
+  "isbn_clean": "3453675096"
+}, {
+  "book_id": "6416011",
+  "title_clean": "1st To Die (Women\u0027s Murder Club, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0755349261"
+}, {
+  "book_id": "1187675",
+  "title_clean": "1st to Die (Women\u0027s Murder Club #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0747263477"
+}, {
+  "book_id": "7843715",
+  "title_clean": "1st to Die (Women\u0027s Murder Club #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0759524548"
+}, {
+  "book_id": "87955",
+  "title_clean": "1st to Die (Women\u0027s Murder Club, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0446610038"
+}, {
+  "book_id": "465844",
+  "title_clean": "1st to Die (Women\u0027s Murder Club, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0316666009"
+}, {
+  "book_id": "13137",
+  "title_clean": "1st to Die (Women\u0027s Murder Club, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0446696617"
+}, {
+  "book_id": "828632",
+  "title_clean": "1st to Die (Women\u0027s Murder Club, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0747266905"
+}, {
+  "book_id": "6283575",
+  "title_clean": "1st to Die (Women\u0027s Murder Club, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "3614297",
+  "title_clean": "2 Bodies For The Price Of 1 (Body Movers, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0778326063"
+}, {
+  "book_id": "288845",
+  "title_clean": "2 Bodies for the Price of 1 (Body Movers, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "3.99",
+  "isbn_clean": "0778324842"
+}, {
+  "book_id": "18515959",
+  "title_clean": "2 Menantu",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":696073}"],
+  "average_rating": "3.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "8007346",
+  "title_clean": "2 in the Hat",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1223947}"],
+  "average_rating": "3.46",
+  "isbn_clean": "0345502639"
+}, {
+  "book_id": "18387597",
+  "title_clean": "2 ضباط",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3306075}"],
+  "average_rating": "3.64",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18591189",
+  "title_clean": "2 ضباط",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3306075}"],
+  "average_rating": "3.64",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "32866098",
+  "title_clean": "20 vragen voor Gloria",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":140976}"],
+  "average_rating": "3.47",
+  "isbn_clean": "9045119986"
+}, {
+  "book_id": "7746883",
+  "title_clean": "2012 Schatten der Verdammnis",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":61238}", "{\"role\":\"Ubersetzer\",\"author_id\":691717}"],
+  "average_rating": "3.52",
+  "isbn_clean": "345343482X"
+}, {
+  "book_id": "7287284",
+  "title_clean": "2012: The Crystal Skull",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":35848}"],
+  "average_rating": "3.21",
+  "isbn_clean": "0553824457"
+}, {
+  "book_id": "17564143",
+  "title_clean": "2013",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6982069}"],
+  "average_rating": "3.3",
+  "isbn_clean": "9401600368"
+}, {
+  "book_id": "19403375",
+  "title_clean": "2014 Serial Killers True Crime Anthology (Annual True Crime Anthology, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":32430}", "{\"role\":\"\",\"author_id\":4548988}", "{\"role\":\"\",\"author_id\":6915898}", "{\"role\":\"\",\"author_id\":5814238}", "{\"role\":\"\",\"author_id\":7066271}"],
+  "average_rating": "3.62",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22527470",
+  "title_clean": "2014 Summer Collection",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4175683}", "{\"role\":\"\",\"author_id\":4031660}", "{\"role\":\"\",\"author_id\":3387969}"],
+  "average_rating": "3.5",
+  "isbn_clean": "1499733054"
+}, {
+  "book_id": "26870332",
+  "title_clean": "2022 (Percipience, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":596214}"],
+  "average_rating": "3.78",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "31834529",
+  "title_clean": "2055. False Hearts",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5806077}", "{\"role\":\"Translator\",\"author_id\":7376976}"],
+  "average_rating": "3.69",
+  "isbn_clean": "8834730968"
+}, {
+  "book_id": "30637289",
+  "title_clean": "2055: False Hearts (False Hearts, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5806077}"],
+  "average_rating": "3.69",
+  "isbn_clean": "883473145X"
+}, {
+  "book_id": "6548800",
+  "title_clean": "206 Bones (Temperance Brennan #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "0434020052"
+}, {
+  "book_id": "7233141",
+  "title_clean": "206 Bones (Temperance Brennan #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "1439189927"
+}, {
+  "book_id": "7243272",
+  "title_clean": "206 Bones (Temperance Brennan #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "0434014699"
+}, {
+  "book_id": "17396303",
+  "title_clean": "206 Bones (Temperance Brennan #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "1409067599"
+}, {
+  "book_id": "7994166",
+  "title_clean": "206 Bones (Temperance Brennan, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7952716",
+  "title_clean": "206 Bones (Temperance Brennan, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "0099547465"
+}, {
+  "book_id": "7027885",
+  "title_clean": "206 Bones (Temperance Brennan, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "141652567X"
+}, {
+  "book_id": "6878296",
+  "title_clean": "206 Bones (Temperance Brennan, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "1439166234"
+}, {
+  "book_id": "29437132",
+  "title_clean": "206 Bones (Temperance Brennan, #12)",
+  "authors_flat": ["{\"role\":\"Narrator Lorelei King\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6744415",
+  "title_clean": "206 Bones (Temperance Brennan, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "0099492385"
+}, {
+  "book_id": "23572875",
+  "title_clean": "206 Bones (Temperance Brennan, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26372}"],
+  "average_rating": "3.92",
+  "isbn_clean": "0099599260"
+}, {
+  "book_id": "16169344",
+  "title_clean": "2060: On The Run",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6587526}"],
+  "average_rating": "2.94",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "5853401",
+  "title_clean": "207",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1479015}"],
+  "average_rating": "3.57",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "31431916",
+  "title_clean": "21 Dares",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7271034}"],
+  "average_rating": "3.61",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17931605",
+  "title_clean": "21 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4945342}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1480181927"
+}, {
+  "book_id": "8250854",
+  "title_clean": "21 Tales",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":803402}"],
+  "average_rating": "3.73",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18395062",
+  "title_clean": "21 dager (Mia Mikkelsen #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5330147}"],
+  "average_rating": "3.31",
+  "isbn_clean": "8203354920"
+}, {
+  "book_id": "15930548",
+  "title_clean": "21.12",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":11110}", "{\"role\":\"Translator\",\"author_id\":5362754}"],
+  "average_rating": "3.4",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "16000855",
+  "title_clean": "21.12",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":11110}"],
+  "average_rating": "3.4",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "31077045",
+  "title_clean": "212 (Ellie Hatcher #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":108774}"],
+  "average_rating": "3.75",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "9869825",
+  "title_clean": "212 (Ellie Hatcher #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":108774}"],
+  "average_rating": "3.75",
+  "isbn_clean": "0061561320"
+}, {
+  "book_id": "8824240",
+  "title_clean": "212 (Ellie Hatcher #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":108774}"],
+  "average_rating": "3.75",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7838884",
+  "title_clean": "212 (Ellie Hatcher, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":108774}"],
+  "average_rating": "3.75",
+  "isbn_clean": "0061986143"
+}, {
+  "book_id": "17286241",
+  "title_clean": "21:37",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2921369}", "{\"role\":\"Translator\",\"author_id\":6906307}"],
+  "average_rating": "3.46",
+  "isbn_clean": "0957132689"
+}, {
+  "book_id": "24990535",
+  "title_clean": "22 Dead Little Bodies (A Logan and Steel Short Novel) (Logan Mcrae)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":205589}"],
+  "average_rating": "4.12",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25338571",
+  "title_clean": "22 Dead Little Bodies (McRae \u0026  Steel Short  Novel)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":205589}"],
+  "average_rating": "4.11",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25203887",
+  "title_clean": "22 Dead Little Bodies and Other Stories",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":205589}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0008141762"
+}, {
+  "book_id": "13431174",
+  "title_clean": "221b Baker Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3041690}"],
+  "average_rating": "3.63",
+  "isbn_clean": "2749117676"
+}, {
+  "book_id": "27836560",
+  "title_clean": "2222 (Percipience, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":596214}"],
+  "average_rating": "4.36",
+  "isbn_clean": "0994033214"
+}, {
+  "book_id": "13227592",
+  "title_clean": "23 Shades of Black (Filomena Buscarsela, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":379662}", "{\"role\":\"Introduction\",\"author_id\":112338}"],
+  "average_rating": "3.71",
+  "isbn_clean": "1604865873"
+}, {
+  "book_id": "205566",
+  "title_clean": "24 Declassified: Cat\u0027s Claw",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5782}"],
+  "average_rating": "3.62",
+  "isbn_clean": "006084227X"
+}, {
+  "book_id": "314099",
+  "title_clean": "24 Declassified: Chaos Theory",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5782}"],
+  "average_rating": "3.75",
+  "isbn_clean": "0060842296"
+}, {
+  "book_id": "1627269",
+  "title_clean": "24 Declassified: Collateral Damage",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29821}"],
+  "average_rating": "3.8",
+  "isbn_clean": "0061431184"
+}, {
+  "book_id": "8071647",
+  "title_clean": "24 Declassified: Death Angel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":132043}"],
+  "average_rating": "3.47",
+  "isbn_clean": "0061771538"
+}, {
+  "book_id": "6256861",
+  "title_clean": "24 Declassified: Head Shot",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":132043}"],
+  "average_rating": "3.33",
+  "isbn_clean": "006177152X"
+}, {
+  "book_id": "205570",
+  "title_clean": "24 Declassified: Operation Hell Gate",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29821}", "{\"role\":\"\",\"author_id\":292679}", "{\"role\":\"\",\"author_id\":3930893}"],
+  "average_rating": "3.46",
+  "isbn_clean": "0060842245"
+}, {
+  "book_id": "1231126",
+  "title_clean": "24 Declassified: Storm Force",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":132043}"],
+  "average_rating": "3.2",
+  "isbn_clean": "0061378844"
+}, {
+  "book_id": "2287764",
+  "title_clean": "24 Declassified: Trinity",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5782}"],
+  "average_rating": "3.76",
+  "isbn_clean": "0061431192"
+}, {
+  "book_id": "205571",
+  "title_clean": "24 Declassified: Trojan Horse",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29821}"],
+  "average_rating": "3.49",
+  "isbn_clean": "0060842261"
+}, {
+  "book_id": "205569",
+  "title_clean": "24 Declassified: Vanishing Point",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29821}", "{\"role\":\"\",\"author_id\":292679}", "{\"role\":\"\",\"author_id\":3930893}"],
+  "average_rating": "3.57",
+  "isbn_clean": "0060842288"
+}, {
+  "book_id": "80634",
+  "title_clean": "24 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":19696}"],
+  "average_rating": "3.96",
+  "isbn_clean": "0340770066"
+}, {
+  "book_id": "6386307",
+  "title_clean": "24 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":19696}"],
+  "average_rating": "3.96",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "534587",
+  "title_clean": "24 Hours (Mississippi #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":19696}"],
+  "average_rating": "3.96",
+  "isbn_clean": "0399146245"
+}, {
+  "book_id": "1337360",
+  "title_clean": "24 Hours (Mississippi #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":19696}"],
+  "average_rating": "3.96",
+  "isbn_clean": "0451203593"
+}, {
+  "book_id": "10195063",
+  "title_clean": "24 Hours from Tulse Hill",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4575468}"],
+  "average_rating": "3.45",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "28455967",
+  "title_clean": "24 dagen",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":282080}"],
+  "average_rating": "3.72",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "34314004",
+  "title_clean": "24 hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1109514}"],
+  "average_rating": "3.79",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12844095",
+  "title_clean": "24 ruumista",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":719306}", "{\"role\":\"Translator\",\"author_id\":7036948}"],
+  "average_rating": "3.64",
+  "isbn_clean": "9525635430"
+}, {
+  "book_id": "31448722",
+  "title_clean": "24 черни птици (Pendergast, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12577}", "{\"role\":\"\",\"author_id\":11091}", "{\"role\":\"Translator\",\"author_id\":6888916}"],
+  "average_rating": "4.18",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25620200",
+  "title_clean": "24-Karat Conspiracy (Precious Gems, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2839305}"],
+  "average_rating": "4.22",
+  "isbn_clean": "1634760433"
+}, {
+  "book_id": "5118978",
+  "title_clean": "24/7",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6578584}"],
+  "average_rating": "3.77",
+  "isbn_clean": "0345446976"
+}, {
+  "book_id": "1101165",
+  "title_clean": "24/7",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6578584}"],
+  "average_rating": "3.77",
+  "isbn_clean": "0330490982"
+}, {
+  "book_id": "25898552",
+  "title_clean": "24/7",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3284106}"],
+  "average_rating": "3.68",
+  "isbn_clean": "1626396191"
+}, {
+  "book_id": "32198636",
+  "title_clean": "24690 (24690 #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14900030}", "{\"role\":\"\",\"author_id\":5373159}"],
+  "average_rating": "3.98",
+  "isbn_clean": "1535319011"
+}, {
+  "book_id": "23310732",
+  "title_clean": "24: Deadline",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":32643}"],
+  "average_rating": "3.82",
+  "isbn_clean": "0765377918"
+}, {
+  "book_id": "21408125",
+  "title_clean": "24: Deadline (24: Live Another Day #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":32643}"],
+  "average_rating": "3.82",
+  "isbn_clean": "076537790X"
+}, {
+  "book_id": "191515",
+  "title_clean": "24: Nightfall",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":111463}", "{\"role\":\"\",\"author_id\":1099454}", "{\"role\":\"Artist\",\"author_id\":111462}"],
+  "average_rating": "3.08",
+  "isbn_clean": "1600100899"
+}, {
+  "book_id": "703654",
+  "title_clean": "24: The House Special Subcommittee\u0027s Findings at CTU",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29821}", "{\"role\":\"\",\"author_id\":13931}"],
+  "average_rating": "3.69",
+  "isbn_clean": "0060535504"
+}, {
+  "book_id": "22808333",
+  "title_clean": "24: Underground",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5283355}", "{\"role\":\"Illustrations\",\"author_id\":61315}"],
+  "average_rating": "3.28",
+  "isbn_clean": "1631400541"
+}, {
+  "book_id": "11631450",
+  "title_clean": "25 Random Facts",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4925220}"],
+  "average_rating": "3.94",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "3123668",
+  "title_clean": "27",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":109299}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0394568486"
+}, {
+  "book_id": "657383",
+  "title_clean": "27",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":109299}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0345370732"
+}, {
+  "book_id": "27156156",
+  "title_clean": "28 Days",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6559967}"],
+  "average_rating": "4.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13408651",
+  "title_clean": "28 Pages",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5443671}"],
+  "average_rating": "3.91",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "16086614",
+  "title_clean": "28 Shades of Black",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6539949}"],
+  "average_rating": "2.26",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "27467537",
+  "title_clean": "29",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6734986}"],
+  "average_rating": "4.0",
+  "isbn_clean": "0996810609"
+}, {
+  "book_id": "27287393",
+  "title_clean": "29",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6734986}", "{\"role\":\"\",\"author_id\":6734986}"],
+  "average_rating": "4.0",
+  "isbn_clean": "0996810617"
+}, {
+  "book_id": "32864324",
+  "title_clean": "29.Oda",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29471}"],
+  "average_rating": "3.67",
+  "isbn_clean": "6059232574"
+}, {
+  "book_id": "30051397",
+  "title_clean": "2C",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1321847}"],
+  "average_rating": "3.64",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20820038",
+  "title_clean": "2nd Amendment Remedies (Scott Wolfe Series #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7545162}"],
+  "average_rating": "4.53",
+  "isbn_clean": "1495974200"
+}, {
+  "book_id": "1187710",
+  "title_clean": "2nd Chance (Women\u0027s Murder Club #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"Contributor\",\"author_id\":8214}"],
+  "average_rating": "4.01",
+  "isbn_clean": "0316695971"
+}, {
+  "book_id": "33678",
+  "title_clean": "2nd Chance (Women\u0027s Murder Club #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.01",
+  "isbn_clean": "0739424106"
+}, {
+  "book_id": "1187708",
+  "title_clean": "2nd Chance (Women\u0027s Murder Club #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.01",
+  "isbn_clean": "0747274347"
+}, {
+  "book_id": "228361",
+  "title_clean": "2nd Chance (Women\u0027s Murder Club, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.01",
+  "isbn_clean": "0446612790"
+}, {
+  "book_id": "13136",
+  "title_clean": "2nd Chance (Women\u0027s Murder Club, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}", "{\"role\":\"Narrator\",\"author_id\":2115322}", "{\"role\":\"Narrator\",\"author_id\":2745908}"],
+  "average_rating": "4.01",
+  "isbn_clean": "0446696633"
+}, {
+  "book_id": "446878",
+  "title_clean": "2nd Chance (Women\u0027s Murder Club, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.01",
+  "isbn_clean": "0316693200"
+}, {
+  "book_id": "4366357",
+  "title_clean": "2nd Chance (Women\u0027s Murder Club, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}", "{\"role\":\"\",\"author_id\":5451301}"],
+  "average_rating": "4.01",
+  "isbn_clean": "075534927X"
+}, {
+  "book_id": "7405463",
+  "title_clean": "2nd Chance - Kesempatan Kedua",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.01",
+  "isbn_clean": "9792212191"
+}, {
+  "book_id": "13344527",
+  "title_clean": "2ª Chance (Clube das Mulheres Contra o Crime #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.01",
+  "isbn_clean": "8532524702"
+}, {
+  "book_id": "18719875",
+  "title_clean": "3 A.M.",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2531685}"],
+  "average_rating": "3.85",
+  "isbn_clean": "B00FV4IT7Q"
+}, {
+  "book_id": "17788600",
+  "title_clean": "3 Bodies and a Biscotti (Lexy Baker #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5762605}"],
+  "average_rating": "3.86",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "10744683",
+  "title_clean": "3 Day Terror",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":71874}"],
+  "average_rating": "2.44",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6389505",
+  "title_clean": "3 Fois Plus Loin",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":70145}", "{\"role\":\"\",\"author_id\":704593}"],
+  "average_rating": "3.18",
+  "isbn_clean": "2702139906"
+}, {
+  "book_id": "17239328",
+  "title_clean": "3 Gates of the Dead",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3506711}"],
+  "average_rating": "3.92",
+  "isbn_clean": "1624670997"
+}, {
+  "book_id": "9927022",
+  "title_clean": "3 Lies (Masters CIA Thriller, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":608798}"],
+  "average_rating": "4.07",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6081284",
+  "title_clean": "3 Men And A Body (Body Movers, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "3.98",
+  "isbn_clean": "0778326594"
+}, {
+  "book_id": "427096",
+  "title_clean": "3 Novels: The Eye Of The Beholder; The Queen Of The Night; The Ice Maiden",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26373}", "{\"role\":\"Introduction\",\"author_id\":28063}"],
+  "average_rating": "4.59",
+  "isbn_clean": "0946391211"
+}, {
+  "book_id": "4501566",
+  "title_clean": "3 Quarters",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":99273}"],
+  "average_rating": "3.92",
+  "isbn_clean": "067100249X"
+}, {
+  "book_id": "23556414",
+  "title_clean": "3 Sleuths, 2 Dogs, 1 Murder (The Sleuth Sisters #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7912913}"],
+  "average_rating": "3.91",
+  "isbn_clean": "0990380432"
+}, {
+  "book_id": "4575895",
+  "title_clean": "3 Wochen bis zur Wahrheit",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":254681}"],
+  "average_rating": "3.63",
+  "isbn_clean": "3499245558"
+}, {
+  "book_id": "17792385",
+  "title_clean": "3 [Thrillers]",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5005208}"],
+  "average_rating": "3.62",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "21782475",
+  "title_clean": "3 a.m. (Henry Bins, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2531685}"],
+  "average_rating": "3.85",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "34099155",
+  "title_clean": "3 and a Half Murders",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5424921}"],
+  "average_rating": "4.05",
+  "isbn_clean": "8175994258"
+}, {
+  "book_id": "35340867",
+  "title_clean": "3 etsivää ja kauhujen linna (Alfred Hitchcock and The Three Investigators, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":50291}", "{\"role\":\"Translator\",\"author_id\":7835468}"],
+  "average_rating": "4.02",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25366775",
+  "title_clean": "3 etsivää ja purppuranpunainen merirosvo",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":50309}"],
+  "average_rating": "3.59",
+  "isbn_clean": "951202439X"
+}, {
+  "book_id": "28483500",
+  "title_clean": "3 etsivää ja varastettu valas (The Three Investigators, #35)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":140160}", "{\"role\":\"Translator\",\"author_id\":2960659}"],
+  "average_rating": "3.85",
+  "isbn_clean": "9512025418"
+}, {
+  "book_id": "26892182",
+  "title_clean": "3 of a Kind (Knightley \u0026 Son #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7105265}"],
+  "average_rating": "3.83",
+  "isbn_clean": "1408860082"
+}, {
+  "book_id": "10447965",
+  "title_clean": "3 đêm trước Giao thừa",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8881}", "{\"role\":\"Translator\",\"author_id\":4642739}"],
+  "average_rating": "3.61",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "9247128",
+  "title_clean": "3,096 Days",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"Translator\",\"author_id\":7204864}"],
+  "average_rating": "3.83",
+  "isbn_clean": "0670919993"
+}, {
+  "book_id": "10617074",
+  "title_clean": "3,096 Days in Captivity: The True Story of My Abduction, Eight Years of Enslavement,and Escape",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}"],
+  "average_rating": "3.83",
+  "isbn_clean": "0425244288"
+}, {
+  "book_id": "10917668",
+  "title_clean": "3,096 días",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}"],
+  "average_rating": "3.83",
+  "isbn_clean": "6071109442"
+}, {
+  "book_id": "18042373",
+  "title_clean": "3.096 dias",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"Translator\",\"author_id\":7123132}"],
+  "average_rating": "3.83",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17677833",
+  "title_clean": "30 Days Hath Revenge",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5765265}"],
+  "average_rating": "4.55",
+  "isbn_clean": "160290362X"
+}, {
+  "book_id": "18752200",
+  "title_clean": "30 Pieces of Silver",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4127933}"],
+  "average_rating": "3.53",
+  "isbn_clean": "B004HB1W82"
+}, {
+  "book_id": "10044193",
+  "title_clean": "30 Pieces of Silver (Betrayed, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4127933}"],
+  "average_rating": "3.53",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "35959231",
+  "title_clean": "30 Red Dresses",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14582814}"],
+  "average_rating": "4.77",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22591698",
+  "title_clean": "30 Seconds",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7202655}"],
+  "average_rating": "4.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11792651",
+  "title_clean": "3096 Dage",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}"],
+  "average_rating": "3.83",
+  "isbn_clean": "8702107546"
+}, {
+  "book_id": "11465475",
+  "title_clean": "3096 Dias",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"Translator\",\"author_id\":7123132}"],
+  "average_rating": "3.83",
+  "isbn_clean": "8576861070"
+}, {
+  "book_id": "9696546",
+  "title_clean": "3096 Jours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"Translator\",\"author_id\":35628}", "{\"role\":\"Translator\",\"author_id\":4564441}"],
+  "average_rating": "3.83",
+  "isbn_clean": "2709636387"
+}, {
+  "book_id": "9275517",
+  "title_clean": "3096 Tage",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}"],
+  "average_rating": "3.83",
+  "isbn_clean": "3471350403"
+}, {
+  "book_id": "17448710",
+  "title_clean": "3096 Tage",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}"],
+  "average_rating": "3.83",
+  "isbn_clean": "3548374263"
+}, {
+  "book_id": "12071364",
+  "title_clean": "3096 dagar",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"Contributor\",\"author_id\":4749653}", "{\"role\":\"Contributor\",\"author_id\":1013846}", "{\"role\":\"Translator\",\"author_id\":1392572}"],
+  "average_rating": "3.83",
+  "isbn_clean": "9100126187"
+}, {
+  "book_id": "10911459",
+  "title_clean": "3096 dager",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"\",\"author_id\":1013846}", "{\"role\":\"\",\"author_id\":4749653}", "{\"role\":\"Translator\",\"author_id\":4749654}"],
+  "average_rating": "3.83",
+  "isbn_clean": "8202346916"
+}, {
+  "book_id": "13181933",
+  "title_clean": "3096 dana",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"Translator\",\"author_id\":4696102}"],
+  "average_rating": "3.83",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11329304",
+  "title_clean": "3096 giorni",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"Translator\",\"author_id\":4463482}"],
+  "average_rating": "3.83",
+  "isbn_clean": "8845267180"
+}, {
+  "book_id": "13499409",
+  "title_clean": "3096 päivää",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}"],
+  "average_rating": "3.83",
+  "isbn_clean": "9511256904"
+}, {
+  "book_id": "22102653",
+  "title_clean": "3096 μέρες",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4333327}", "{\"role\":\"translator\",\"author_id\":8206508}"],
+  "average_rating": "3.83",
+  "isbn_clean": "9604842005"
+}, {
+  "book_id": "16004013",
+  "title_clean": "31",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6525392}"],
+  "average_rating": "3.19",
+  "isbn_clean": "9381626758"
+}, {
+  "book_id": "7882036",
+  "title_clean": "31 Bond Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3156231}"],
+  "average_rating": "3.4",
+  "isbn_clean": "0061969370"
+}, {
+  "book_id": "7101914",
+  "title_clean": "31 Bond Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3156231}"],
+  "average_rating": "3.4",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "8341898",
+  "title_clean": "31 Bond Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3156231}"],
+  "average_rating": "3.4",
+  "isbn_clean": "0007304048"
+}, {
+  "book_id": "8341899",
+  "title_clean": "31 Bond Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3156231}"],
+  "average_rating": "3.4",
+  "isbn_clean": "0007304056"
+}, {
+  "book_id": "8994374",
+  "title_clean": "31 Bond Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3156231}"],
+  "average_rating": "3.4",
+  "isbn_clean": "0061773972"
+}, {
+  "book_id": "13623339",
+  "title_clean": "31 Bond Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3156231}"],
+  "average_rating": "3.4",
+  "isbn_clean": "1443402761"
+}, {
+  "book_id": "17157720",
+  "title_clean": "31 Days to Life",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6860201}"],
+  "average_rating": "3.55",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6516460",
+  "title_clean": "31 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":44525}"],
+  "average_rating": "3.3",
+  "isbn_clean": "1932961836"
+}, {
+  "book_id": "16066362",
+  "title_clean": "31. korruse hukk. Mees, kes haihtus nagu suits",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6547}", "{\"role\":\"\",\"author_id\":6546}", "{\"role\":\"translator, afterword\",\"author_id\":5575072}", "{\"role\":\"illustrator\",\"author_id\":6548254}"],
+  "average_rating": "3.5",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18250100",
+  "title_clean": "313",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6425980}"],
+  "average_rating": "3.04",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17735190",
+  "title_clean": "314 (Widowsfield Trilogy,#1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5429635}"],
+  "average_rating": "3.54",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17204692",
+  "title_clean": "314 (Widowsfield Trilogy,#1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5429635}"],
+  "average_rating": "3.54",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "262419",
+  "title_clean": "32 Cadillacs (DKA File, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":153386}"],
+  "average_rating": "3.65",
+  "isbn_clean": "0446403601"
+}, {
+  "book_id": "8261480",
+  "title_clean": "320 Down",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3465740}"],
+  "average_rating": "4.2",
+  "isbn_clean": "1450042708"
+}, {
+  "book_id": "18516958",
+  "title_clean": "320 de pisici negre",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2771587}"],
+  "average_rating": "4.3",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6068880",
+  "title_clean": "320 de pisici negre",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2771587}"],
+  "average_rating": "4.3",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13623796",
+  "title_clean": "33 Ways To Kill My Husband",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2035238}"],
+  "average_rating": "3.49",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "9484544",
+  "title_clean": "33, A Gay Love Story",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4442544}"],
+  "average_rating": "3.7",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "16160464",
+  "title_clean": "333: La Formula Segreta di Dante",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":201369}", "{\"role\":\"Translator\",\"author_id\":5447831}"],
+  "average_rating": "3.86",
+  "isbn_clean": "8854139505"
+}, {
+  "book_id": "29280245",
+  "title_clean": "36 (36, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7572100}"],
+  "average_rating": "4.49",
+  "isbn_clean": "1523865091"
+}, {
+  "book_id": "18882632",
+  "title_clean": "36 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":52527}"],
+  "average_rating": "4.2",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "1244049",
+  "title_clean": "36 Yalta Boulevard (Ruthenia, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":327983}"],
+  "average_rating": "3.87",
+  "isbn_clean": "0312332017"
+}, {
+  "book_id": "1244048",
+  "title_clean": "36 Yalta Boulevard (The Yalta Boulevard Sequence #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":327983}"],
+  "average_rating": "3.87",
+  "isbn_clean": "0312332033"
+}, {
+  "book_id": "15742684",
+  "title_clean": "36 tydzień",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4824220}", "{\"role\":\"Translator\",\"author_id\":6438168}"],
+  "average_rating": "3.26",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "552732",
+  "title_clean": "361 (Hard Case Crime #9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":30953}"],
+  "average_rating": "3.59",
+  "isbn_clean": "0843953578"
+}, {
+  "book_id": "17850522",
+  "title_clean": "39 Minutes, Volume 1",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":744160}", "{\"role\":\"Illustrations\",\"author_id\":7063872}", "{\"role\":\"Illustrations\",\"author_id\":7063873}"],
+  "average_rating": "2.25",
+  "isbn_clean": "1607067560"
+}, {
+  "book_id": "22204644",
+  "title_clean": "3:00 AM",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2531685}"],
+  "average_rating": "3.85",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "35161120",
+  "title_clean": "3:01 (Tina Boyd #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":253943}"],
+  "average_rating": "3.9",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22591152",
+  "title_clean": "3rd Body",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4127933}", "{\"role\":\"\",\"author_id\":5427599}"],
+  "average_rating": "4.53",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6100246",
+  "title_clean": "3rd Degree",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.0",
+  "isbn_clean": "141766391X"
+}, {
+  "book_id": "6697049",
+  "title_clean": "3rd Degree",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5451301}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.0",
+  "isbn_clean": "0755349288"
+}, {
+  "book_id": "13155",
+  "title_clean": "3rd Degree",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.0",
+  "isbn_clean": "0446696641"
+}, {
+  "book_id": "446383",
+  "title_clean": "3rd Degree",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.0",
+  "isbn_clean": "0755300246"
+}, {
+  "book_id": "919582",
+  "title_clean": "3rd Degree (Women\u0027s Murder Club, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.0",
+  "isbn_clean": "0316603570"
+}, {
+  "book_id": "13132",
+  "title_clean": "3rd Degree (Women\u0027s Murder Club, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.0",
+  "isbn_clean": "0446614831"
+}, {
+  "book_id": "446384",
+  "title_clean": "3rd Degree (Women\u0027s Murder Club, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8214}"],
+  "average_rating": "4.0",
+  "isbn_clean": "0755300254"
+}, {
+  "book_id": "18191665",
+  "title_clean": "3rd Degree (Women\u0027s Murder Club, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.0",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11253273",
+  "title_clean": "3º Grau (Clube das Investigadoras #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"Translator\",\"author_id\":5257458}"],
+  "average_rating": "4.0",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "9458124",
+  "title_clean": "4 Bodies And A Funeral (Body Movers, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}", "{\"role\":\"Narrator\",\"author_id\":428160}"],
+  "average_rating": "4.01",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13189851",
+  "title_clean": "4 Bodies and a Funeral (Body Movers #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}", "{\"role\":\"Narrator\",\"author_id\":428160}"],
+  "average_rating": "4.01",
+  "isbn_clean": "1415964742"
+}, {
+  "book_id": "5961090",
+  "title_clean": "4 Bodies and a Funeral (Body Movers, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "4.01",
+  "isbn_clean": "0778326683"
+}, {
+  "book_id": "438212",
+  "title_clean": "4 Novels: Night of the Jabberwock; The Screaming Mimi; Knock Three-One-Two; The Fabulous Clipjoint",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":51503}", "{\"role\":\"Introduction\",\"author_id\":52651}"],
+  "average_rating": "4.14",
+  "isbn_clean": "0946391114"
+}, {
+  "book_id": "16246638",
+  "title_clean": "4 Tahun Tinggal Di Rumah Hantu",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6623264}"],
+  "average_rating": "4.16",
+  "isbn_clean": "9797943739"
+}, {
+  "book_id": "13628716",
+  "title_clean": "4 Temmuz (Kadın Cinayetleri Kulübü, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"Cevirmen\",\"author_id\":8588755}"],
+  "average_rating": "4.04",
+  "isbn_clean": "9751025125"
+}, {
+  "book_id": "951612",
+  "title_clean": "4,000 Days: My Life and Survival in a Bangkok Prison",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":222985}"],
+  "average_rating": "4.05",
+  "isbn_clean": "0312253648"
+}, {
+  "book_id": "7284586",
+  "title_clean": "4.50 From Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "1444802283"
+}, {
+  "book_id": "17793637",
+  "title_clean": "4.50 From Paddington / Ten Little Niggers",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "4.32",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "1435283",
+  "title_clean": "4.50 From Paddington/They Do It With Mirrors",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"Illustrator\",\"author_id\":1047594}", "{\"role\":\"Illustrator\",\"author_id\":5447147}"],
+  "average_rating": "3.83",
+  "isbn_clean": "0921111495"
+}, {
+  "book_id": "34751976",
+  "title_clean": "4.50 from Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20410638",
+  "title_clean": "4.50 from Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6473187",
+  "title_clean": "4.50 from Paddington (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "923215",
+  "title_clean": "4.50 from Paddington (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0007208545"
+}, {
+  "book_id": "1839780",
+  "title_clean": "4.50 from Paddington - Kereta 4.50 dari Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"Translator\",\"author_id\":957567}"],
+  "average_rating": "3.93",
+  "isbn_clean": "9792231307"
+}, {
+  "book_id": "26833666",
+  "title_clean": "4.50 från Paddington (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"Translator\",\"author_id\":4197122}"],
+  "average_rating": "3.93",
+  "isbn_clean": "9187441772"
+}, {
+  "book_id": "25683681",
+  "title_clean": "4.50 iš Padingtono (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"\",\"author_id\":123715}", "{\"role\":\"Translator\",\"author_id\":7777157}"],
+  "average_rating": "3.93",
+  "isbn_clean": "9986436400"
+}, {
+  "book_id": "20566171",
+  "title_clean": "40 Stunden (Faris Iskander, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1050837}"],
+  "average_rating": "3.8",
+  "isbn_clean": "3442381290"
+}, {
+  "book_id": "447201",
+  "title_clean": "40 Whacks: New Evidence in the Life and Legend of Lizzie Borden",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":96376}", "{\"role\":\"Foreword by\",\"author_id\":1175788}"],
+  "average_rating": "3.7",
+  "isbn_clean": "0899093515"
+}, {
+  "book_id": "22365854",
+  "title_clean": "40 uur",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1050837}", "{\"role\":\"Translator\",\"author_id\":2771524}"],
+  "average_rating": "3.8",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20967259",
+  "title_clean": "400 Things Cops Know: Lessons from a Veteran Patrolman on the Dangerous and Quirky World of Policing",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7924917}"],
+  "average_rating": "4.03",
+  "isbn_clean": "1610352173"
+}, {
+  "book_id": "13080963",
+  "title_clean": "44 (44, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4485062}"],
+  "average_rating": "3.64",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "16192941",
+  "title_clean": "44. laps",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":981834}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25989124",
+  "title_clean": "45 υπό σκιάν",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9693}", "{\"role\":\"translator\",\"author_id\":4415001}"],
+  "average_rating": "3.29",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "26147051",
+  "title_clean": "450 stron",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7055330}"],
+  "average_rating": "3.26",
+  "isbn_clean": "8379763157"
+}, {
+  "book_id": "15994517",
+  "title_clean": "45° à l\u0027ombre",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9693}"],
+  "average_rating": "3.29",
+  "isbn_clean": "2070367363"
+}, {
+  "book_id": "953052",
+  "title_clean": "47 Rules of Highly Effective Bank Robbers",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":483473}"],
+  "average_rating": "3.04",
+  "isbn_clean": "0977627667"
+}, {
+  "book_id": "21414721",
+  "title_clean": "47-ят самурай",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12546}", "{\"role\":\"\",\"author_id\":8036175}", "{\"role\":\"Translator\",\"author_id\":3101600}"],
+  "average_rating": "3.82",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17898816",
+  "title_clean": "48 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6927355}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17344683",
+  "title_clean": "48 Hours (City of London, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6927355}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "25005950",
+  "title_clean": "48 Hours To Die: An Anthony Stone Novel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1170780}"],
+  "average_rating": "2.78",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "32920367",
+  "title_clean": "48 heures pour mourir",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1878804}"],
+  "average_rating": "4.21",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "1729017",
+  "title_clean": "4:50 From Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0061003832"
+}, {
+  "book_id": "694495",
+  "title_clean": "4:50 from Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0451200519"
+}, {
+  "book_id": "14524579",
+  "title_clean": "4:50 from Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "1611732808"
+}, {
+  "book_id": "2450544",
+  "title_clean": "4:50 from Paddington (Miss Marple #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0006157629"
+}, {
+  "book_id": "9583307",
+  "title_clean": "4:50 from Paddington (Miss Marple #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0062073664"
+}, {
+  "book_id": "1086365",
+  "title_clean": "4:50 from Paddington (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0007120826"
+}, {
+  "book_id": "10154243",
+  "title_clean": "4:50 from Paddington (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0061738441"
+}, {
+  "book_id": "140278",
+  "title_clean": "4:50 from Paddington (Miss Marple, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "1579126936"
+}, {
+  "book_id": "6071017",
+  "title_clean": "4:50 from Paddington - Kereta 4.50 dari Paddington",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.93",
+  "isbn_clean": "9794031550"
+}, {
+  "book_id": "2370689",
+  "title_clean": "4th of July",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0446179663"
+}, {
+  "book_id": "696320",
+  "title_clean": "4th of July",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0316058858"
+}, {
+  "book_id": "1070265",
+  "title_clean": "4th of July (Women\u0027s Murder Club, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0316710601"
+}, {
+  "book_id": "33668",
+  "title_clean": "4th of July (Women\u0027s Murder Club, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0446613363"
+}, {
+  "book_id": "22821662",
+  "title_clean": "4th of July (Women\u0027s Murder Club, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1920798668"
+}, {
+  "book_id": "13120097",
+  "title_clean": "4η Ιουλίου (Γυναικεία λέσχη φόνων #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}", "{\"role\":\"Translator\",\"author_id\":5354400}"],
+  "average_rating": "4.04",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "29279602",
+  "title_clean": "5",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1050839}"],
+  "average_rating": "3.96",
+  "isbn_clean": "6059702066"
+}, {
+  "book_id": "6072105",
+  "title_clean": "5 Bodies to Die For (Body Movers, #5)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "4.07",
+  "isbn_clean": "0778327051"
+}, {
+  "book_id": "22915602",
+  "title_clean": "5. Kurban (Maeve Kerrigan #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1173340}"],
+  "average_rating": "3.8",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18520471",
+  "title_clean": "50 Australian Crimes of the 20th Century",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":251814}"],
+  "average_rating": "3.84",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7343673",
+  "title_clean": "50 Mysteries",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16667}", "{\"role\":\"\",\"author_id\":1947587}"],
+  "average_rating": "3.57",
+  "isbn_clean": "8172454023"
+}, {
+  "book_id": "226808",
+  "title_clean": "50 Wisconsin Crimes of the Century",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":132763}", "{\"role\":\"Editor\",\"author_id\":399118}"],
+  "average_rating": "3.22",
+  "isbn_clean": "1878569473"
+}, {
+  "book_id": "11511533",
+  "title_clean": "50% Off Murder (Good Buy Girls, #1)",
+  "authors_flat": ["{\"role\":\"Pseudonym\",\"author_id\":5441220}", "{\"role\":\"\",\"author_id\":2992321}"],
+  "average_rating": "3.82",
+  "isbn_clean": "0425247023"
+}, {
+  "book_id": "21528398",
+  "title_clean": "50/50 Killer",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":216455}"],
+  "average_rating": "3.67",
+  "isbn_clean": "8850219385"
+}, {
+  "book_id": "10529359",
+  "title_clean": "50/50 killer",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":216455}", "{\"role\":\"Translator\",\"author_id\":4550580}"],
+  "average_rating": "3.67",
+  "isbn_clean": "8846210182"
+}, {
+  "book_id": "32573278",
+  "title_clean": "50/50 žudikas",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":216455}", "{\"role\":\"Translator\",\"author_id\":7457798}"],
+  "average_rating": "3.67",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "33294484",
+  "title_clean": "50/50 убиец",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":216455}", "{\"role\":\"\",\"author_id\":16172079}"],
+  "average_rating": "3.67",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20930643",
+  "title_clean": "500",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5294238}"],
+  "average_rating": "3.47",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "15705431",
+  "title_clean": "500 (Mike Ford, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5294238}"],
+  "average_rating": "3.47",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7313115",
+  "title_clean": "501 Most Notorious Crimes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":73700}"],
+  "average_rating": "4.02",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "1022038",
+  "title_clean": "5150, rue des Ormes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1302085}"],
+  "average_rating": "3.99",
+  "isbn_clean": "2922145514"
+}, {
+  "book_id": "23349701",
+  "title_clean": "52 Likes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4086531}"],
+  "average_rating": "3.7",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "24663013",
+  "title_clean": "52 Likes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4086531}"],
+  "average_rating": "3.7",
+  "isbn_clean": "1772332151"
+}, {
+  "book_id": "288995",
+  "title_clean": "52 Pick Up",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12940}"],
+  "average_rating": "3.94",
+  "isbn_clean": "0753819627"
+}, {
+  "book_id": "842028",
+  "title_clean": "52 Pickup",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12940}"],
+  "average_rating": "3.94",
+  "isbn_clean": "0786280778"
+}, {
+  "book_id": "6547936",
+  "title_clean": "52 Pickup",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12940}"],
+  "average_rating": "3.94",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "425181",
+  "title_clean": "52 Pickup",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12940}"],
+  "average_rating": "3.94",
+  "isbn_clean": "0060083999"
+}, {
+  "book_id": "9595604",
+  "title_clean": "52 Pickup",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12940}"],
+  "average_rating": "3.94",
+  "isbn_clean": "006054774X"
+}, {
+  "book_id": "16248327",
+  "title_clean": "52 Pickup: A Novel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12940}"],
+  "average_rating": "3.94",
+  "isbn_clean": "0062266004"
+}, {
+  "book_id": "10457318",
+  "title_clean": "52 Pickup: A Novel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12940}"],
+  "average_rating": "3.94",
+  "isbn_clean": "006180231X"
+}, {
+  "book_id": "32766209",
+  "title_clean": "52 Steps To Murder (Dekker Cozy Mystery #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4050580}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18752727",
+  "title_clean": "52 Steps To Murder (Dekker Cozy Mystery #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4050580}"],
+  "average_rating": "3.59",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18375872",
+  "title_clean": "52 gioca o muori",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":12940}", "{\"role\":\"Translator\",\"author_id\":4415389}"],
+  "average_rating": "3.94",
+  "isbn_clean": "8820006073"
+}, {
+  "book_id": "28335",
+  "title_clean": "53 Days",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":15923}", "{\"role\":\"Editor\",\"author_id\":160026}", "{\"role\":\"Editor\",\"author_id\":52676}"],
+  "average_rating": "3.64",
+  "isbn_clean": "1567920888"
+}, {
+  "book_id": "15883048",
+  "title_clean": "55 Graves",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6490622}"],
+  "average_rating": "3.98",
+  "isbn_clean": "1469198584"
+}, {
+  "book_id": "17377037",
+  "title_clean": "58 Minutes (Basis for the Film Die Hard 2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":922632}"],
+  "average_rating": "3.58",
+  "isbn_clean": "1935169033"
+}, {
+  "book_id": "17287530",
+  "title_clean": "5º Cavaleiro (Clube das Mulheres Contra o Crime #5)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.04",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "1089284",
+  "title_clean": "5分間ミステリー",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":418736}", "{\"role\":\"\",\"author_id\":7627589}", "{\"role\":\"Translator\",\"author_id\":885194}"],
+  "average_rating": "3.22",
+  "isbn_clean": "4594015867"
+}, {
+  "book_id": "18285777",
+  "title_clean": "6 1/2 Body Parts (Body Movers, #6.5)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "3.88",
+  "isbn_clean": "0989042960"
+}, {
+  "book_id": "1867490",
+  "title_clean": "6 Days",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":39304}"],
+  "average_rating": "3.45",
+  "isbn_clean": "0316854816"
+}, {
+  "book_id": "6072107",
+  "title_clean": "6 Killer Bodies (Body Movers, #6)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "4.11",
+  "isbn_clean": "0778327078"
+}, {
+  "book_id": "11043650",
+  "title_clean": "6.Hedef (Women\u0027s Murder Club, #6)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.02",
+  "isbn_clean": "975102756X"
+}, {
+  "book_id": "22325658",
+  "title_clean": "60 Minutes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6525392}"],
+  "average_rating": "2.92",
+  "isbn_clean": "9384030244"
+}, {
+  "book_id": "24992653",
+  "title_clean": "60 tuntia",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}", "{\"role\":\"Translator\",\"author_id\":4603922}"],
+  "average_rating": "3.8",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17252180",
+  "title_clean": "60 tuntia",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}", "{\"role\":\"Translator\",\"author_id\":4603922}"],
+  "average_rating": "3.8",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12473464",
+  "title_clean": "60 ώρες",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}", "{\"role\":\"Translator\",\"author_id\":4062874}"],
+  "average_rating": "3.8",
+  "isbn_clean": "9789604509"
+}, {
+  "book_id": "8228026",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0440243696"
+}, {
+  "book_id": "7962896",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0553825569"
+}, {
+  "book_id": "8035527",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0593057074"
+}, {
+  "book_id": "7457610",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0739377671"
+}, {
+  "book_id": "8331897",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17428451",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "1409094766"
+}, {
+  "book_id": "7457608",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}", "{\"role\":\"Reading\",\"author_id\":238243}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0739365932"
+}, {
+  "book_id": "7956386",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0553818139"
+}, {
+  "book_id": "7960128",
+  "title_clean": "61 Hours (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0440339537"
+}, {
+  "book_id": "18069613",
+  "title_clean": "61 Stunden (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "8153858",
+  "title_clean": "61 Uur (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}", "{\"role\":\"Translator\",\"author_id\":3522123}"],
+  "average_rating": "4.08",
+  "isbn_clean": "9024531721"
+}, {
+  "book_id": "17214673",
+  "title_clean": "61 hodin (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}", "{\"role\":\"Translator\",\"author_id\":6881063}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12515893",
+  "title_clean": "61 sat (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}", "{\"role\":\"translator\",\"author_id\":5174745}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "14059208",
+  "title_clean": "61 uur (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}", "{\"role\":\"Translator\",\"author_id\":3522123}"],
+  "average_rating": "4.08",
+  "isbn_clean": "9021012464"
+}, {
+  "book_id": "17282029",
+  "title_clean": "61 שעות (Jack Reacher, #14)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5091}", "{\"role\":\"Translator\",\"author_id\":6904542}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "997556",
+  "title_clean": "633 Squadron: Operation Crucible",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":208683}"],
+  "average_rating": "3.9",
+  "isbn_clean": "0304366234"
+}, {
+  "book_id": "22019189",
+  "title_clean": "64：史上最凶惡綁架撕票事件",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5529932}", "{\"role\":\"\",\"author_id\":7360575}", "{\"role\":\"Translator\",\"author_id\":6981334}"],
+  "average_rating": "3.41",
+  "isbn_clean": "9863311944"
+}, {
+  "book_id": "11389566",
+  "title_clean": "65 Below",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1910513}"],
+  "average_rating": "3.69",
+  "isbn_clean": "1453770666"
+}, {
+  "book_id": "6416360",
+  "title_clean": "65 Proof",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":137270}"],
+  "average_rating": "3.86",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11200407",
+  "title_clean": "658",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3248211}", "{\"role\":\"Translator\",\"author_id\":530606}", "{\"role\":\"Translator\",\"author_id\":147098}"],
+  "average_rating": "3.83",
+  "isbn_clean": "2246769612"
+}, {
+  "book_id": "11112461",
+  "title_clean": "66 North (Fire and Ice, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161003}"],
+  "average_rating": "3.78",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11112462",
+  "title_clean": "66º North (Fire and Ice #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161003}"],
+  "average_rating": "3.78",
+  "isbn_clean": "1848874006"
+}, {
+  "book_id": "13479642",
+  "title_clean": "66º North (Fire and Ice #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":161003}"],
+  "average_rating": "3.78",
+  "isbn_clean": "1848874022"
+}, {
+  "book_id": "18137025",
+  "title_clean": "68 Kill",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":21071}"],
+  "average_rating": "3.84",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "15814140",
+  "title_clean": "69 Barrow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4341895}", "{\"role\":\"\",\"author_id\":17613}"],
+  "average_rating": "3.0",
+  "isbn_clean": "1453263357"
+}, {
+  "book_id": "12962475",
+  "title_clean": "69 Barrow Street; Strange Embrace (Hard Case Crime #69)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":17613}", "{\"role\":\"\",\"author_id\":4341895}", "{\"role\":\"\",\"author_id\":9854124}"],
+  "average_rating": "3.39",
+  "isbn_clean": "1596064897"
+}, {
+  "book_id": "31259322",
+  "title_clean": "6th Grade Revengers: Cat Crimes and Wannabes",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7014006}"],
+  "average_rating": "4.44",
+  "isbn_clean": "1927905087"
+}, {
+  "book_id": "17409036",
+  "title_clean": "6º Alvo (Clube das Mulheres Contra o Crime #6)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}", "{\"role\":\"Translator\",\"author_id\":6613934}"],
+  "average_rating": "4.02",
+  "isbn_clean": "8580410541"
+}, {
+  "book_id": "25177751",
+  "title_clean": "7 Brides for 7 Bodies (Body Movers, #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "4.14",
+  "isbn_clean": "0991520904"
+}, {
+  "book_id": "17992819",
+  "title_clean": "7 Brides for 7 Bodies (Body Movers, #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":167400}"],
+  "average_rating": "4.14",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13375580",
+  "title_clean": "7 Days (Benny Griessel, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":283304}"],
+  "average_rating": "4.02",
+  "isbn_clean": "1444723707"
+}, {
+  "book_id": "13414581",
+  "title_clean": "7 Days (Benny Griessel, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":283304}"],
+  "average_rating": "4.02",
+  "isbn_clean": "0307360199"
+}, {
+  "book_id": "144804",
+  "title_clean": "7 Deadly Wonders",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":83714}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0786284005"
+}, {
+  "book_id": "348907",
+  "title_clean": "7 Deadly Wonders (Jack West Jr, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":83714}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0743270533"
+}, {
+  "book_id": "20933984",
+  "title_clean": "7 Divisi",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5817614}"],
+  "average_rating": "3.64",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "16047903",
+  "title_clean": "7 Favorite Stories of Sherlock Holmes Chosen by Sir Arthur Conan Doyle",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2448}"],
+  "average_rating": "3.93",
+  "isbn_clean": "9790651678"
+}, {
+  "book_id": "17978440",
+  "title_clean": "7 Grams of Lead",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":166872}"],
+  "average_rating": "3.6",
+  "isbn_clean": "0307949907"
+}, {
+  "book_id": "26783256",
+  "title_clean": "7 Kisah Klasik Edgar Allan Poe",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4624490}", "{\"role\":\"translator\",\"author_id\":4770439}", "{\"role\":\"translator\",\"author_id\":14410645}"],
+  "average_rating": "3.58",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13071094",
+  "title_clean": "7 Souls",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":309018}", "{\"role\":\"\",\"author_id\":780075}"],
+  "average_rating": "3.6",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7091296",
+  "title_clean": "7 Souls",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":309018}", "{\"role\":\"\",\"author_id\":780075}"],
+  "average_rating": "3.6",
+  "isbn_clean": "0385736738"
+}, {
+  "book_id": "3379535",
+  "title_clean": "7 Steps To Midnight",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8726}"],
+  "average_rating": "3.43",
+  "isbn_clean": "0812550579"
+}, {
+  "book_id": "6972322",
+  "title_clean": "7 Steps to Midnight",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8726}"],
+  "average_rating": "3.43",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6122932",
+  "title_clean": "7 Steps to Midnight",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8726}"],
+  "average_rating": "3.43",
+  "isbn_clean": "0312854099"
+}, {
+  "book_id": "33551",
+  "title_clean": "7 Steps to Midnight",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8726}"],
+  "average_rating": "3.43",
+  "isbn_clean": "0765308371"
+}, {
+  "book_id": "13582068",
+  "title_clean": "7 ans après...",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":282080}"],
+  "average_rating": "3.58",
+  "isbn_clean": "2845635230"
+}, {
+  "book_id": "17451665",
+  "title_clean": "7 ans après...",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":282080}"],
+  "average_rating": "3.58",
+  "isbn_clean": "2266239066"
+}, {
+  "book_id": "13020193",
+  "title_clean": "7 dae (Bennie Griessel, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":283304}"],
+  "average_rating": "4.02",
+  "isbn_clean": "079815621X"
+}, {
+  "book_id": "17912332",
+  "title_clean": "7 dagen",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":283304}", "{\"role\":\"Translator\",\"author_id\":3053575}", "{\"role\":\"Translator\",\"author_id\":3387541}"],
+  "average_rating": "4.02",
+  "isbn_clean": "904496934X"
+}, {
+  "book_id": "7182943",
+  "title_clean": "7,000 Clams",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":794368}"],
+  "average_rating": "3.57",
+  "isbn_clean": "0385511892"
+}, {
+  "book_id": "30824286",
+  "title_clean": "7-7-2007",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3313886}"],
+  "average_rating": "4.14",
+  "isbn_clean": "8838935408"
+}, {
+  "book_id": "13489659",
+  "title_clean": "7. Il numero maledetto",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":309018}", "{\"role\":\"\",\"author_id\":780075}", "{\"role\":\"Translator\",\"author_id\":6877157}"],
+  "average_rating": "3.6",
+  "isbn_clean": "8854135763"
+}, {
+  "book_id": "31194202",
+  "title_clean": "700 метра под земята (Philip Mercer, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2828239}", "{\"role\":\"\",\"author_id\":4622632}"],
+  "average_rating": "3.93",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "11231090",
+  "title_clean": "72 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4745749}"],
+  "average_rating": "4.0",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "8891539",
+  "title_clean": "72 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1276146}"],
+  "average_rating": "3.63",
+  "isbn_clean": "1615815937"
+}, {
+  "book_id": "10943589",
+  "title_clean": "72 Hours",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5291058}"],
+  "average_rating": "4.0",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "2114132",
+  "title_clean": "72 Hours (SDDU, #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":150270}"],
+  "average_rating": "3.42",
+  "isbn_clean": "0373888295"
+}, {
+  "book_id": "6926296",
+  "title_clean": "72 Virgins",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":330308}"],
+  "average_rating": "4.0",
+  "isbn_clean": "061528051X"
+}, {
+  "book_id": "12297412",
+  "title_clean": "72 horas para morrer",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5109898}"],
+  "average_rating": "3.53",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "28644707",
+  "title_clean": "72 ore",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1276146}", "{\"role\":\"Translator\",\"author_id\":6978665}"],
+  "average_rating": "3.63",
+  "isbn_clean": "8893120259"
+}, {
+  "book_id": "15797369",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "0553593064"
+}, {
+  "book_id": "13096040",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "000732698X"
+}, {
+  "book_id": "13096039",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "0007452985"
+}, {
+  "book_id": "11166891",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12066009",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}", "{\"role\":\"narrator\",\"author_id\":4105737}"],
+  "average_rating": "3.3",
+  "isbn_clean": "1441818472"
+}, {
+  "book_id": "13007625",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "0007326955"
+}, {
+  "book_id": "12956808",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "0007326971"
+}, {
+  "book_id": "20443346",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18415776",
+  "title_clean": "77 Shadow Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "1299082998"
+}, {
+  "book_id": "11166890",
+  "title_clean": "77 Shadow Street (Pendleton, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9355}"],
+  "average_rating": "3.3",
+  "isbn_clean": "0553807714"
+}, {
+  "book_id": "1015032",
+  "title_clean": "77th Street Requiem (A Maggie MacGowen Mystery #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":171168}"],
+  "average_rating": "3.76",
+  "isbn_clean": "0525939989"
+}, {
+  "book_id": "18679932",
+  "title_clean": "7days",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":283304}"],
+  "average_rating": "4.02",
+  "isbn_clean": "144475176X"
+}, {
+  "book_id": "2202607",
+  "title_clean": "7th Heaven",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "1846052505"
+}, {
+  "book_id": "3160954",
+  "title_clean": "7th Heaven",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0099514540"
+}, {
+  "book_id": "5995956",
+  "title_clean": "7th Heaven",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0446199257"
+}, {
+  "book_id": "7036620",
+  "title_clean": "7th Heaven",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0446536245"
+}, {
+  "book_id": "7036621",
+  "title_clean": "7th Heaven (Women\u0027s Murder Club #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0316029033"
+}, {
+  "book_id": "2647597",
+  "title_clean": "7th Heaven (Women\u0027s Murder Club #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.06",
+  "isbn_clean": "1846052513"
+}, {
+  "book_id": "552894",
+  "title_clean": "7th Heaven (Women\u0027s Murder Club, #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0316017701"
+}, {
+  "book_id": "8120402",
+  "title_clean": "7th Heaven (Women\u0027s Murder Club, #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}"],
+  "average_rating": "4.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17801239",
+  "title_clean": "7th Sin (Darc Murders, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4127933}", "{\"role\":\"\",\"author_id\":5427599}"],
+  "average_rating": "4.27",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "9029916",
+  "title_clean": "7th Son: Descent",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":238756}"],
+  "average_rating": "4.05",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7084203",
+  "title_clean": "7th Son: Descent",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":238756}"],
+  "average_rating": "4.05",
+  "isbn_clean": "1429983817"
+}, {
+  "book_id": "6474698",
+  "title_clean": "7th Son: Descent",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":238756}"],
+  "average_rating": "4.05",
+  "isbn_clean": "0312384378"
+}, {
+  "book_id": "24777039",
+  "title_clean": "7ος ουρανός (Γυναικεία λέσχη φόνων, #7)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"\",\"author_id\":8215}", "{\"role\":\"Translator\",\"author_id\":5271641}"],
+  "average_rating": "4.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "380694",
+  "title_clean": "8 Ball Chicks",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":216861}"],
+  "average_rating": "3.84",
+  "isbn_clean": "0385474326"
+}, {
+  "book_id": "1906713",
+  "title_clean": "8 Ball Chicks : A Year in the Violent World of Girl Gangsters",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":216861}"],
+  "average_rating": "3.84",
+  "isbn_clean": "0385474318"
+}, {
+  "book_id": "19365445",
+  "title_clean": "8 Hours to Die",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6963}"],
+  "average_rating": "3.87",
+  "isbn_clean": "1760080640"
+}, {
+  "book_id": "9537350",
+  "title_clean": "8 Pounds: Eight Tales of Crime, Horror, \u0026 Suspense",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14178660}", "{\"role\":\"\",\"author_id\":4415207}"],
+  "average_rating": "3.77",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7291416",
+  "title_clean": "8 in the Box: A Novel of Suspense",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1223947}"],
+  "average_rating": "3.41",
+  "isbn_clean": "0345502620"
+}, {
+  "book_id": "1686571",
+  "title_clean": "8.4",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14771}"],
+  "average_rating": "3.73",
+  "isbn_clean": "0399144005"
+}, {
+  "book_id": "832548",
+  "title_clean": "8.4",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":14771}"],
+  "average_rating": "3.73",
+  "isbn_clean": "0515127132"
+}, {
+  "book_id": "17673398",
+  "title_clean": "80 från varmvattnet",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3242647}"],
+  "average_rating": "3.44",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "15745720",
+  "title_clean": "80 grader från Varmvattnet (Ellen Elg, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3242647}"],
+  "average_rating": "3.44",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18591386",
+  "title_clean": "809 Jacob Street",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2920783}", "{\"role\":\"Editor\",\"author_id\":3890114}", "{\"role\":\"Illustrator\",\"author_id\":6454341}"],
+  "average_rating": "3.57",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "141271",
+  "title_clean": "813",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1569298}", "{\"role\":\"Illustrator\",\"author_id\":3906804}", "{\"role\":\"Translator\",\"author_id\":1319502}"],
+  "average_rating": "4.04",
+  "isbn_clean": "0809531445"
+}, {
+  "book_id": "1879517",
+  "title_clean": "813 / Les Trois Crimes d\u0027Arsène Lupin",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1569298}"],
+  "average_rating": "4.06",
+  "isbn_clean": "2253067822"
+}, {
+  "book_id": "1589321",
+  "title_clean": "82 Desire (Skip Langdon, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":99237}"],
+  "average_rating": "3.89",
+  "isbn_clean": "0804116997"
+}, {
+  "book_id": "35297901",
+  "title_clean": "82년생 김지영",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16497955}"],
+  "average_rating": "4.17",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13062098",
+  "title_clean": "86 Avenue Du Goulet (Samantha Jamison Mystery, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4780780}"],
+  "average_rating": "3.9",
+  "isbn_clean": "1937387747"
+}, {
+  "book_id": "20504779",
+  "title_clean": "87° Distretto: finché morte non vi separi",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":21318}"],
+  "average_rating": "3.88",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13765754",
+  "title_clean": "88 Killer",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3463224}"],
+  "average_rating": "3.93",
+  "isbn_clean": "0755370139"
+}, {
+  "book_id": "18282831",
+  "title_clean": "8th Amendment",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5441852}"],
+  "average_rating": "3.99",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "15731191",
+  "title_clean": "8th Amendment",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5441852}"],
+  "average_rating": "3.99",
+  "isbn_clean": "1477539360"
+}, {
+  "book_id": "6987559",
+  "title_clean": "8th Confession: (Women\u0027s Murder Club 8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.02",
+  "isbn_clean": "0099514583"
+}, {
+  "book_id": "1766034",
+  "title_clean": "8th Day (Cassiday James Mysteries, #8)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":163640}"],
+  "average_rating": "4.0",
+  "isbn_clean": "193151304X"
+}, {
+  "book_id": "17372482",
+  "title_clean": "9 - Die Wiederkehr",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5028226}"],
+  "average_rating": "3.52",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "26624912",
+  "title_clean": "9 Giorni",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8183303}"],
+  "average_rating": "3.89",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "10192495",
+  "title_clean": "9 Gold Bullets (Vincent Calvino, #12)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26842}"],
+  "average_rating": "4.1",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "13629808",
+  "title_clean": "9 Months - Book One (9 Months Trilogy)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1089965}"],
+  "average_rating": "3.78",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7194417",
+  "title_clean": "9 Nyawa",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":569001}"],
+  "average_rating": "3.9",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "271020",
+  "title_clean": "9 Scorpions",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":88535}"],
+  "average_rating": "3.64",
+  "isbn_clean": "0671019406"
+}, {
+  "book_id": "18710339",
+  "title_clean": "9 Stunden Angst",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":300521}"],
+  "average_rating": "3.65",
+  "isbn_clean": "3442478774"
+}, {
+  "book_id": "26865386",
+  "title_clean": "9 giorni",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8183303}"],
+  "average_rating": "3.89",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "33556710",
+  "title_clean": "9 Škorpiónov",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":88535}", "{\"role\":\"Translator\",\"author_id\":5110094}"],
+  "average_rating": "3.64",
+  "isbn_clean": "8055100578"
+}, {
+  "book_id": "15712543",
+  "title_clean": "9 ملي",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6425980}"],
+  "average_rating": "3.14",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "14760944",
+  "title_clean": "9 ملّي",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6425980}"],
+  "average_rating": "3.14",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "22857254",
+  "title_clean": "90 Church: Inside America\u0027s Notorious First Narcotics Squad",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6903915}"],
+  "average_rating": "3.74",
+  "isbn_clean": "1250067332"
+}, {
+  "book_id": "17280580",
+  "title_clean": "90 Church: The True Story of the Narcotics Squad from Hell",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6903915}"],
+  "average_rating": "3.74",
+  "isbn_clean": "075354072X"
+}, {
+  "book_id": "11535216",
+  "title_clean": "90 Miles to Freedom",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4606082}"],
+  "average_rating": "3.4",
+  "isbn_clean": "1463566492"
+}, {
+  "book_id": "34336569",
+  "title_clean": "90 Seconds from Sanity",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16431042}"],
+  "average_rating": "4.21",
+  "isbn_clean": "1543033458"
+}, {
+  "book_id": "33672782",
+  "title_clean": "900 Miles to Safford (Genesis Road, # 1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16262327}"],
+  "average_rating": "4.0",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "10518561",
+  "title_clean": "99 Days",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":317754}", "{\"role\":\"Illustrator\",\"author_id\":137864}"],
+  "average_rating": "2.92",
+  "isbn_clean": "140123089X"
+}, {
+  "book_id": "26406631",
+  "title_clean": "99 Percent Kill (A Lucky Dey Thriller #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5319054}"],
+  "average_rating": "4.24",
+  "isbn_clean": "0996456309"
+}, {
+  "book_id": "35447483",
+  "title_clean": "99 Red Balloons",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16861836}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0008223521"
+}, {
+  "book_id": "34066359",
+  "title_clean": "99 Red Balloons",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":16861836}"],
+  "average_rating": "4.06",
+  "isbn_clean": "0008248869"
+}, {
+  "book_id": "12054357",
+  "title_clean": "999. El Ultimo Guardian",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4463868}"],
+  "average_rating": "3.13",
+  "isbn_clean": "8492833513"
+}, {
+  "book_id": "9711657",
+  "title_clean": "999: L\u0027ultimo custode",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4463868}"],
+  "average_rating": "3.13",
+  "isbn_clean": "8876153209"
+}, {
+  "book_id": "368875",
+  "title_clean": "9Tail Fox",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":109005}"],
+  "average_rating": "3.75",
+  "isbn_clean": "1597800783"
+}, {
+  "book_id": "11178745",
+  "title_clean": "9th Judgement: (Women\u0027s Murder Club 9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.08",
+  "isbn_clean": "0099549522"
+}, {
+  "book_id": "7669950",
+  "title_clean": "9th Judgement: (Women\u0027s Murder Club 9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}", "{\"role\":\"Reader\",\"author_id\":899110}"],
+  "average_rating": "4.08",
+  "isbn_clean": "1846572185"
+}, {
+  "book_id": "8047077",
+  "title_clean": "9th Judgement: (Women\u0027s Murder Club 9)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3780}"],
+  "average_rating": "4.08",
+  "isbn_clean": "1846054818"
+}, {
+  "book_id": "27311701",
+  "title_clean": "@  (The APEX Cycle # 1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5043959}"],
+  "average_rating": "3.41",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "3698212",
+  "title_clean": "@ssassins.net (Les enquêtes de Logicielle, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":146300}"],
+  "average_rating": "3.44",
+  "isbn_clean": "2700226496"
+}, {
+  "book_id": "4212509",
+  "title_clean": "@ssassins.net (Les enquêtes de Logicielle, #4)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":146300}"],
+  "average_rating": "3.44",
+  "isbn_clean": "2700229142"
+}, {
+  "book_id": "716582",
+  "title_clean": "A   Conspiracy of Tall Men",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":381355}"],
+  "average_rating": "3.17",
+  "isbn_clean": "0671038249"
+}, {
+  "book_id": "35264975",
+  "title_clean": "A (R)evolução das Mulheres",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5351825}"],
+  "average_rating": "4.25",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18143679",
+  "title_clean": "A 37ª Hora",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":391769}"],
+  "average_rating": "3.33",
+  "isbn_clean": "9721057371"
+}, {
+  "book_id": "20494257",
+  "title_clean": "A 39 kulcs 2. – Egy hamis hang",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2130}", "{\"role\":\"translator\",\"author_id\":7276173}"],
+  "average_rating": "3.88",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20494230",
+  "title_clean": "A 39 kulcs 3. – A kardtolvaj",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":17216}", "{\"role\":\"translator\",\"author_id\":7276173}"],
+  "average_rating": "3.88",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "20494190",
+  "title_clean": "A 39 kulcs 5. – Sötét erők",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":46474}", "{\"role\":\"translator\",\"author_id\":7276173}"],
+  "average_rating": "4.01",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "28173682",
+  "title_clean": "A 3rd Time to Die",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2875897}"],
+  "average_rating": "4.34",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "18334278",
+  "title_clean": "A 3rd Time to Die",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2875897}"],
+  "average_rating": "4.34",
+  "isbn_clean": "0989468100"
+}, {
+  "book_id": "25661807",
+  "title_clean": "A 64-es betegnapló (A Q-ügyosztály esetei 4.)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1734716}"],
+  "average_rating": "4.04",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "3390853",
+  "title_clean": "A Agência N.º1 de Mulheres Detectives (No. 1 Ladies\u0027 Detective Agency, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4738}"],
+  "average_rating": "3.76",
+  "isbn_clean": "9722332007"
+}, {
+  "book_id": "13096663",
+  "title_clean": "A Alma das Pedras",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3313685}"],
+  "average_rating": "3.64",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6571817",
+  "title_clean": "A Ameaça",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3447}"],
+  "average_rating": "3.54",
+  "isbn_clean": "9722336967"
+}, {
+  "book_id": "35497253",
+  "title_clean": "A Amiga",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":38651}"],
+  "average_rating": "4.29",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6759111",
+  "title_clean": "A Anatomia do Segredo",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":88042}"],
+  "average_rating": "3.3",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6976589",
+  "title_clean": "A Arte de Matar",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":190058}"],
+  "average_rating": "3.66",
+  "isbn_clean": "9722340425"
+}, {
+  "book_id": "6286774",
+  "title_clean": "A Arte de Matar Dragões",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":374875}", "{\"role\":\"Translator\",\"author_id\":2877804}"],
+  "average_rating": "3.4",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "3291451",
+  "title_clean": "A Aventura do Cabeleireiro de Senhoras",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":37020}"],
+  "average_rating": "3.71",
+  "isbn_clean": "9724613194"
+}, {
+  "book_id": "8878473",
+  "title_clean": "A Aventura do Pudim de Natal",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.72",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "26094060",
+  "title_clean": "A Aventura do Pudim de Natal",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":123715}"],
+  "average_rating": "3.72",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "1426862",
+  "title_clean": "A Baby Before Dawn (Lights Out, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":54958}"],
+  "average_rating": "3.62",
+  "isbn_clean": "0373692676"
+}, {
+  "book_id": "7465650",
+  "title_clean": "A Baby Between Them",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":57819}"],
+  "average_rating": "3.27",
+  "isbn_clean": "0373694571"
+}, {
+  "book_id": "7465651",
+  "title_clean": "A Baby Between Them (Harlequin Intrigue #1190)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":57819}"],
+  "average_rating": "3.27",
+  "isbn_clean": "1426848439"
+}, {
+  "book_id": "2356349",
+  "title_clean": "A Back Room in Somers Town (Tim Simpson, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":118307}"],
+  "average_rating": "3.36",
+  "isbn_clean": "1933397799"
+}, {
+  "book_id": "15869932",
+  "title_clean": "A Bad Day for Mercy",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "3.7",
+  "isbn_clean": "1410450503"
+}, {
+  "book_id": "8982340",
+  "title_clean": "A Bad Day for Pretty (Bad Day #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "3.65",
+  "isbn_clean": "141043155X"
+}, {
+  "book_id": "8421457",
+  "title_clean": "A Bad Day for Pretty (Bad Day #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "3.65",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "7488669",
+  "title_clean": "A Bad Day for Pretty (Bad Day, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "3.65",
+  "isbn_clean": "0312559755"
+}, {
+  "book_id": "16130124",
+  "title_clean": "A Bad Day for Romance (Bad Day, #5)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "4.04",
+  "isbn_clean": "1476710112"
+}, {
+  "book_id": "12138929",
+  "title_clean": "A Bad Day for Scandal (Bad Day, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "3.73",
+  "isbn_clean": "1410441202"
+}, {
+  "book_id": "6515329",
+  "title_clean": "A Bad Day for Sorry (Bad Day, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "3.51",
+  "isbn_clean": "0312559208"
+}, {
+  "book_id": "7717282",
+  "title_clean": "A Bad Day for Sorry (Bad Day, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "3.51",
+  "isbn_clean": "1429990406"
+}, {
+  "book_id": "8982341",
+  "title_clean": "A Bad Day for Sorry (Bad Day, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2949152}"],
+  "average_rating": "3.51",
+  "isbn_clean": "1410431541"
+}, {
+  "book_id": "10945758",
+  "title_clean": "A Bad Night\u0027s Sleep",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":851318}"],
+  "average_rating": "3.54",
+  "isbn_clean": "0312552246"
+}, {
+  "book_id": "17226623",
+  "title_clean": "A Baker\u0027s Dozen: 13 Tales of Murder and More",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6884058}", "{\"role\":\"Contributor\",\"author_id\":6884059}"],
+  "average_rating": "4.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "17721751",
+  "title_clean": "A Baker\u0027s Dozen: 13 Tales of Murder and More (13 Tales, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6884058}", "{\"role\":\"Contributor\",\"author_id\":6884059}"],
+  "average_rating": "4.06",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "6483055",
+  "title_clean": "A Bali Conspiracy Most Foul (Inspector Singh Investigates #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":435521}"],
+  "average_rating": "3.74",
+  "isbn_clean": "0749929766"
+}, {
+  "book_id": "22749057",
+  "title_clean": "A Balm in Gilead: A Novel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8393876}"],
+  "average_rating": "3.81",
+  "isbn_clean": "099043382X"
+}, {
+  "book_id": "22701148",
+  "title_clean": "A Balm in Gilead: A Novel",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8393876}"],
+  "average_rating": "3.81",
+  "isbn_clean": "0990433811"
+}, {
+  "book_id": "22571493",
+  "title_clean": "A Banquet of Consequences",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1402383}", "{\"role\":\"narrator\",\"author_id\":29187}"],
+  "average_rating": "3.94",
+  "isbn_clean": "1611763665"
+}, {
+  "book_id": "24713232",
+  "title_clean": "A Banquet of Consequences",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1402383}", "{\"role\":\"Narrator\",\"author_id\":5774051}"],
+  "average_rating": "3.94",
+  "isbn_clean": "110188780X"
+}, {
+  "book_id": "22571556",
+  "title_clean": "A Banquet of Consequences (Inspector Lynley, #19)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1402383}"],
+  "average_rating": "3.94",
+  "isbn_clean": "0525954333"
+}, {
+  "book_id": "26331736",
+  "title_clean": "A Banquet of Consequences (Inspector Lynley, #19)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1402383}"],
+  "average_rating": "3.94",
+  "isbn_clean": "1410477223"
+}, {
+  "book_id": "22716812",
+  "title_clean": "A Banquet of Consequences (Inspector Lynley, #19)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1402383}"],
+  "average_rating": "3.94",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "27876792",
+  "title_clean": "A Banquet of Consequences (Inspector Lynley, #19)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1402383}"],
+  "average_rating": "3.94",
+  "isbn_clean": "045146785X"
+}, {
+  "book_id": "25147843",
+  "title_clean": "A Banquet of Consequences (Inspector Lynley, #19)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1402383}", "{\"role\":\"Narrator\",\"author_id\":29187}"],
+  "average_rating": "3.94",
+  "isbn_clean": "0698189027"
+}, {
+  "book_id": "32603860",
+  "title_clean": "A Banquet of Consequences (Inspector Lynley, #19)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1402383}"],
+  "average_rating": "3.94",
+  "isbn_clean": "0143111566"
+}, {
+  "book_id": "22961574",
+  "title_clean": "A Barlow Lens (Circles, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4781553}"],
+  "average_rating": "3.85",
+  "isbn_clean": "163216678X"
+}, {
+  "book_id": "25110594",
+  "title_clean": "A Barrow Boy\u0027s Cadenza (Kind Hearts and Martinets, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7432389}"],
+  "average_rating": "4.46",
+  "isbn_clean": "1909273961"
+}, {
+  "book_id": "18931554",
+  "title_clean": "A Basket of Trouble",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":471598}"],
+  "average_rating": "3.72",
+  "isbn_clean": "0738737879"
+}, {
+  "book_id": "17436867",
+  "title_clean": "A Basket of Trouble (Claire Hanover, Gift Basket Designer, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":471598}"],
+  "average_rating": "3.72",
+  "isbn_clean": "0738727032"
+}, {
+  "book_id": "15799157",
+  "title_clean": "A Bat in the Belfry (Home Repair Is Homicide, #16)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29183}"],
+  "average_rating": "3.67",
+  "isbn_clean": "0345534999"
+}, {
+  "book_id": "16127046",
+  "title_clean": "A Bat in the Belfry (Home Repair Is Homicide, #16)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29183}"],
+  "average_rating": "3.67",
+  "isbn_clean": "0345538587"
+}, {
+  "book_id": "17409102",
+  "title_clean": "A Bat in the Belfry (Home Repair Is Homicide, #16)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29183}"],
+  "average_rating": "3.67",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23014667",
+  "title_clean": "A Batter of Life and Death (A Bakeshop Mystery, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8123142}"],
+  "average_rating": "3.98",
+  "isbn_clean": "1250054249"
+}, {
+  "book_id": "27869466",
+  "title_clean": "A Bead in the Hand (Glass Bead Mystery Series Book 2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8389583}"],
+  "average_rating": "4.19",
+  "isbn_clean": "151370561X"
+}, {
+  "book_id": "28013065",
+  "title_clean": "A Bead in the Hand (Glass Bead Mystery Series Book 2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8389583}"],
+  "average_rating": "4.19",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "27311494",
+  "title_clean": "A Beam of Light",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":17350}", "{\"role\":\"Translation\",\"author_id\":147623}"],
+  "average_rating": "3.96",
+  "isbn_clean": "0606374965"
+}, {
+  "book_id": "24611504",
+  "title_clean": "A Beam of Light",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":17350}", "{\"role\":\"Translation\",\"author_id\":147623}"],
+  "average_rating": "3.96",
+  "isbn_clean": "0143126431"
+}, {
+  "book_id": "27132345",
+  "title_clean": "A Beam of Light (Commissario Montalbano, #19)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":17350}"],
+  "average_rating": "3.96",
+  "isbn_clean": "1628998377"
+}, {
+  "book_id": "7323897",
+  "title_clean": "A Beautiful Blue Death",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":520296}"],
+  "average_rating": "3.62",
+  "isbn_clean": "1429955333"
+}, {
+  "book_id": "447988",
+  "title_clean": "A Beautiful Child",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6938783}"],
+  "average_rating": "4.01",
+  "isbn_clean": "0425204405"
+}, {
+  "book_id": "8309817",
+  "title_clean": "A Beautiful Child",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6938783}"],
+  "average_rating": "4.01",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "2893239",
+  "title_clean": "A Beautiful Child",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":6938783}"],
+  "average_rating": "4.01",
+  "isbn_clean": "042519650X"
+}, {
+  "book_id": "18388567",
+  "title_clean": "A Beautiful Heist",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7061247}"],
+  "average_rating": "3.49",
+  "isbn_clean": "1601832095"
+}, {
+  "book_id": "17839493",
+  "title_clean": "A Beautiful Heist (Agency of Burglary \u0026 Theft, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":7061247}"],
+  "average_rating": "3.49",
+  "isbn_clean": "1601830645"
+}, {
+  "book_id": "5062929",
+  "title_clean": "A Beautiful Lie",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":93345}"],
+  "average_rating": "4.09",
+  "isbn_clean": "1741166500"
+}, {
+  "book_id": "20747705",
+  "title_clean": "A Beautiful Madness",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4651572}"],
+  "average_rating": "3.92",
+  "isbn_clean": "1940544297"
+}, {
+  "book_id": "22070587",
+  "title_clean": "A Beautiful Madness",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4651572}"],
+  "average_rating": "3.92",
+  "isbn_clean": "9781940544"
+}, {
+  "book_id": "18407109",
+  "title_clean": "A Beautiful Place To Die",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1288231}"],
+  "average_rating": "3.89",
+  "isbn_clean": "0330425056"
+}, {
+  "book_id": "7933113",
+  "title_clean": "A Beautiful Place To Die (Detective Emmanuel Cooper, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1288231}"],
+  "average_rating": "3.89",
+  "isbn_clean": "0230711219"
+}, {
+  "book_id": "8776600",
+  "title_clean": "A Beautiful Place To Die (Detective Emmanuel Cooper, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1288231}"],
+  "average_rating": "3.89",
+  "isbn_clean": "0330461001"
+}, {
+  "book_id": "6272048",
+  "title_clean": "A Beautiful Place To Die (Detective Emmanuel Cooper, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1288231}"],
+  "average_rating": "3.89",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "2991868",
+  "title_clean": "A Beautiful Place to Die (Detective Emmanuel Cooper, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1288231}"],
+  "average_rating": "3.89",
+  "isbn_clean": "1416586202"
+}, {
+  "book_id": "2991867",
+  "title_clean": "A Beautiful Place to Die (Martha\u0027s Vineyard Mystery #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":81265}"],
+  "average_rating": "3.83",
+  "isbn_clean": "0684191229"
+}, {
+  "book_id": "391867",
+  "title_clean": "A Beautiful Place to Die (Martha\u0027s Vineyard Mystery #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":81265}"],
+  "average_rating": "3.83",
+  "isbn_clean": "0380711559"
+}, {
+  "book_id": "34932769",
+  "title_clean": "A Beautiful Poison",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5436815}"],
+  "average_rating": "3.88",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "33788985",
+  "title_clean": "A Beautiful Poison",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":5436815}"],
+  "average_rating": "3.88",
+  "isbn_clean": "1477848878"
+}, {
+  "book_id": "19056042",
+  "title_clean": "A Bed by the Window: A Novel Of Mystery And Redemption",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3061}"],
+  "average_rating": "3.64",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "743090",
+  "title_clean": "A Bed by the Window: A Novel Of Mystery And Redemption",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":3061}"],
+  "average_rating": "3.64",
+  "isbn_clean": "055335387X"
+}, {
+  "book_id": "25515913",
+  "title_clean": "A Bed of Scorpions",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29860}"],
+  "average_rating": "3.73",
+  "isbn_clean": "0749015381"
+}, {
+  "book_id": "26074521",
+  "title_clean": "A Bed of Scorpions",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29860}"],
+  "average_rating": "3.73",
+  "isbn_clean": "1466860294"
+}, {
+  "book_id": "25663726",
+  "title_clean": "A Bed of Scorpions",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":29860}"],
+  "average_rating": "3.73",
+  "isbn_clean": "1250056462"
+}, {
+  "book_id": "9769568",
+  "title_clean": "A Bedlam of Bones: A Reverend Oughterard Mystery",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":289685}"],
+  "average_rating": "3.51",
+  "isbn_clean": "1569479593"
+}, {
+  "book_id": "24388455",
+  "title_clean": "A Beeline to Murder (Henny Penny Farmette Mystery, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":206462}"],
+  "average_rating": "3.58",
+  "isbn_clean": "161773909X"
+}, {
+  "book_id": "24388525",
+  "title_clean": "A Beeline to Murder (Henny Penny Farmette Mystery, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":206462}"],
+  "average_rating": "3.58",
+  "isbn_clean": "1617739103"
+}, {
+  "book_id": "1160687",
+  "title_clean": "A Beer at a Bawdy House",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":140189}"],
+  "average_rating": "3.5",
+  "isbn_clean": "0312252420"
+}, {
+  "book_id": "11236853",
+  "title_clean": "A Bella Street Mystery: The Secret Formula",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4820047}"],
+  "average_rating": "4.08",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "12198216",
+  "title_clean": "A Bespoke Murder",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26899}"],
+  "average_rating": "3.6",
+  "isbn_clean": "074900990X"
+}, {
+  "book_id": "14806259",
+  "title_clean": "A Bespoke Murder (The Home Front Detective, #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":26899}"],
+  "average_rating": "3.6",
+  "isbn_clean": "0749011440"
+}, {
+  "book_id": "2883975",
+  "title_clean": "A Better Class of Murder",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":152920}", "{\"role\":\"Editor\",\"author_id\":554233}"],
+  "average_rating": "2.88",
+  "isbn_clean": "0449150135"
+}, {
+  "book_id": "3180266",
+  "title_clean": "A Better Class of Person",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":94467}"],
+  "average_rating": "3.3",
+  "isbn_clean": "0727859021"
+}, {
+  "book_id": "9211662",
+  "title_clean": "A Better Quality of Murder",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9474}"],
+  "average_rating": "3.63",
+  "isbn_clean": "0755349202"
+}, {
+  "book_id": "6933694",
+  "title_clean": "A Better Quality of Murder (Lizzie Martin, #3)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":9474}"],
+  "average_rating": "3.63",
+  "isbn_clean": "0755349083"
+}, {
+  "book_id": "30516914",
+  "title_clean": "A Better Truth",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4449604}"],
+  "average_rating": "4.24",
+  "isbn_clean": "1944193367"
+}, {
+  "book_id": "20917817",
+  "title_clean": "A Better World (Brilliance Saga, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":38652}"],
+  "average_rating": "4.15",
+  "isbn_clean": "1477823948"
+}, {
+  "book_id": "32996125",
+  "title_clean": "A Better World (Brilliance Saga, #2)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":38652}"],
+  "average_rating": "4.15",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "23289278",
+  "title_clean": "A Biased Judgement: The Sherlock Holmes Diaries 1897",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":8632845}"],
+  "average_rating": "4.32",
+  "isbn_clean": "178092674X"
+}, {
+  "book_id": "7047124",
+  "title_clean": "A Biblioteca da Morte",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":2902232}"],
+  "average_rating": "3.74",
+  "isbn_clean": "9896570345"
+}, {
+  "book_id": "11050587",
+  "title_clean": "A Biblioteca das Sombras",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":1109326}"],
+  "average_rating": "3.39",
+  "isbn_clean": "Unknown"
+}, {
+  "book_id": "1598410",
+  "title_clean": "A Bicycle Built for Murder (Manor House Mystery #1)",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":225514}"],
+  "average_rating": "3.7",
+  "isbn_clean": "0425178560"
+}, {
+  "book_id": "854257",
+  "title_clean": "A Bid for Fortune or Dr Nikola\u0027s Vendetta",
+  "authors_flat": ["{\"role\":\"\",\"author_id\":4727856}"],
+  "average_rating": "3.39",
+  "isbn_clean": "1587155427"
+}]
