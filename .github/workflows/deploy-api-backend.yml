@@ -6,13 +6,14 @@ on:
       - master
     paths:
       - 'api/**'
+      - 'terraform/**'        
   workflow_dispatch:
 
 env:
   SERVICE_NAME: recommendation-service
   REGION: ${{ secrets.GCP_REGION }}
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  TF_WORKING_DIR: api/infra
+  TF_WORKING_DIR: terraform   
 
 jobs:
   build-and-deploy:
