@@ -21,20 +21,27 @@ class GeneratePredictions:
             location="us-central1"
         )
 
-    def get_mf_predictions(self, endpoint_name, user_id):
+    def get_mf_predictions(self, model_name, user_id):
         """
         Generate book recommendations for a given user_id using Matrix Factorization model.
         """
-        endpoint = aiplatform.Endpoint(endpoint_name)
-        instances = {"user_id": user_id}
-        print(instances)
-        results = endpoint.predict(instances=instances).predictions[0]
-        results_df = pd.DataFrame({
-            'book_id': results['predicted_book_id'],
-            'predicted_rating': results['predicted_rating']
-        })
-        results = results_df.sort_values(by='predicted_rating', ascending=False)
-        return results
+        config = {
+            "project_id": self.project_id,
+            "dataset": self.dataset_id,
+            "model_name": model_name
+        }
+        
+        with open("src/mf_predictor_query.sql", "r") as file:
+            query_template = file.read()
+        
+        query = query_template.format(**config)
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+            ]
+        )
+        results = self.client.query(query, job_config=job_config).to_dataframe(create_bqstorage_client=False)
+        return results[['book_id', 'title', 'rating', 'author_names']]
 
     def get_bt_predictions(self, model_name, user_id):
         """
@@ -63,7 +70,7 @@ class GeneratePredictions:
         if "boosted_tree" in display_name:
             return f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
         elif "matrix_factorization" in display_name:
-            return "{self.project_id}.{self.dataset_id}.matrix_factorization_model"
+            return f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
         else:
             print(f"Model type for {display_name} not recognized.")
             return None
@@ -78,13 +85,18 @@ class GeneratePredictions:
             raise ValueError("No model selected for predictions.")
         
         model_name = model_info['display_name']
+        model_name = "matrix_factorization"
 
         bq_model_id = self.get_model_from_registry(model_name)
 
         if not bq_model_id:
-            raise ValueError(f"Could not retrieve BigQuery model ID for model {model_name}.")        
-        predictions = self.get_bt_predictions(bq_model_id, user_id)
-        
+            raise ValueError(f"Could not retrieve BigQuery model ID for model {model_name}.")
+        if "matrix_factorization" in model_name:
+            predictions = self.get_mf_predictions(bq_model_id, user_id)
+        elif "boosted_tree" in model_name:
+            predictions = self.get_bt_predictions(bq_model_id, user_id)
+        else:
+            raise ValueError(f"Model type for {model_name} not recognized.")     
         return predictions
 
 if __name__ == "__main__":
