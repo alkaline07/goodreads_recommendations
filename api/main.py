@@ -31,7 +31,7 @@ def health_check():
 # ------------------------------------------------------
 # 1. LOGIN
 # ------------------------------------------------------
-@app.post("/load-recommmendation", response_model=LoginResponse)
+@app.post("/load-recommendation", response_model=LoginResponse)
 def login(request: LoginRequest):
     user_id = request.user_id
 
