@@ -135,3 +135,32 @@ def get_books_not_read_by_user(user_id: str):
     """
     job = client.query(query)
     return [dict(row) for row in job.result()]   # FIXED
+
+def ensure_global_top10_table_exists():
+    query = f"""
+    BEGIN
+      CREATE TABLE `{project}.{dataset}.global_top10_books` AS
+      SELECT
+          b.book_id,
+          b.average_rating,
+          b.title_clean,
+          COALESCE(
+              SAFE_CAST(JSON_EXTRACT_SCALAR(b.authors_flat[OFFSET(0)], '$.author_name') AS STRING),
+              "Unknown"
+          ) AS author,
+          b.ratings_count
+      FROM `{project}.{dataset}.goodreads_books_cleaned` AS b
+      WHERE b.average_rating IS NOT NULL
+      ORDER BY b.average_rating DESC, b.ratings_count DESC
+      LIMIT 10;
+
+    EXCEPTION WHEN ERROR THEN
+      SELECT "Table already exists, skipping creation." AS status;
+
+    END;
+    """
+
+    client.query(query).result()
+
+# Ensure the top 10 table exists before any API call happens
+ensure_global_top10_table_exists()
