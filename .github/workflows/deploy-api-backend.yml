@@ -80,6 +80,14 @@ jobs:
           docker build -t "${IMAGE}" ./api
           docker push "${IMAGE}"
 
+      - name: Disable Cloud Run deletion protection (if service exists)
+        continue-on-error: true
+        run: |
+          gcloud run services update ${{ env.SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --no-deletion-protection
+
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
