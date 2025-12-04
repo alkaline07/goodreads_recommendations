@@ -64,11 +64,6 @@ resource "google_service_account" "cloud_run_sa" {
   display_name = "Cloud Run Recommendation Service SA"
 }
 
-resource "google_project_iam_member" "cloud_run_sa_bigquery" {
-  project = var.project_id
-  role    = "roles/bigquery.user"
-  member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
-}
 
 # -----------------------------
 # Cloud Run v2 service (FastAPI)
