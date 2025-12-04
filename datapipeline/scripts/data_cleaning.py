@@ -153,11 +153,18 @@ class DataCleaning:
         """
         Cleans the interactions table (no custom outlier filtering).
         """
+        filter_clause = """
+        WHERE interaction_type != 'view'
+        QUALIFY ROW_NUMBER() OVER (
+                    PARTITION BY user_id, book_id
+                    ORDER BY date_updated DESC
+                ) = 1
+        """
         self.logger.info(f"Cleaning interactions table: {self.dataset_id}.{interactions_table_name}")
         self._clean_table_generic(
             table_name=interactions_table_name,
             destination_table=interactions_destination,
-            filter_clause=None # No filter
+            filter_clause=filter_clause
         )
 
         # --- Filter interactions table based on cleaned books ---
