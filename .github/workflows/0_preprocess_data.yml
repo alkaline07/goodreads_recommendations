@@ -1,3 +1,244 @@
+# name: 0. Run Airflow Pipeline
+
+# on:
+#   workflow_dispatch: 
+#     inputs:
+#       dag_id:
+#         description: 'DAG ID to trigger'
+#         required: true
+#         type: string
+#         default: 'goodreads_recommendation_pipeline'
+#       wait_for_completion:
+#         description: 'Wait for DAG to complete'
+#         required: false
+#         type: boolean
+#         default: true
+
+# env:
+#   COMPOSE_FILE: docker-compose.yaml
+
+# jobs:
+#   run-airflow-pipeline:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 90  
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Set up environment variables
+#         run: |
+#           echo "GIT_USER_NAME=${{ secrets.GIT_USER_NAME }}" >> $GITHUB_ENV
+#           echo "GIT_USER_EMAIL=${{ secrets.GIT_USER_EMAIL }}" >> $GITHUB_ENV
+#           echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> $GITHUB_ENV
+
+#       - name: Create GCP credentials file
+#         run: |
+#           mkdir -p config
+#           echo '${{ secrets.GCP_CREDENTIALS }}' > config/gcp_credentials.json
+
+#       - name: Build and start Airflow services
+#         run: |
+#           docker compose up -d --build
+
+#       - name: Wait for Airflow webserver to be healthy
+#         run: |
+#           echo "Waiting for Airflow webserver to be ready..."
+#           timeout 300 bash -c 'until curl -sf http://localhost:8080/health > /dev/null; do sleep 5; done'
+#           echo "Airflow is ready!"
+
+#       - name: Setup ngrok and expose Airflow UI
+#         run: |
+
+#           curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+#           echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+#           sudo apt update && sudo apt install ngrok -y
+          
+#           ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+          
+#           ngrok http 8080 --log=stdout > ngrok.log &
+          
+#           echo "Starting ngrok tunnel..."
+#           sleep 10
+          
+#           NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+          
+#           if [ -z "$NGROK_URL" ] || [ "$NGROK_URL" = "null" ]; then
+#             echo "Failed to get ngrok URL. Check ngrok.log:"
+#             cat ngrok.log
+#             exit 1
+#           fi
+          
+#           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
+          
+#           # Display access information
+#           echo "=========================================="
+#           echo "Airflow UI is now publicly accessible!"
+#           echo "=========================================="
+#           echo "URL:      $NGROK_URL"
+#           echo "Username: admin"
+#           echo "Password: admin"
+#           echo "=========================================="
+#           echo ""
+          
+#           echo "::notice title=Airflow UI Access::Access Airflow at $NGROK_URL (user: admin, pass: admin)"
+
+#       - name: List available DAGs
+#         run: |
+#           echo "Available DAGs:"
+#           docker exec airflow-webserver airflow dags list
+
+#       - name: Check DAG structure
+#         run: |
+#           echo "Checking DAG: ${{ inputs.dag_id }}"
+#           docker exec airflow-webserver airflow dags show ${{ inputs.dag_id }} || echo "DAG visualization not available"
+
+#       - name: Trigger DAG
+#         id: trigger_dag
+#         run: |
+#           echo "Triggering DAG: ${{ inputs.dag_id }}"
+#           RUN_ID=$(docker exec airflow-webserver airflow dags trigger ${{ inputs.dag_id }} --output json | jq -r '.run_id')
+#           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+#           echo "DAG triggered with run_id: $RUN_ID"
+#           echo ""
+#           echo "Monitor progress at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+#           echo "::notice title=DAG Triggered::Monitor at $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+
+#       - name: Wait for DAG completion
+#         if: ${{ inputs.wait_for_completion }}
+#         run: |
+#           echo "Waiting for DAG run ${{ steps.trigger_dag.outputs.run_id }} to complete..."
+#           echo "You can monitor live at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+#           echo ""
+          
+#           MAX_WAIT=3600  # 60 minutes for your complex pipeline
+#           ELAPSED=0
+#           INTERVAL=15  # Check every 15 seconds
+          
+#           while [ $ELAPSED -lt $MAX_WAIT ]; do
+#             STATE=$(docker exec airflow-webserver airflow dags state ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null || echo "running")
+            
+#             # Get task status for detailed monitoring
+#             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+#             echo "Time elapsed: ${ELAPSED}s / ${MAX_WAIT}s"
+#             echo "Overall state: $STATE"
+#             echo ""
+#             echo "Task status:"
+#             docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null | grep -E "(success|running|failed|queued)" || echo "  Initializing..."
+#             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+#             echo ""
+            
+#             if [ "$STATE" = "success" ]; then
+#               echo "DAG completed successfully!"
+#               echo ""
+#               echo "Final task summary:"
+#               docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --state success --limit 1
+#               exit 0
+#             elif [ "$STATE" = "failed" ]; then
+#               echo "DAG failed!"
+#               echo ""
+#               echo "Failed tasks:"
+#               docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} | grep failed || true
+#               exit 1
+#             fi
+            
+#             sleep $INTERVAL
+#             ELAPSED=$((ELAPSED + INTERVAL))
+#           done
+          
+#           echo ""
+#           echo "Timeout waiting for DAG completion after ${MAX_WAIT}s"
+#           echo "Check status at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+#           exit 1
+
+#       - name: Show pipeline summary
+#         if: success()
+#         run: |
+#           echo "=========================================="
+#           echo "Pipeline Execution Summary"
+#           echo "=========================================="
+#           echo "DAG: ${{ inputs.dag_id }}"
+#           echo "Run ID: ${{ steps.trigger_dag.outputs.run_id }}"
+#           echo ""
+#           echo "All tasks completed:"
+#           docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }}
+#           echo "=========================================="
+
+#       - name: Show detailed logs on failure
+#         if: failure()
+#         run: |
+#           echo "=========================================="
+#           echo "PIPELINE FAILURE DETAILS"
+#           echo "=========================================="
+#           echo ""
+#           echo "=== Failed Tasks ==="
+#           docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} | grep -i failed || echo "No failed tasks found"
+#           echo ""
+#           echo "=== Last 100 lines of Scheduler ==="
+#           docker logs airflow-scheduler --tail 100
+#           echo ""
+#           echo "=== Last 100 lines of Worker ==="
+#           docker logs airflow-worker --tail 100
+#           echo ""
+#           echo "=== Recent DAG Runs ==="
+#           docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --limit 3
+#           echo ""
+#           echo "=========================================="
+#           echo "Full logs available at: $NGROK_URL"
+#           echo "=========================================="
+
+#       - name: Capture container logs
+#         if: always()
+#         run: |
+#           mkdir -p logs
+          
+#           echo "Capturing container logs..."
+#           docker logs airflow-scheduler > logs/scheduler.log 2>&1 || true
+#           docker logs airflow-worker > logs/worker.log 2>&1 || true
+#           docker logs airflow-webserver > logs/webserver.log 2>&1 || true
+#           docker logs postgres > logs/postgres.log 2>&1 || true
+#           docker logs redis > logs/redis.log 2>&1 || true
+          
+#           echo "Capturing DAG execution info..."
+#           docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --limit 5 > logs/dag-runs.log 2>&1 || true
+#           docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} > logs/task-states.log 2>&1 || true
+
+#       - name: Upload logs as artifacts
+#         if: always()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: airflow-pipeline-logs-${{ github.run_number }}
+#           path: logs/
+#           retention-days: 7
+
+#       - name: Keep ngrok alive for debugging
+#         if: failure()
+#         run: |
+#           echo "=========================================="
+#           echo "Workflow failed - keeping ngrok alive"
+#           echo "=========================================="
+#           echo "Access Airflow UI at: $NGROK_URL"
+#           echo "Direct link to DAG: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+#           echo ""
+#           echo "Keeping tunnel open for 10 minutes for debugging..."
+#           echo "   You can check logs, retry tasks, or investigate failures"
+#           echo "=========================================="
+#           sleep 600
+
+#       - name: Cleanup
+#         if: always()
+#         run: |
+#           echo "Cleaning up..."
+          
+#           # Stop ngrok
+#           pkill ngrok || true
+          
+#           # Stop Docker containers
+#           docker compose down -v
+          
+#           # Remove credentials
+#           rm -f config/gcp_credentials.json
+          
+#           echo "Cleanup complete"
 name: 0. Run Airflow Pipeline
 
 on:
@@ -46,9 +287,29 @@ jobs:
           timeout 300 bash -c 'until curl -sf http://localhost:8080/health > /dev/null; do sleep 5; done'
           echo "Airflow is ready!"
 
+      - name: Monitor container health
+        run: |
+          echo "Container Status:"
+          docker ps -a
+          echo ""
+          echo "Container Health:"
+          docker compose ps
+          echo ""
+          echo "Checking for any stopped containers..."
+          STOPPED=$(docker ps -a --filter "status=exited" --format "{{.Names}}")
+          if [ -n "$STOPPED" ]; then
+            echo "WARNING: Found stopped containers: $STOPPED"
+            for container in $STOPPED; do
+              echo ""
+              echo "=== Logs for $container ==="
+              docker logs $container --tail 50
+            done
+            exit 1
+          fi
+          echo "All containers are running"
+
       - name: Setup ngrok and expose Airflow UI
         run: |
-
           curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
           echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
           sudo apt update && sudo apt install ngrok -y
@@ -70,7 +331,6 @@ jobs:
           
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
           
-          # Display access information
           echo "=========================================="
           echo "Airflow UI is now publicly accessible!"
           echo "=========================================="
@@ -110,16 +370,40 @@ jobs:
           echo "You can monitor live at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
           echo ""
           
-          MAX_WAIT=3600  # 60 minutes for your complex pipeline
+          MAX_WAIT=3600
           ELAPSED=0
-          INTERVAL=15  # Check every 15 seconds
+          INTERVAL=15
           
           while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # Check if containers are still running
+            RUNNING_CONTAINERS=$(docker compose ps --services --filter "status=running" 2>/dev/null | wc -l)
+            EXPECTED_CONTAINERS=5  # webserver, scheduler, worker, postgres, redis
+            
+            if [ $RUNNING_CONTAINERS -lt $EXPECTED_CONTAINERS ]; then
+              echo "ERROR: Some containers stopped running!"
+              echo ""
+              echo "Container status:"
+              docker ps -a
+              echo ""
+              echo "Stopped containers:"
+              docker ps -a --filter "status=exited" --format "table {{.Names}}\t{{.Status}}"
+              echo ""
+              echo "Checking logs of stopped containers..."
+              for container in airflow-webserver airflow-scheduler airflow-worker postgres redis; do
+                if ! docker ps --format '{{.Names}}' | grep -q "^${container}$"; then
+                  echo ""
+                  echo "=== Logs for stopped container: $container ==="
+                  docker logs $container --tail 100 2>&1 || echo "Could not get logs"
+                fi
+              done
+              exit 1
+            fi
+            
             STATE=$(docker exec airflow-webserver airflow dags state ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null || echo "running")
             
-            # Get task status for detailed monitoring
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "Time elapsed: ${ELAPSED}s / ${MAX_WAIT}s"
+            echo "Containers running: ${RUNNING_CONTAINERS}/${EXPECTED_CONTAINERS}"
             echo "Overall state: $STATE"
             echo ""
             echo "Task status:"
@@ -170,18 +454,39 @@ jobs:
           echo "PIPELINE FAILURE DETAILS"
           echo "=========================================="
           echo ""
-          echo "=== Failed Tasks ==="
-          docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} | grep -i failed || echo "No failed tasks found"
+          
+          echo "=== Container Status ==="
+          docker ps -a
           echo ""
-          echo "=== Last 100 lines of Scheduler ==="
-          docker logs airflow-scheduler --tail 100
+          
+          echo "=== Docker Compose Status ==="
+          docker compose ps
           echo ""
-          echo "=== Last 100 lines of Worker ==="
-          docker logs airflow-worker --tail 100
+          
+          # Check each container individually
+          for container in airflow-webserver airflow-scheduler airflow-worker postgres redis; do
+            echo "=== Checking $container ==="
+            if docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
+              STATUS=$(docker inspect -f '{{.State.Status}}' $container 2>/dev/null || echo "not found")
+              echo "Status: $STATUS"
+              if [ "$STATUS" != "running" ]; then
+                echo "WARNING: Container is not running! Last 100 lines of logs:"
+                docker logs $container --tail 100 2>&1 || echo "Could not get logs"
+              else
+                echo "Container is running"
+                echo "Last 50 lines of logs:"
+                docker logs $container --tail 50 2>&1 || echo "Could not get logs"
+              fi
+            else
+              echo "WARNING: Container not found!"
+            fi
+            echo ""
+          done
+          
+          echo "=== Failed Tasks (if accessible) ==="
+          docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>&1 | grep -i failed || echo "Cannot access task states"
           echo ""
-          echo "=== Recent DAG Runs ==="
-          docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --limit 3
-          echo ""
+          
           echo "=========================================="
           echo "Full logs available at: $NGROK_URL"
           echo "=========================================="
@@ -201,6 +506,10 @@ jobs:
           echo "Capturing DAG execution info..."
           docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --limit 5 > logs/dag-runs.log 2>&1 || true
           docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} > logs/task-states.log 2>&1 || true
+          
+          echo "Capturing Docker info..."
+          docker ps -a > logs/docker-ps.log 2>&1 || true
+          docker compose ps > logs/docker-compose-ps.log 2>&1 || true
 
       - name: Upload logs as artifacts
         if: always()
