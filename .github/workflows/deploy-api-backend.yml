@@ -11,8 +11,8 @@ on:
 
 env:
   SERVICE_NAME: recommendation-service
-  REGION: ${{ secrets.GCP_REGION }}
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || 'recommendation-system-475301' }}
   TF_WORKING_DIR: terraform   
 
 jobs:
