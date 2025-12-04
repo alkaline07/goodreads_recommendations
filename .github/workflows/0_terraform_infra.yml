@@ -51,6 +51,10 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: terraform-${{ github.repository }}
+  cancel-in-progress: false
+
 env:
   TF_VERSION: '1.6.0'
   TF_WORKING_DIR: './terraform'
@@ -124,6 +128,17 @@ jobs:
         id: init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
+
+      - name: Clear stale locks
+        run: |
+          LOCK_FILE="gs://recommendation-system-475301-terraform-state/model-deployment/default.tflock"
+          if gsutil -q stat "$LOCK_FILE" 2>/dev/null; then
+            echo "Found existing lock file, removing stale lock..."
+            gsutil rm "$LOCK_FILE" || true
+            echo "Stale lock removed"
+          else
+            echo "No stale lock found"
+          fi
 
       - name: Terraform Validate
         id: validate
@@ -263,6 +278,17 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
 
+      - name: Clear stale locks
+        run: |
+          LOCK_FILE="gs://recommendation-system-475301-terraform-state/model-deployment/default.tflock"
+          if gsutil -q stat "$LOCK_FILE" 2>/dev/null; then
+            echo "Found existing lock file, removing stale lock..."
+            gsutil rm "$LOCK_FILE" || true
+            echo "Stale lock removed"
+          else
+            echo "No stale lock found"
+          fi
+
       - name: Download Plan
         uses: actions/download-artifact@v4
         with:
@@ -366,6 +392,17 @@ jobs:
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
+
+      - name: Clear stale locks
+        run: |
+          LOCK_FILE="gs://recommendation-system-475301-terraform-state/model-deployment/default.tflock"
+          if gsutil -q stat "$LOCK_FILE" 2>/dev/null; then
+            echo "Found existing lock file, removing stale lock..."
+            gsutil rm "$LOCK_FILE" || true
+            echo "Stale lock removed"
+          else
+            echo "No stale lock found"
+          fi
 
       - name: Terraform Destroy
         working-directory: ${{ env.TF_WORKING_DIR }}
