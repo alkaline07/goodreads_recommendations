@@ -102,3 +102,17 @@ variable "notification_channels" {
   type        = list(string)
   default     = []
 }
+
+# -----------------------------
+# Cloud Run Variables
+# -----------------------------
+variable "service_name" {
+  type        = string
+  description = "Cloud Run service name"
+  default     = "recommendation-service"
+}
+
+variable "image" {
+  type        = string
+  description = "Container image URL (GHCR)"
+}
