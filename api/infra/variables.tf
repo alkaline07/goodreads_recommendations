@@ -17,5 +17,5 @@ variable "service_name" {
 
 variable "image" {
   type        = string
-  description = "Container image URL (GHCR)"
+  description = "Container image URL (Artifact Registry)"
 }

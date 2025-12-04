@@ -21,6 +21,14 @@ app = FastAPI(title="Goodreads Recommendation API")
 
 
 # ------------------------------------------------------
+# HEALTH CHECK (no external dependencies)
+# ------------------------------------------------------
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+
+# ------------------------------------------------------
 # 1. LOGIN
 # ------------------------------------------------------
 @app.post("/load-recommmendation", response_model=LoginResponse)
