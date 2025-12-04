@@ -1,5 +1,5 @@
 """
-Comprehensive test cases for generate_prediction_tables.py
+Comprehensive test cases for bias_prediction_tables.py
 Covers all scenarios: success, failure, edge cases, boundary conditions
 """
 
@@ -7,13 +7,13 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 import pandas as pd
-from src.generate_prediction_tables import BiasReadyPredictionGenerator
+from src.bias_prediction_tables import BiasReadyPredictionGenerator
 
 
 class TestBiasReadyPredictionGenerator:
     """Comprehensive test cases for BiasReadyPredictionGenerator class"""
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     @patch.dict('os.environ', {'AIRFLOW_HOME': '/test/airflow'})
     def test_init(self, mock_client_class):
         """Test initialization"""
@@ -26,7 +26,7 @@ class TestBiasReadyPredictionGenerator:
         assert generator.project_id == "test-project"
         assert generator.dataset_id == "books"
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_init_without_airflow_home(self, mock_client_class):
         """Test initialization without AIRFLOW_HOME"""
         mock_client = Mock()
@@ -37,7 +37,7 @@ class TestBiasReadyPredictionGenerator:
             generator = BiasReadyPredictionGenerator()
             assert generator.project_id == "test-project"
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_find_latest_model_success(self, mock_client_class):
         """Test finding latest model successfully"""
         mock_client = Mock()
@@ -60,7 +60,7 @@ class TestBiasReadyPredictionGenerator:
         assert model_path is not None
         assert "boosted_tree_regressor_model_20250102" in model_path
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_find_latest_model_not_found(self, mock_client_class):
         """Test finding latest model when none exists"""
         mock_client = Mock()
@@ -76,7 +76,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert model_path is None
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_find_latest_model_exception(self, mock_client_class):
         """Test exception handling in find_latest_model"""
         mock_client = Mock()
@@ -92,7 +92,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert model_path is None
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_verify_test_table_exists_success(self, mock_client_class):
         """Test verifying test table exists successfully"""
         mock_client = Mock()
@@ -111,7 +111,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert result is True
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_verify_test_table_exists_not_found(self, mock_client_class):
         """Test verifying test table when it doesn't exist"""
         mock_client = Mock()
@@ -127,7 +127,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert result is False
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_verify_test_table_exists_zero_rows(self, mock_client_class):
         """Test verifying test table with zero rows"""
         mock_client = Mock()
@@ -146,7 +146,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert result is True  # Table exists, just empty
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_list_available_models_success(self, mock_client_class):
         """Test listing available models successfully"""
         mock_client = Mock()
@@ -166,7 +166,7 @@ class TestBiasReadyPredictionGenerator:
         assert isinstance(models, dict)
         assert 'boosted_tree' in models or 'matrix_factorization' in models
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_list_available_models_empty(self, mock_client_class):
         """Test listing available models when none exist"""
         mock_client = Mock()
@@ -182,7 +182,7 @@ class TestBiasReadyPredictionGenerator:
         assert isinstance(models, dict)
         assert not any(models.values())
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_list_available_models_exception(self, mock_client_class):
         """Test exception handling in list_available_models"""
         mock_client = Mock()
@@ -198,7 +198,7 @@ class TestBiasReadyPredictionGenerator:
         assert isinstance(models, dict)
         assert len(models) == 0
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_generate_boosted_tree_predictions_success(self, mock_client_class):
         """Test generating boosted tree predictions successfully"""
         mock_client = Mock()
@@ -225,7 +225,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert result is True
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_generate_boosted_tree_predictions_exception(self, mock_client_class):
         """Test exception handling in generate_boosted_tree_predictions"""
         mock_client = Mock()
@@ -243,7 +243,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert result is False
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_generate_matrix_factorization_predictions_success(self, mock_client_class):
         """Test generating matrix factorization predictions successfully"""
         mock_client = Mock()
@@ -270,7 +270,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert result is True
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_generate_matrix_factorization_predictions_exception(self, mock_client_class):
         """Test exception handling in generate_matrix_factorization_predictions"""
         mock_client = Mock()
@@ -288,7 +288,7 @@ class TestBiasReadyPredictionGenerator:
         
         assert result is False
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_run_with_all_models(self, mock_client_class):
         """Test running pipeline with all model types"""
         mock_client = Mock()
@@ -318,7 +318,7 @@ class TestBiasReadyPredictionGenerator:
                 # Should not raise exception
                 assert True
     
-    @patch('src.generate_prediction_tables.bigquery.Client')
+    @patch('src.bias_prediction_tables.bigquery.Client')
     def test_run_with_no_test_table(self, mock_client_class):
         """Test running pipeline when test table doesn't exist"""
         mock_client = Mock()
