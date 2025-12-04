@@ -30,7 +30,7 @@ provider "google-beta" {
 
 locals {
   timestamp = formatdate("YYYYMMDDhhmmss", timestamp())
-  
+
   labels = {
     project     = "goodreads-recommendations"
     environment = var.environment
@@ -39,6 +39,7 @@ locals {
 }
 
 data "google_project" "current" {}
+
 
 resource "google_project_service" "required_apis" {
   for_each = toset([
@@ -53,4 +54,52 @@ resource "google_project_service" "required_apis" {
 
   service            = each.key
   disable_on_destroy = false
+}
+
+# -----------------------------
+# Cloud Run runtime service account
+# -----------------------------
+resource "google_service_account" "cloud_run_sa" {
+  account_id   = "cloud-run-reco-sa"
+  display_name = "Cloud Run Recommendation Service SA"
+}
+
+resource "google_project_iam_member" "cloud_run_sa_bigquery" {
+  project = var.project_id
+  role    = "roles/bigquery.user"
+  member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
+}
+
+# -----------------------------
+# Cloud Run v2 service (FastAPI)
+# -----------------------------
+resource "google_cloud_run_v2_service" "recommendation_service" {
+  name     = var.service_name
+  location = var.region
+
+  template {
+    service_account = google_service_account.cloud_run_sa.email
+
+    containers {
+      image = var.image   # passed from GitHub Actions via TF_VAR_image
+
+      env {
+        name  = "PORT"
+        value = "8080"
+      }
+    }
+  }
+
+  traffic {
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+    percent = 100
+  }
+}
+
+
+resource "google_cloud_run_service_iam_member" "public_invoker" {
+  location = google_cloud_run_v2_service.recommendation_service.location
+  service  = google_cloud_run_v2_service.recommendation_service.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
 }
