@@ -1,15 +1,24 @@
 from google.cloud import bigquery
 from .database import get_bq_client
 
-client = get_bq_client()
-project = client.project
+_client = None
+_project = None
 dataset = "books"
+
+
+def _get_client():
+    global _client, _project
+    if _client is None:
+        _client = get_bq_client()
+        _project = _client.project
+    return _client, _project
 
 
 # ---------------------------------------------------------------------
 # CHECK IF USER EXISTS IN PREDICTION TABLE
 # ---------------------------------------------------------------------
 def check_user_exists(user_id: str) -> bool:
+    client, project = _get_client()
     query = f"""
     SELECT COUNT(*) AS cnt
     FROM `{project}.{dataset}.boosted_tree_rating_predictions`
@@ -24,6 +33,7 @@ def check_user_exists(user_id: str) -> bool:
 # GET TOP 10 RECOMMENDATIONS FOR EXISTING USER
 # ---------------------------------------------------------------------
 def get_top_recommendations(user_id: str):
+    client, project = _get_client()
     query = f"""
     SELECT
         pred.book_id,
@@ -45,6 +55,7 @@ def get_top_recommendations(user_id: str):
 # GET GLOBAL TOP 10 BOOKS FOR NEW USERS
 # ---------------------------------------------------------------------
 def get_global_top_recommendations():
+    client, project = _get_client()
     query = f"""
     SELECT
         book_id,
@@ -62,6 +73,7 @@ def get_global_top_recommendations():
 # LOG CTR EVENT
 # ---------------------------------------------------------------------
 def log_ctr_event(user_id: str, book_id: int):
+    client, project = _get_client()
     table_id = f"{project}.{dataset}.user_ctr_events"
     rows = [{"user_id": user_id, "book_id": book_id}]
     errors = client.insert_rows_json(table_id, rows)
@@ -72,6 +84,7 @@ def log_ctr_event(user_id: str, book_id: int):
 # BOOK DETAILS
 # ---------------------------------------------------------------------
 def get_book_details(book_id: int):
+    client, project = _get_client()
     query = f"""
     SELECT
         book_id,
@@ -96,6 +109,7 @@ def get_book_details(book_id: int):
 # GET BOOKS USER HAS READ
 # ---------------------------------------------------------------------
 def get_books_read_by_user(user_id: str):
+    client, project = _get_client()
     query = f"""
     SELECT
         inter.book_id,
@@ -116,6 +130,7 @@ def get_books_read_by_user(user_id: str):
 # GET BOOKS USER HAS NOT READ
 # ---------------------------------------------------------------------
 def get_books_not_read_by_user(user_id: str):
+    client, project = _get_client()
     query = f"""
     WITH read_books AS (
         SELECT book_id
@@ -135,3 +150,39 @@ def get_books_not_read_by_user(user_id: str):
     """
     job = client.query(query)
     return [dict(row) for row in job.result()]   # FIXED
+
+
+# ---------------------------------------------------------------------
+# ENSURE GLOBAL TOP 10 TABLE EXISTS
+# ---------------------------------------------------------------------
+def ensure_global_top10_table_exists():
+    client, project = _get_client()
+
+    query = f"""
+    BEGIN
+      CREATE TABLE `{project}.{dataset}.global_top10_books` AS
+      SELECT
+          b.book_id,
+          b.average_rating,
+          b.title_clean,
+          COALESCE(
+              SAFE_CAST(JSON_EXTRACT_SCALAR(b.authors_flat[OFFSET(0)], '$.author_name') AS STRING),
+              "Unknown"
+          ) AS author,
+          b.ratings_count
+      FROM `{project}.{dataset}.goodreads_books_cleaned` AS b
+      WHERE b.average_rating IS NOT NULL
+      ORDER BY b.average_rating DESC, b.ratings_count DESC
+      LIMIT 10;
+
+    EXCEPTION WHEN ERROR THEN
+      SELECT "Table already exists, skipping creation." AS status;
+
+    END;
+    """
+
+    client.query(query).result()
+
+
+# Run ONCE when module loads
+ensure_global_top10_table_exists()

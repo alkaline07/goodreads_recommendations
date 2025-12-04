@@ -9,11 +9,16 @@ on:
       - 'terraform/**'        
   workflow_dispatch:
 
+concurrency:
+  group: terraform-${{ github.repository }}
+  cancel-in-progress: false
+
 env:
   SERVICE_NAME: recommendation-service
-  REGION: ${{ secrets.GCP_REGION }}
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  TF_WORKING_DIR: terraform   
+  REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || 'recommendation-system-475301' }}
+  TF_WORKING_DIR: terraform
+  TF_LOCK_TIMEOUT: '300s'
 
 jobs:
   build-and-deploy:
@@ -22,7 +27,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      packages: write
 
     steps:
       - name: Checkout
@@ -38,27 +42,61 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push Docker image
-        run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/recommendation-service:${{ github.sha }}"
-          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
-
-          docker build -t "${IMAGE}" ./api
-          docker push "${IMAGE}"
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
+
+      - name: Clear stale locks
+        run: |
+          LOCK_FILE="gs://recommendation-system-475301-terraform-state/model-deployment/default.tflock"
+          if gsutil -q stat "$LOCK_FILE" 2>/dev/null; then
+            echo "Found existing lock file, removing stale lock..."
+            gsutil rm "$LOCK_FILE" || true
+            echo "Stale lock removed"
+          else
+            echo "No stale lock found"
+          fi
+
+      - name: Import Artifact Registry if exists but not in state
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        continue-on-error: true
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          TF_VAR_region: ${{ env.REGION }}
+          TF_VAR_service_name: ${{ env.SERVICE_NAME }}
+          TF_VAR_image: "placeholder"
+        run: |
+          terraform import google_artifact_registry_repository.docker_repo \
+            projects/${{ env.PROJECT_ID }}/locations/${{ env.REGION }}/repositories/recommendation-service
+
+      - name: Create Artifact Registry (Terraform targeted apply)
+        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          TF_VAR_region: ${{ env.REGION }}
+          TF_VAR_service_name: ${{ env.SERVICE_NAME }}
+          TF_VAR_image: "placeholder"
+        run: |
+          terraform apply -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }} \
+            -target=google_artifact_registry_repository.docker_repo \
+            -target=google_project_service.required_apis
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/recommendation-service/recommendation-service:${{ github.sha }}"
+          IMAGE_LATEST="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/recommendation-service/recommendation-service:latest"
+          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
+
+          docker build -t "${IMAGE}" -t "${IMAGE_LATEST}" ./api
+          docker push "${IMAGE}"
+          docker push "${IMAGE_LATEST}"
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -67,14 +105,14 @@ jobs:
           TF_VAR_region: ${{ env.REGION }}
           TF_VAR_service_name: ${{ env.SERVICE_NAME }}
           TF_VAR_image: ${{ env.IMAGE }}
-        run: terraform plan
+        run: terraform plan -lock-timeout=${{ env.TF_LOCK_TIMEOUT }}
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
           TF_VAR_project_id: ${{ env.PROJECT_ID }}
           TF_VAR_region: ${{ env.REGION }}
           TF_VAR_service_name: ${{ env.SERVICE_NAME }}
           TF_VAR_image: ${{ env.IMAGE }}
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }}

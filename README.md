@@ -563,9 +563,9 @@ The Matrix Factorization model's performance depends on factorization parameters
 
 These sensitivity analyses informed our final hyperparameter selections, ensuring optimal model performance while maintaining computational efficiency.
 
-## Code for Generating Predictions
+## Code for Generating Predictions for Bias Pipeline
 
-**Module:** [`src/generate_prediction_tables.py`](src/generate_prediction_tables.py)
+**Module:** [`src/bias_prediction_tables.py`](src/bias_prediction_tables.py)
 
 **Purpose:** Generates bias-ready prediction tables with all features needed for bias detection and evaluation.
 
@@ -588,7 +588,7 @@ These sensitivity analyses informed our final hyperparameter selections, ensurin
 2. **Set up Python 3.11** - Configures environment
 3. **Authenticate to Google Cloud** - Sets up GCP access
 4. **Install dependencies** - Installs required packages
-5. **Run Prediction Generator** - Executes `src.generate_prediction_tables` which:
+5. **Run Prediction Generator** - Executes `src.bias_prediction_tables` which:
    - Finds latest trained models in BigQuery
    - Generates predictions for each model type (Boosted Tree, Matrix Factorization)
    - Creates prediction tables with all features needed for bias detection
@@ -1464,7 +1464,7 @@ The `src/` directory groups together the reusable services that orchestrate mode
 | `src/load_data.py` | Bootstraps BigQuery credentials and returns the curated train split as either BigFrames or pandas DataFrames. |
 | `src/df_model_training.py` | Lightweight, in-memory training stub for experimentation and CI smoke tests using pandas data. |
 | `src/bq_model_training.py` | Production BigQuery ML training workflow with concurrency handling, MLflow logging, and evaluation hooks. |
-| `src/generate_prediction_tables.py` | Builds bias-ready prediction tables (features + inferred slices) for every trained model. |
+| `src/bias_prediction_tables.py` | Builds bias-ready prediction tables (features + inferred slices) for every trained model. |
 | [`src/bias_detection.py`](src/bias_detection.py) | Computes slice-aware performance metrics, disparity summaries, and mitigation recommendations. |
 | [`src/bias_mitigation.py`](src/bias_mitigation.py) | Implements shrinkage, threshold adjustment, and re-weighting strategies to reduce detected bias. |
 | [`src/bias_pipeline.py`](src/bias_pipeline.py) | End-to-end orchestrator that stitches detection, mitigation, visualization, and reporting steps. |
