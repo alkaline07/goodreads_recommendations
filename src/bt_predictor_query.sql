@@ -52,6 +52,17 @@ book_features AS (
   FROM `{project_id}.{dataset}.goodreads_features`
   WHERE book_id IS NOT NULL
 ),
+
+book_author_names AS (
+  SELECT 
+    CAST(b.book_id AS STRING) AS book_id,
+    STRING_AGG(a.name, ', ') AS author_names
+  FROM `{project_id}.{dataset}.goodreads_books_mystery_thriller_crime` b
+  CROSS JOIN UNNEST(b.authors) AS author_struct
+  JOIN `{project_id}.{dataset}.goodreads_book_authors` a
+    ON CAST(a.author_id AS STRING) = CAST(author_struct.author_id AS STRING)
+  GROUP BY 1
+),
  
 read_books AS (
   SELECT DISTINCT
@@ -59,7 +70,7 @@ read_books AS (
     book_id
   FROM `{project_id}.{dataset}.goodreads_features`
   WHERE is_read = TRUE
-    AND user_id_clean = @user_id -- Filter applied here to speed up exclusion check
+    AND user_id_clean = @user_id 
 ),
  
 unread_pairs AS (
@@ -185,18 +196,21 @@ predictions AS (
 )
  
 SELECT
-  user_id_clean,
-  book_id,
-  predicted_rating,
-  rank,
-  title_clean,
-  average_rating,
-  ratings_count,
-  num_pages,
-  publication_year,
-  book_popularity_normalized,
-  book_length_category,
-  book_era
-FROM predictions
-WHERE rank <= 50
-ORDER BY rank;
+  p.user_id_clean,
+  p.book_id as book_id,
+  COALESCE(auth.author_names, 'Unknown Author') AS author_names,
+  p.predicted_rating,
+  p.rank as rank,
+  p.title_clean as title,
+  p.average_rating as rating,
+  p.ratings_count,
+  p.num_pages,
+  p.publication_year,
+  p.book_popularity_normalized,
+  p.book_length_category,
+  p.book_era
+FROM predictions p
+LEFT JOIN book_author_names auth
+  ON CAST(p.book_id AS STRING) = auth.book_id
+WHERE p.rank <= 50
+ORDER BY p.rank;
