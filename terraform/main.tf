@@ -102,8 +102,9 @@ resource "google_project_iam_member" "cloud_run_sa_bigquery_data_editor" {
 # Cloud Run v2 service (FastAPI)
 # -----------------------------
 resource "google_cloud_run_v2_service" "recommendation_service" {
-  name     = var.service_name
-  location = var.region
+  name                = var.service_name
+  location            = var.region
+  deletion_protection = false
 
   template {
     service_account = google_service_account.cloud_run_sa.email
