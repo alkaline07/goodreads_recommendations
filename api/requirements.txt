@@ -4,6 +4,7 @@ uvicorn[standard]
 google-auth
 google-api-core
 google-cloud-core
+google-cloud-bigquery
 uvloop
 httptools
 orjson
