@@ -102,6 +102,7 @@ resource "google_project_iam_member" "cloud_run_sa_bigquery_data_editor" {
 # Cloud Run v2 service (FastAPI)
 # -----------------------------
 resource "google_cloud_run_v2_service" "recommendation_service" {
+  count               = var.image != "" ? 1 : 0
   name                = var.service_name
   location            = var.region
   deletion_protection = false
@@ -122,8 +123,9 @@ resource "google_cloud_run_v2_service" "recommendation_service" {
 
 
 resource "google_cloud_run_service_iam_member" "public_invoker" {
-  location = google_cloud_run_v2_service.recommendation_service.location
-  service  = google_cloud_run_v2_service.recommendation_service.name
+  count    = var.image != "" ? 1 : 0
+  location = google_cloud_run_v2_service.recommendation_service[0].location
+  service  = google_cloud_run_v2_service.recommendation_service[0].name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }

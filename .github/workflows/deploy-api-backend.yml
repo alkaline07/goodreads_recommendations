@@ -9,6 +9,10 @@ on:
       - 'terraform/**'        
   workflow_dispatch:
 
+concurrency:
+  group: terraform-${{ github.repository }}
+  cancel-in-progress: false
+
 env:
   SERVICE_NAME: recommendation-service
   REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
