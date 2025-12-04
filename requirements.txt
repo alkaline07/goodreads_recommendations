@@ -17,3 +17,4 @@ gender-guesser
 mlflow
 bigframes
 pandas-gbq
+db-dtypes
