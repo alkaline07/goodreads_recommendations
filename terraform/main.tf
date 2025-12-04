@@ -65,9 +65,11 @@ resource "google_artifact_registry_repository" "docker_repo" {
   description   = "Docker repository for recommendation service images"
   format        = "DOCKER"
 
-  labels = local.labels
-
   depends_on = [google_project_service.required_apis]
+
+  lifecycle {
+    ignore_changes = [labels]
+  }
 }
 
 # -----------------------------
@@ -78,9 +80,21 @@ resource "google_service_account" "cloud_run_sa" {
   display_name = "Cloud Run Recommendation Service SA"
 }
 
-resource "google_project_iam_member" "cloud_run_sa_bigquery" {
+resource "google_project_iam_member" "cloud_run_sa_bigquery_user" {
   project = var.project_id
   role    = "roles/bigquery.user"
+  member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
+}
+
+resource "google_project_iam_member" "cloud_run_sa_bigquery_data_viewer" {
+  project = var.project_id
+  role    = "roles/bigquery.dataViewer"
+  member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
+}
+
+resource "google_project_iam_member" "cloud_run_sa_bigquery_data_editor" {
+  project = var.project_id
+  role    = "roles/bigquery.dataEditor"
   member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
 }
 
