@@ -70,18 +70,3 @@ resource "google_service_account_iam_member" "deployer_can_impersonate_serving" 
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.model_deployer[0].email}"
 }
-
-resource "google_project_iam_member" "cloud_run_sa_bigquery" {
-  count   = var.create_service_accounts ? 1 : 0
-  project = var.project_id
-  role    = "roles/bigquery.user"
-  member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
-}
-
-
-resource "google_service_account_iam_member" "gha_can_act_as_cloud_run_sa" {
-  count   = var.create_service_accounts ? 1 : 0
-  service_account_id = google_service_account.cloud_run_sa.name
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:goodreads-books@recommendation-system-475301.iam.gserviceaccount.com"
-}
