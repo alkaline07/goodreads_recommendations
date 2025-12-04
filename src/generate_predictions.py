@@ -1,8 +1,9 @@
-from src.model_deployment import get_selected_model_info, ModelDeployer
+from src.model_deployment import get_selected_model_info
 import os
 from google.cloud import bigquery, aiplatform
-import pandas as pd
 from typing import Optional
+import datetime
+import argparse
 
 class GeneratePredictions:
     def __init__(self):
@@ -16,9 +17,10 @@ class GeneratePredictions:
         self.client = bigquery.Client()
         self.project_id = self.client.project
         self.dataset_id = "books"
+        self.location = "us-central1"
         aiplatform.init(
             project=self.project_id,
-            location="us-central1"
+            location=self.location
         )
 
     def get_mf_predictions(self, model_name, user_id):
@@ -66,6 +68,52 @@ class GeneratePredictions:
         print(results.columns)
         return results[['book_id', 'title', 'rating', 'author_names']]
     
+    def get_version(self, display_name):
+        try:
+            models = aiplatform.Model.list(
+                filter=f'display_name="{display_name}"',
+                location=self.location
+            )
+            
+            if not models:
+                print(f"No model found with display name: {display_name}")
+                return None
+            
+            parent_model = models[0]
+            print(f"Found parent model: {parent_model.resource_name}")
+            
+            versions = parent_model.versioning_registry.list_versions()
+            default_version = None
+                
+            for v in versions:
+                if hasattr(v, 'version_aliases') and 'default' in v.version_aliases:
+                    default_version = v
+                    break
+            return default_version.version_id if default_version else None
+        except Exception as e:
+            print(f"Error retrieving model version: {e}")
+            return None
+    
+    def get_bq_model_id_by_version(self, display_name, version_id):
+        model_resource_name = f"projects/{self.project_id}/locations/{self.location}/models/{display_name}@{version_id}"
+        model_version = aiplatform.Model(model_resource_name)
+        model_dict = model_version.to_dict()
+
+        # Get version creation time
+        version_create_time = model_dict['versionCreateTime']
+        # Convert to datetime and format as YYYYMMDD_HHMMSS
+        create_datetime = datetime.fromisoformat(version_create_time.replace('Z', '+00:00'))
+        timestamp_str = create_datetime.strftime("%Y%m%d_%H%M%S")
+
+        if "boosted_tree" in display_name:
+            bq_model_id = f"boosted_tree_regressor_model_{timestamp_str}"
+        elif "matrix_factorization" in display_name:
+            bq_model_id = f"matrix_factorization_model_{timestamp_str}"
+        else:
+            raise ValueError(f"Model type for {display_name} not recognized.")
+
+        return bq_model_id
+
     def get_model_from_registry(self, display_name: str) -> Optional[str]:
         if "boosted_tree" in display_name:
             return f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
@@ -74,7 +122,6 @@ class GeneratePredictions:
         else:
             print(f"Model type for {display_name} not recognized.")
             return None
-
     
     def get_predictions(self, user_id):
         """
@@ -85,7 +132,6 @@ class GeneratePredictions:
             raise ValueError("No model selected for predictions.")
         
         model_name = model_info['display_name']
-        model_name = "matrix_factorization"
 
         bq_model_id = self.get_model_from_registry(model_name)
 
@@ -100,9 +146,16 @@ class GeneratePredictions:
         return predictions
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate book predictions for a user")
+    parser.add_argument("--user_id", type=str, required=True, help="User ID to generate predictions for")
+    
+    args = parser.parse_args()
+    
     generator = GeneratePredictions()
-    user_id = "017fa7fa5ca764f1b912b4b1716adca5"  # Replace with actual user_id
-    predictions = generator.get_predictions(user_id)
+    predictions = generator.get_predictions(args.user_id)
     print(predictions)
+
+# Sample runner command:
+# python -m src.generate_predictions --user_id "017fa7fa5ca764f1b912b4b1716adca5"
 
 
