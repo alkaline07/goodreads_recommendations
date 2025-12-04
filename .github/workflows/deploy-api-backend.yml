@@ -80,16 +80,6 @@ jobs:
           docker build -t "${IMAGE}" ./api
           docker push "${IMAGE}"
 
-      - name: Disable deletion protection via REST API (if service exists)
-        continue-on-error: true
-        run: |
-          ACCESS_TOKEN=$(gcloud auth print-access-token)
-          curl -s -X PATCH \
-            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d '{"deletionProtection": false}' \
-            "https://run.googleapis.com/v2/projects/${{ env.PROJECT_ID }}/locations/${{ env.REGION }}/services/${{ env.SERVICE_NAME }}?updateMask=deletionProtection"
-
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
