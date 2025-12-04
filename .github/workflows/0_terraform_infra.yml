@@ -54,6 +54,7 @@ on:
 env:
   TF_VERSION: '1.6.0'
   TF_WORKING_DIR: './terraform'
+  TF_LOCK_TIMEOUT: '300s'
 
 jobs:
   terraform-plan:
@@ -139,7 +140,7 @@ jobs:
         id: plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
-          terraform plan -no-color -out=tfplan
+          terraform plan -no-color -out=tfplan -lock-timeout=${{ env.TF_LOCK_TIMEOUT }}
           echo "plan_exitcode=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
 
@@ -272,9 +273,9 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           if [ "${{ github.event.inputs.auto_approve }}" == "true" ]; then
-            terraform apply -auto-approve tfplan
+            terraform apply -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }} tfplan
           else
-            terraform apply tfplan
+            terraform apply -lock-timeout=${{ env.TF_LOCK_TIMEOUT }} tfplan
           fi
 
       - name: Terraform Output
@@ -370,9 +371,9 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           if [ "${{ github.event.inputs.auto_approve }}" == "true" ]; then
-            terraform destroy -auto-approve
+            terraform destroy -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }}
           else
-            terraform destroy
+            terraform destroy -lock-timeout=${{ env.TF_LOCK_TIMEOUT }}
           fi
 
       - name: Generate Destroy Summary
