@@ -1,4 +1,3 @@
-# Vertex AI Endpoint - this is the main resource
 resource "google_vertex_ai_endpoint" "recommendation_endpoint" {
   provider     = google-beta
   name         = var.endpoint_display_name
@@ -14,27 +13,42 @@ resource "google_vertex_ai_endpoint" "recommendation_endpoint" {
   ]
 }
 
-# Logging metrics - only created if var.create_logging_metrics is true
-# Requires: logging.logMetrics.create permission
-
-resource "google_logging_metric" "prediction_count" {
-  count       = var.create_logging_metrics ? 1 : 0
-  name        = "goodreads-prediction-count"
-  description = "Count of prediction requests"
-  filter      = "resource.type=\"aiplatform.googleapis.com/Endpoint\""
+resource "google_logging_metric" "prediction_latency" {
+  name        = "goodreads-prediction-latency"
+  description = "Latency of prediction requests"
+  filter      = <<-EOT
+    resource.type="aiplatform.googleapis.com/Endpoint"
+    resource.labels.endpoint_id="${google_vertex_ai_endpoint.recommendation_endpoint.name}"
+    severity>=DEFAULT
+  EOT
 
   metric_descriptor {
     metric_kind = "DELTA"
-    value_type  = "INT64"
-    unit        = "1"
+    value_type  = "DISTRIBUTION"
+    unit        = "ms"
+
+    labels {
+      key         = "model_version"
+      value_type  = "STRING"
+      description = "The model version used for prediction"
+    }
+  }
+
+  bucket_options {
+    explicit_buckets {
+      bounds = [0, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+    }
   }
 }
 
 resource "google_logging_metric" "prediction_errors" {
-  count       = var.create_logging_metrics ? 1 : 0
   name        = "goodreads-prediction-errors"
   description = "Count of prediction errors"
-  filter      = "resource.type=\"aiplatform.googleapis.com/Endpoint\" AND severity>=ERROR"
+  filter      = <<-EOT
+    resource.type="aiplatform.googleapis.com/Endpoint"
+    resource.labels.endpoint_id="${google_vertex_ai_endpoint.recommendation_endpoint.name}"
+    severity>=ERROR
+  EOT
 
   metric_descriptor {
     metric_kind = "DELTA"
@@ -44,192 +58,189 @@ resource "google_logging_metric" "prediction_errors" {
 }
 
 resource "google_logging_metric" "deployment_events" {
-  count       = var.create_logging_metrics ? 1 : 0
   name        = "goodreads-deployment-events"
   description = "Model deployment events"
-  filter      = "resource.type=\"aiplatform.googleapis.com/Endpoint\" AND (jsonPayload.event_type=\"DEPLOY\" OR jsonPayload.event_type=\"UNDEPLOY\")"
+  filter      = <<-EOT
+    resource.type="aiplatform.googleapis.com/Endpoint"
+    resource.labels.endpoint_id="${google_vertex_ai_endpoint.recommendation_endpoint.name}"
+    jsonPayload.event_type=~"DEPLOY|UNDEPLOY"
+  EOT
 
   metric_descriptor {
     metric_kind = "DELTA"
     value_type  = "INT64"
     unit        = "1"
+
+    labels {
+      key         = "event_type"
+      value_type  = "STRING"
+      description = "Type of deployment event (DEPLOY/UNDEPLOY)"
+    }
   }
 }
 
-# Alert policies - disabled until endpoint has traffic
-# These require actual prediction data to work properly
-# Uncomment after your endpoint is serving predictions
+resource "google_monitoring_alert_policy" "prediction_error_rate" {
+  count        = var.enable_monitoring ? 1 : 0
+  display_name = "Goodreads Model - High Error Rate"
+  combiner     = "OR"
 
-# resource "google_monitoring_alert_policy" "prediction_error_rate" {
-#   count        = var.enable_monitoring && var.create_logging_metrics ? 1 : 0
-#   display_name = "Goodreads Model - High Error Rate"
-#   combiner     = "OR"
-#
-#   conditions {
-#     display_name = "Prediction Error Rate > 5/min"
-#
-#     condition_threshold {
-#       filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.prediction_errors[0].name}\" AND resource.type=\"global\""
-#       duration        = "300s"
-#       comparison      = "COMPARISON_GT"
-#       threshold_value = 5
-#
-#       aggregations {
-#         alignment_period   = "60s"
-#         per_series_aligner = "ALIGN_RATE"
-#       }
-#     }
-#   }
-#
-#   notification_channels = var.notification_channels
-#
-#   alert_strategy {
-#     auto_close = "604800s"
-#   }
-#
-#   documentation {
-#     content   = "The prediction error count for the Goodreads recommendation model has exceeded 5 per minute. Please investigate the model endpoint and recent deployments."
-#     mime_type = "text/markdown"
-#   }
-#
-#   depends_on = [google_logging_metric.prediction_errors]
-# }
+  conditions {
+    display_name = "Prediction Error Rate > 5%"
 
-# Dashboard - only created if enable_monitoring is true
+    condition_threshold {
+      filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.prediction_errors.name}\" AND resource.type=\"aiplatform.googleapis.com/Endpoint\""
+      duration        = "300s"
+      comparison      = "COMPARISON_GT"
+      threshold_value = 0.05
+
+      aggregations {
+        alignment_period     = "60s"
+        per_series_aligner   = "ALIGN_RATE"
+        cross_series_reducer = "REDUCE_SUM"
+      }
+    }
+  }
+
+  notification_channels = var.notification_channels
+
+  alert_strategy {
+    auto_close = "604800s"
+  }
+
+  documentation {
+    content   = "The prediction error rate for the Goodreads recommendation model has exceeded 5%. Please investigate the model endpoint and recent deployments."
+    mime_type = "text/markdown"
+  }
+}
+
+resource "google_monitoring_alert_policy" "prediction_latency" {
+  count        = var.enable_monitoring ? 1 : 0
+  display_name = "Goodreads Model - High Latency"
+  combiner     = "OR"
+
+  conditions {
+    display_name = "P95 Latency > 2s"
+
+    condition_threshold {
+      filter          = "metric.type=\"aiplatform.googleapis.com/prediction/online/response_latencies\" AND resource.type=\"aiplatform.googleapis.com/Endpoint\""
+      duration        = "300s"
+      comparison      = "COMPARISON_GT"
+      threshold_value = 2000
+
+      aggregations {
+        alignment_period     = "60s"
+        per_series_aligner   = "ALIGN_PERCENTILE_95"
+        cross_series_reducer = "REDUCE_MEAN"
+      }
+    }
+  }
+
+  notification_channels = var.notification_channels
+
+  alert_strategy {
+    auto_close = "604800s"
+  }
+
+  documentation {
+    content   = "The P95 prediction latency for the Goodreads recommendation model has exceeded 2 seconds. Consider scaling up resources or investigating model performance."
+    mime_type = "text/markdown"
+  }
+}
+
 resource "google_monitoring_dashboard" "model_dashboard" {
-  count = var.enable_monitoring ? 1 : 0
   dashboard_json = jsonencode({
     displayName = "Goodreads Model Deployment Dashboard"
-    mosaicLayout = {
-      columns = 12
-      tiles = [
+    gridLayout = {
+      columns = 2
+      widgets = [
         {
-          width  = 6
-          height = 4
-          widget = {
-            title = "Prediction Request Count"
-            xyChart = {
-              dataSets = [{
-                timeSeriesQuery = {
-                  timeSeriesFilter = {
-                    filter = "resource.type=\"aiplatform.googleapis.com/Endpoint\" AND metric.type=\"aiplatform.googleapis.com/prediction/online/prediction_count\""
-                    aggregation = {
-                      alignmentPeriod  = "60s"
-                      perSeriesAligner = "ALIGN_RATE"
-                    }
+          title = "Prediction Request Count"
+          xyChart = {
+            dataSets = [{
+              timeSeriesQuery = {
+                timeSeriesFilter = {
+                  filter = "metric.type=\"aiplatform.googleapis.com/prediction/online/prediction_count\" AND resource.type=\"aiplatform.googleapis.com/Endpoint\""
+                  aggregation = {
+                    alignmentPeriod  = "60s"
+                    perSeriesAligner = "ALIGN_RATE"
                   }
                 }
-                plotType = "LINE"
-              }]
-              yAxis = {
-                scale = "LINEAR"
               }
-            }
+            }]
           }
         },
         {
-          xPos   = 6
-          width  = 6
-          height = 4
-          widget = {
-            title = "Prediction Latency (P50, P95, P99)"
-            xyChart = {
-              dataSets = [
-                {
-                  timeSeriesQuery = {
-                    timeSeriesFilter = {
-                      filter = "resource.type=\"aiplatform.googleapis.com/Endpoint\" AND metric.type=\"aiplatform.googleapis.com/prediction/online/response_latencies\""
-                      aggregation = {
-                        alignmentPeriod    = "60s"
-                        perSeriesAligner   = "ALIGN_DELTA"
-                        crossSeriesReducer = "REDUCE_PERCENTILE_50"
-                      }
+          title = "Prediction Latency (P50, P95, P99)"
+          xyChart = {
+            dataSets = [
+              {
+                timeSeriesQuery = {
+                  timeSeriesFilter = {
+                    filter = "metric.type=\"aiplatform.googleapis.com/prediction/online/response_latencies\" AND resource.type=\"aiplatform.googleapis.com/Endpoint\""
+                    aggregation = {
+                      alignmentPeriod  = "60s"
+                      perSeriesAligner = "ALIGN_PERCENTILE_50"
                     }
                   }
-                  plotType = "LINE"
-                },
-                {
-                  timeSeriesQuery = {
-                    timeSeriesFilter = {
-                      filter = "resource.type=\"aiplatform.googleapis.com/Endpoint\" AND metric.type=\"aiplatform.googleapis.com/prediction/online/response_latencies\""
-                      aggregation = {
-                        alignmentPeriod    = "60s"
-                        perSeriesAligner   = "ALIGN_DELTA"
-                        crossSeriesReducer = "REDUCE_PERCENTILE_95"
-                      }
-                    }
-                  }
-                  plotType = "LINE"
-                },
-                {
-                  timeSeriesQuery = {
-                    timeSeriesFilter = {
-                      filter = "resource.type=\"aiplatform.googleapis.com/Endpoint\" AND metric.type=\"aiplatform.googleapis.com/prediction/online/response_latencies\""
-                      aggregation = {
-                        alignmentPeriod    = "60s"
-                        perSeriesAligner   = "ALIGN_DELTA"
-                        crossSeriesReducer = "REDUCE_PERCENTILE_99"
-                      }
-                    }
-                  }
-                  plotType = "LINE"
                 }
-              ]
-              yAxis = {
-                scale = "LINEAR"
+              },
+              {
+                timeSeriesQuery = {
+                  timeSeriesFilter = {
+                    filter = "metric.type=\"aiplatform.googleapis.com/prediction/online/response_latencies\" AND resource.type=\"aiplatform.googleapis.com/Endpoint\""
+                    aggregation = {
+                      alignmentPeriod  = "60s"
+                      perSeriesAligner = "ALIGN_PERCENTILE_95"
+                    }
+                  }
+                }
+              },
+              {
+                timeSeriesQuery = {
+                  timeSeriesFilter = {
+                    filter = "metric.type=\"aiplatform.googleapis.com/prediction/online/response_latencies\" AND resource.type=\"aiplatform.googleapis.com/Endpoint\""
+                    aggregation = {
+                      alignmentPeriod  = "60s"
+                      perSeriesAligner = "ALIGN_PERCENTILE_99"
+                    }
+                  }
+                }
               }
-            }
+            ]
           }
         },
         {
-          yPos   = 4
-          width  = 6
-          height = 4
-          widget = {
-            title = "Replica Count"
-            xyChart = {
-              dataSets = [{
-                timeSeriesQuery = {
-                  timeSeriesFilter = {
-                    filter = "resource.type=\"aiplatform.googleapis.com/Endpoint\" AND metric.type=\"aiplatform.googleapis.com/prediction/online/replicas\""
-                    aggregation = {
-                      alignmentPeriod  = "60s"
-                      perSeriesAligner = "ALIGN_MEAN"
-                    }
+          title = "Error Rate"
+          xyChart = {
+            dataSets = [{
+              timeSeriesQuery = {
+                timeSeriesFilter = {
+                  filter = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.prediction_errors.name}\""
+                  aggregation = {
+                    alignmentPeriod  = "60s"
+                    perSeriesAligner = "ALIGN_RATE"
                   }
                 }
-                plotType = "LINE"
-              }]
-              yAxis = {
-                scale = "LINEAR"
               }
-            }
+            }]
           }
         },
         {
-          xPos   = 6
-          yPos   = 4
-          width  = 6
-          height = 4
-          widget = {
-            title = "CPU Utilization"
-            xyChart = {
-              dataSets = [{
-                timeSeriesQuery = {
-                  timeSeriesFilter = {
-                    filter = "resource.type=\"aiplatform.googleapis.com/Endpoint\" AND metric.type=\"aiplatform.googleapis.com/prediction/online/cpu/utilization\""
-                    aggregation = {
-                      alignmentPeriod  = "60s"
-                      perSeriesAligner = "ALIGN_MEAN"
-                    }
+          title = "Deployment Events"
+          xyChart = {
+            dataSets = [{
+              timeSeriesQuery = {
+                timeSeriesFilter = {
+                  filter = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.deployment_events.name}\""
+                  aggregation = {
+                    alignmentPeriod    = "3600s"
+                    perSeriesAligner   = "ALIGN_SUM"
+                    crossSeriesReducer = "REDUCE_SUM"
+                    groupByFields      = ["metric.label.event_type"]
                   }
                 }
-                plotType = "LINE"
-              }]
-              yAxis = {
-                scale = "LINEAR"
               }
-            }
+            }]
           }
         }
       ]
