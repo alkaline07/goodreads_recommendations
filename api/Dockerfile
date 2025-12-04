@@ -1,14 +1,16 @@
 FROM python:3.11-slim
 
 WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt uvicorn
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN mkdir -p api
-COPY *.py api/
 
-EXPOSE 8000
+COPY . ./api
 
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENV PORT=8080
+EXPOSE 8080
 
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
