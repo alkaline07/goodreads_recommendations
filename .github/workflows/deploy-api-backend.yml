@@ -37,6 +37,17 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
+      - name: Create Artifact Registry repository (if not exists)
+        run: |
+          gcloud artifacts repositories describe recommendation-service \
+            --location=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} 2>/dev/null || \
+          gcloud artifacts repositories create recommendation-service \
+            --repository-format=docker \
+            --location=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --description="Docker repository for recommendation service images"
+
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
@@ -73,4 +84,3 @@ jobs:
           TF_VAR_service_name: ${{ env.SERVICE_NAME }}
           TF_VAR_image: ${{ env.IMAGE }}
         run: terraform apply -auto-approve
-        
