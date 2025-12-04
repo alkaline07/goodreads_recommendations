@@ -267,6 +267,15 @@ class AnomalyDetection:
                         """,
                         "max_allowed": 0
                     },
+                    {
+                        "name": "Check for null interaction_type",
+                        "query": f"""
+                        SELECT COUNT(*) as null_count
+                        FROM `{self.project_id}.{self.dataset}.{table_name}`
+                        WHERE interaction_type IS NULL
+                        """,
+                        "max_allowed": 0
+                    },
                 ]
             else:
                 validation_queries = [
@@ -296,7 +305,16 @@ class AnomalyDetection:
                         WHERE rating < 0 OR rating > 5
                         """,
                         "max_allowed": 0
-                    }
+                    },
+                    {
+                        "name": "Check for null interaction_type",
+                        "query": f"""
+                        SELECT COUNT(*) as null_count
+                        FROM `{self.project_id}.{self.dataset}.{table_name}`
+                        WHERE interaction_type IS NULL OR interaction_type = 'view'
+                        """,
+                        "max_allowed": 0
+                    },
                 ]
             
             # Run validation queries (uniform handling for pre/post)
