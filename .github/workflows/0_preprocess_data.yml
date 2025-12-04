@@ -1,4 +1,4 @@
-name: Run Airflow Pipeline
+name: 0. Run Airflow Pipeline
 
 on:
   workflow_dispatch: 
@@ -227,7 +227,7 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          echo "🧹 Cleaning up..."
+          echo "Cleaning up..."
           
           # Stop ngrok
           pkill ngrok || true
