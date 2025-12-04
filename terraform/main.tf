@@ -80,14 +80,11 @@ resource "google_service_account" "cloud_run_sa" {
   display_name = "Cloud Run Recommendation Service SA"
 }
 
-<<<<<<< HEAD
-=======
 resource "google_project_iam_member" "cloud_run_sa_bigquery_user" {
   project = var.project_id
   role    = "roles/bigquery.user"
   member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
 }
->>>>>>> upstream/master
 
 resource "google_project_iam_member" "cloud_run_sa_bigquery_data_viewer" {
   project = var.project_id
@@ -105,31 +102,16 @@ resource "google_project_iam_member" "cloud_run_sa_bigquery_data_editor" {
 # Cloud Run v2 service (FastAPI)
 # -----------------------------
 resource "google_cloud_run_v2_service" "recommendation_service" {
-<<<<<<< HEAD
-  name     = var.service_name
-  location = var.region
-  project  = var.project_id
-=======
   count               = var.image != "" ? 1 : 0
   name                = var.service_name
   location            = var.region
   deletion_protection = false
->>>>>>> upstream/master
 
   template {
     service_account = google_service_account.cloud_run_sa.email
 
     containers {
-<<<<<<< HEAD
-      image = var.image   
-
-      env {
-        name  = "PORT"
-        value = "8080"
-      }
-=======
       image = var.image   # passed from GitHub Actions via TF_VAR_image
->>>>>>> upstream/master
     }
   }
 

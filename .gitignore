@@ -40,7 +40,7 @@ terraform/*.tfstate.backup
 terraform/*.tfplan
 terraform/terraform.tfvars
 terraform.lock.hcl
-terraform/
+
 # Deployment logs
 docs/deployment_logs/*.log
 docs/deployment_logs/*.json
