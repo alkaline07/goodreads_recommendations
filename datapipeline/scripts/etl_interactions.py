@@ -89,8 +89,8 @@ class ETLInteractions:
                 
                 CAST(event_timestamp AS STRING) as date_added,
                 CAST(event_timestamp AS STRING) as date_updated,
-                NULL as read_at,
-                NULL as started_at,
+                '' as read_at,
+                '' as started_at,
                 
                 CASE 
                     WHEN event_type IN ('read', 'already_read') THEN TRUE 
@@ -125,7 +125,7 @@ class ETLInteractions:
             self.logger.info(f"Migration Complete. Raw event types are stored in 'interaction_type'.")
 
             self.logger.info(f"Wiping source table {self.full_source_table_id}...")
-            wipe_query = f"TRUNCATE TABLE `{self.full_source_table_id}`"
+            wipe_query = f"DELETE FROM `{self.full_source_table_id}` WHERE TRUE"
             wipe_job = self.client.query(wipe_query)
             wipe_job.result()
             self.logger.info("Source table wiped clean.")
