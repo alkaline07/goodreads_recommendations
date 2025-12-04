@@ -102,7 +102,7 @@ class GeneratePredictions:
         # Get version creation time
         version_create_time = model_dict['versionCreateTime']
         # Convert to datetime and format as YYYYMMDD_HHMMSS
-        create_datetime = datetime.fromisoformat(version_create_time.replace('Z', '+00:00'))
+        create_datetime = datetime.datetime.fromisoformat(version_create_time.replace('Z', '+00:00'))
         timestamp_str = create_datetime.strftime("%Y%m%d_%H%M%S")
 
         if "boosted_tree" in display_name:
