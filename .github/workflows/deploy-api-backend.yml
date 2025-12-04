@@ -83,10 +83,10 @@ jobs:
       - name: Disable Cloud Run deletion protection (if service exists)
         continue-on-error: true
         run: |
-          gcloud run services update ${{ env.SERVICE_NAME }} \
+          gcloud beta run services update ${{ env.SERVICE_NAME }} \
             --region=${{ env.REGION }} \
             --project=${{ env.PROJECT_ID }} \
-            --no-deletion-protection
+            --no-deletion-protection --quiet
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
