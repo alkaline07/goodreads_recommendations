@@ -83,6 +83,7 @@ jobs:
       - name: Disable Cloud Run deletion protection (if service exists)
         continue-on-error: true
         run: |
+          gcloud components install beta --quiet
           gcloud beta run services update ${{ env.SERVICE_NAME }} \
             --region=${{ env.REGION }} \
             --project=${{ env.PROJECT_ID }} \
