@@ -71,12 +71,13 @@ resource "google_service_account" "cloud_run_sa" {
 resource "google_cloud_run_v2_service" "recommendation_service" {
   name     = var.service_name
   location = var.region
+  project  = var.project_id
 
   template {
     service_account = google_service_account.cloud_run_sa.email
 
     containers {
-      image = var.image   # passed from GitHub Actions via TF_VAR_image
+      image = var.image   
 
       env {
         name  = "PORT"
