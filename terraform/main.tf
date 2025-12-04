@@ -57,6 +57,20 @@ resource "google_project_service" "required_apis" {
 }
 
 # -----------------------------
+# Artifact Registry for Docker images
+# -----------------------------
+resource "google_artifact_registry_repository" "docker_repo" {
+  location      = var.region
+  repository_id = "recommendation-service"
+  description   = "Docker repository for recommendation service images"
+  format        = "DOCKER"
+
+  labels = local.labels
+
+  depends_on = [google_project_service.required_apis]
+}
+
+# -----------------------------
 # Cloud Run runtime service account
 # -----------------------------
 resource "google_service_account" "cloud_run_sa" {
