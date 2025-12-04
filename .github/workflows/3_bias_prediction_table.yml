@@ -1,5 +1,5 @@
-name: 3. Generate Predictions
-run-name: Generate Prediction Tables
+name: 3. Bias Predictions
+run-name: Generate Bias Prediction Tables
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
     - name: Run Prediction Generator
       run: |
         echo "Running bias prediction table generator."
-        python -m src.generate_prediction_tables
+        python -m src.bias_prediction_tables
 
     - name: Generate Branch Name
       run: echo "BRANCH_NAME=artifacts_bot_$(date +%s)" >> $GITHUB_ENV

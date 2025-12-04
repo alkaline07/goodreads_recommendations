@@ -3,7 +3,7 @@ run-name: Run Model Evaluation Pipeline
 
 on:
   workflow_run:
-    workflows: ["3. Generate Predictions"]
+    workflows: ["3. Bias Predictions"]
     types: [completed]
 
 jobs:
