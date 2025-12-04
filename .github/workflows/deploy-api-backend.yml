@@ -9,12 +9,16 @@ on:
       - 'terraform/**'        
   workflow_dispatch:
 
+concurrency:
+  group: terraform-${{ github.repository }}
+  cancel-in-progress: false
+
 env:
   SERVICE_NAME: recommendation-service
   REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || 'recommendation-system-475301' }}
   TF_WORKING_DIR: terraform
-  TF_LOCK_TIMEOUT: '300s'   
+  TF_LOCK_TIMEOUT: '300s'
 
 jobs:
   build-and-deploy:
@@ -44,6 +48,17 @@ jobs:
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
+
+      - name: Clear stale locks
+        run: |
+          LOCK_FILE="gs://recommendation-system-475301-terraform-state/model-deployment/default.tflock"
+          if gsutil -q stat "$LOCK_FILE" 2>/dev/null; then
+            echo "Found existing lock file, removing stale lock..."
+            gsutil rm "$LOCK_FILE" || true
+            echo "Stale lock removed"
+          else
+            echo "No stale lock found"
+          fi
 
       - name: Import Artifact Registry if exists but not in state
         working-directory: ${{ env.TF_WORKING_DIR }}
