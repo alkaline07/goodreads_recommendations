@@ -58,3 +58,16 @@ resource "google_cloud_run_service_iam_member" "public_invoker" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+terraform {
+  backend "gcs" {
+    bucket = "tf-state-recommendation-system-475301"
+    prefix = "cloud-run"
+  }
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.0"
+    }
+  }
+}
