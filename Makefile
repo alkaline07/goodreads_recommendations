@@ -77,7 +77,7 @@ predict:
 	@echo "Generating prediction tables"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) run --rm \
 		-e GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_credentials.json \
-		model-training python -m src.generate_prediction_tables
+		model-training python -m src.bias_prediction_tables
 	@echo "Prediction generation complete!"
 
 bias:
