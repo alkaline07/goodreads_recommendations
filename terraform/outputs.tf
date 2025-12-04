@@ -26,7 +26,7 @@ output "serving_service_account" {
 
 output "monitoring_dashboard_url" {
   description = "URL to the Cloud Monitoring dashboard"
-  value       = "https://console.cloud.google.com/monitoring/dashboards/builder/${google_monitoring_dashboard.model_dashboard.id}?project=${var.project_id}"
+  value       = var.enable_monitoring ? "https://console.cloud.google.com/monitoring/dashboards/builder/${google_monitoring_dashboard.model_dashboard[0].id}?project=${var.project_id}" : "not_created"
 }
 
 output "project_id" {
