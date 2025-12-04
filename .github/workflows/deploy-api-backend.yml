@@ -13,7 +13,8 @@ env:
   SERVICE_NAME: recommendation-service
   REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || 'recommendation-system-475301' }}
-  TF_WORKING_DIR: terraform   
+  TF_WORKING_DIR: terraform
+  TF_LOCK_TIMEOUT: '300s'   
 
 jobs:
   build-and-deploy:
@@ -65,7 +66,7 @@ jobs:
           TF_VAR_service_name: ${{ env.SERVICE_NAME }}
           TF_VAR_image: "placeholder"
         run: |
-          terraform apply -auto-approve \
+          terraform apply -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }} \
             -target=google_artifact_registry_repository.docker_repo \
             -target=google_project_service.required_apis
 
@@ -89,7 +90,7 @@ jobs:
           TF_VAR_region: ${{ env.REGION }}
           TF_VAR_service_name: ${{ env.SERVICE_NAME }}
           TF_VAR_image: ${{ env.IMAGE }}
-        run: terraform plan
+        run: terraform plan -lock-timeout=${{ env.TF_LOCK_TIMEOUT }}
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
@@ -99,4 +100,4 @@ jobs:
           TF_VAR_region: ${{ env.REGION }}
           TF_VAR_service_name: ${{ env.SERVICE_NAME }}
           TF_VAR_image: ${{ env.IMAGE }}
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }}
