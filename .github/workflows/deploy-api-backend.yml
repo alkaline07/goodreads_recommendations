@@ -22,7 +22,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      packages: write
 
     steps:
       - name: Checkout
@@ -38,16 +37,12 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build and push Docker image
         run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/recommendation-service:${{ github.sha }}"
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/recommendation-service/recommendation-service:${{ github.sha }}"
           echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
 
           docker build -t "${IMAGE}" ./api
@@ -78,3 +73,4 @@ jobs:
           TF_VAR_service_name: ${{ env.SERVICE_NAME }}
           TF_VAR_image: ${{ env.IMAGE }}
         run: terraform apply -auto-approve
+        
