@@ -151,7 +151,13 @@ def get_books_not_read_by_user(user_id: str):
     job = client.query(query)
     return [dict(row) for row in job.result()]   # FIXED
 
+
+# ---------------------------------------------------------------------
+# ENSURE GLOBAL TOP 10 TABLE EXISTS
+# ---------------------------------------------------------------------
 def ensure_global_top10_table_exists():
+    client, project = _get_client()
+
     query = f"""
     BEGIN
       CREATE TABLE `{project}.{dataset}.global_top10_books` AS
@@ -177,5 +183,6 @@ def ensure_global_top10_table_exists():
 
     client.query(query).result()
 
-# Ensure the top 10 table exists before any API call happens
+
+# Run ONCE when module loads
 ensure_global_top10_table_exists()
