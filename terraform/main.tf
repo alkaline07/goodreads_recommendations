@@ -96,11 +96,6 @@ resource "google_cloud_run_v2_service" "recommendation_service" {
 
     containers {
       image = var.image   # passed from GitHub Actions via TF_VAR_image
-
-      env {
-        name  = "PORT"
-        value = "8080"
-      }
     }
   }
 
