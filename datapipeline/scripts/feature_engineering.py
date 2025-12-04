@@ -70,6 +70,10 @@ class FeatureEngineering:
         
         The query uses CTEs (Common Table Expressions) to organize the feature
         engineering logic and creates a final merged table with all features.
+
+        Updates:
+        - derived 'interaction_weight' from 'interaction_type' (5=read, 4=like, 3=add_to_list, 1=click)
+        - derived 'is_read' flag from 'interaction_type'
         """
         try:
             self.logger.info(f"Starting feature engineering pipeline")
@@ -255,6 +259,17 @@ class FeatureEngineering:
                 book_id,
                 COALESCE(rating, 0) AS rating,
                 COALESCE(is_read, FALSE) AS is_read,
+
+                -- Feature: Explicit Interaction Score
+                -- Based on the hierarchy: read > like > add_to_list > click
+                CASE 
+                    WHEN interaction_type = 'read' THEN 5
+                    WHEN interaction_type = 'like' THEN 4
+                    WHEN interaction_type = 'add_to_list' THEN 3
+                    WHEN interaction_type = 'click' THEN 1
+                    ELSE 0
+                END as interaction_weight,
+
                 COALESCE(
                   CASE 
                     WHEN SAFE.PARSE_TIMESTAMP('%a %b %d %H:%M:%S %z %Y', read_at_clean) IS NOT NULL 
