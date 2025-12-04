@@ -1,4 +1,14 @@
 WITH 
+-- 0. Get Books Already Read by User
+read_books AS (
+  SELECT DISTINCT
+    user_id_clean,
+    book_id
+  FROM `{project_id}.{dataset}.goodreads_features`
+  WHERE is_read = TRUE
+    AND user_id_clean = @user_id 
+),
+
 -- 1. Generate Recommendations
 recommendations AS (
   SELECT 
@@ -8,6 +18,12 @@ recommendations AS (
   FROM ML.RECOMMEND(
     MODEL `{model_name}`,
     (SELECT @user_id AS user_id_clean)
+  )
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM read_books r
+    WHERE r.user_id_clean = recommendations.user_id_clean
+      AND r.book_id = recommendations.book_id
   )
 ),
 
