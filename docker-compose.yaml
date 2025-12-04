@@ -34,6 +34,7 @@ x-airflow-common: &airflow-common
   volumes:
     - .:/opt/airflow
     - ./config/gcp_credentials.json:/opt/airflow/config/gcp_credentials.json
+  user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     postgres:
       condition: service_started
@@ -64,11 +65,16 @@ services:
     <<: *airflow-common
     container_name: airflow-init
     entrypoint: /bin/bash
+    user: "0:0" 
     command:
       - -c
       - |
         set -e
         echo "Starting Airflow initialization..."
+        
+        # Create necessary directories with correct permissions
+        mkdir -p /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
+        chown -R 50000:0 /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
         
         # Check if GCP credentials file exists
         if [ ! -f /opt/airflow/config/gcp_credentials.json ]; then

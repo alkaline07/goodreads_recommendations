@@ -33,8 +33,11 @@ jobs:
 
       - name: Create GCP credentials file
         run: |
-          mkdir -p config
+          mkdir -p config logs dags plugins
           echo '${{ secrets.GCP_CREDENTIALS }}' > config/gcp_credentials.json
+          
+          # Set proper permissions for Airflow directories
+          chmod -R 777 logs dags plugins config
           
           # Verify the file was created and is valid JSON
           if [ ! -f config/gcp_credentials.json ]; then
