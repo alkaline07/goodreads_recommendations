@@ -75,10 +75,12 @@ jobs:
       - name: Build and push Docker image
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/recommendation-service/recommendation-service:${{ github.sha }}"
+          IMAGE_LATEST="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/recommendation-service/recommendation-service:latest"
           echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
 
-          docker build -t "${IMAGE}" ./api
+          docker build -t "${IMAGE}" -t "${IMAGE_LATEST}" ./api
           docker push "${IMAGE}"
+          docker push "${IMAGE_LATEST}"
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
