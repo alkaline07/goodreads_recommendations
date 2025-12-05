@@ -197,18 +197,24 @@ jobs:
               ${{ inputs.dag_id }} \
               ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null)
             
-            # Count task states
-            TOTAL_TASKS=$(echo "$TASK_STATES" | grep -c "^" || echo "0")
-            SUCCESS_TASKS=$(echo "$TASK_STATES" | grep -c "success" || echo "0")
-            FAILED_TASKS=$(echo "$TASK_STATES" | grep -c "failed" || echo "0")
-            RUNNING_TASKS=$(echo "$TASK_STATES" | grep -c "running" || echo "0")
+            # Count task states (FIX: strip newlines and spaces)
+            SUCCESS_TASKS=$(echo "$TASK_STATES" | grep -c "success" 2>/dev/null | tr -d ' \n' || echo "0")
+            FAILED_TASKS=$(echo "$TASK_STATES" | grep -c "failed" 2>/dev/null | tr -d ' \n' || echo "0")
+            RUNNING_TASKS=$(echo "$TASK_STATES" | grep -c "running" 2>/dev/null | tr -d ' \n' || echo "0")
+            TOTAL_TASKS=$(echo "$TASK_STATES" | wc -l | tr -d ' \n' || echo "0")
+            
+            # Ensure variables are numeric (default to 0 if empty)
+            SUCCESS_TASKS=${SUCCESS_TASKS:-0}
+            FAILED_TASKS=${FAILED_TASKS:-0}
+            RUNNING_TASKS=${RUNNING_TASKS:-0}
+            TOTAL_TASKS=${TOTAL_TASKS:-0}
             
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "Time elapsed: ${ELAPSED}s / ${MAX_WAIT}s"
             echo "Tasks: $SUCCESS_TASKS success, $RUNNING_TASKS running, $FAILED_TASKS failed (Total: $TOTAL_TASKS)"
             echo ""
             echo "Task status:"
-            echo "$TASK_STATES" | grep -E "(success|running|failed|queued)" || echo "  Initializing..."
+            echo "$TASK_STATES" | head -20
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo ""
             
@@ -221,11 +227,11 @@ jobs:
               exit 1
             fi
             
-            # Check if all tasks succeeded (exclude start/end tasks from count if needed)
+            # Check if all tasks succeeded (13 tasks in your DAG)
             if [ "$SUCCESS_TASKS" -ge 13 ] && [ "$RUNNING_TASKS" -eq 0 ]; then
               echo "DAG completed successfully!"
               echo ""
-              docker exec airflow-scheduler airflow dags list-runs -d ${{ inputs.dag_id }} --state success --limit 1
+              docker exec airflow-scheduler airflow dags list-runs -d ${{ inputs.dag_id }} --state success --limit 1 || true
               exit 0
             fi
             
@@ -234,7 +240,8 @@ jobs:
           done
           
           echo ""
-          echo "Timeout waiting for DAG completion after ${MAX_WAIT}s"
+          echo "⏱️ Timeout waiting for DAG completion after ${MAX_WAIT}s"
+          echo "Current status: $SUCCESS_TASKS success, $RUNNING_TASKS running, $FAILED_TASKS failed"
           echo "Check status at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
           exit 1
 
