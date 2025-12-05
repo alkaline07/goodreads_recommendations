@@ -240,7 +240,7 @@ jobs:
           done
           
           echo ""
-          echo "⏱️ Timeout waiting for DAG completion after ${MAX_WAIT}s"
+          echo "Timeout waiting for DAG completion after ${MAX_WAIT}s"
           echo "Current status: $SUCCESS_TASKS success, $RUNNING_TASKS running, $FAILED_TASKS failed"
           echo "Check status at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
           exit 1
@@ -284,47 +284,6 @@ jobs:
           echo ""
           echo "Full logs available at: $NGROK_URL"
           echo "=========================================="
-
-      - name: Capture logs as artifacts
-        if: always()
-        run: |
-          mkdir -p artifact-logs
-          
-          # Capture container logs
-          docker logs airflow-scheduler > artifact-logs/scheduler.log 2>&1 || true
-          docker logs airflow-worker > artifact-logs/worker.log 2>&1 || true
-          docker logs airflow-webserver > artifact-logs/webserver.log 2>&1 || true
-          
-          # Capture DAG execution info
-          docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --limit 5 > artifact-logs/dag-runs.log 2>&1 || true
-          docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} > artifact-logs/task-states.log 2>&1 || true
-          
-          # Copy task logs with sanitized filenames (replace : with -)
-          if [ -d "logs" ]; then
-            echo "Copying task logs with sanitized filenames..."
-            find logs -name "*.log" -type f | while read -r logfile; do
-              # Replace colons and other invalid chars with dashes
-              sanitized=$(echo "$logfile" | sed 's/://g' | sed 's/[<>"|?*]/-/g')
-              mkdir -p "artifact-logs/$(dirname "$sanitized")"
-              cp "$logfile" "artifact-logs/$sanitized" 2>/dev/null || true
-            done
-          fi
-
-      - name: Upload logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: airflow-pipeline-logs-${{ github.run_number }}
-          path: artifact-logs/
-          retention-days: 7
-
-      - name: Upload logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: airflow-pipeline-logs-${{ github.run_number }}
-          path: logs/
-          retention-days: 7
 
       - name: Keep ngrok alive for debugging
         if: failure()
