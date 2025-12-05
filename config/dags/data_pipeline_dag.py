@@ -48,6 +48,7 @@ default_args = {
     'email_on_failure': False,           # Disable email on failure (handled by callbacks)
     'email_on_retry': False,             # Disable email on retry
 }
+
 def send_failure_email(context):
     """
     Send email notification when a DAG task fails.
@@ -167,7 +168,35 @@ def normalization_run():
 
 def data_versioning_run():
     feature_metadata_main()
+    airflow_home = os.environ.get("AIRFLOW_HOME", "/opt/airflow")
+    logging.info("Configuring Git safe directory at runtime")
 
+    subprocess.run(
+        ["git", "config", "--global", "--add", "safe.directory", airflow_home],
+        capture_output=True,
+        text=True
+    )
+    logging.info("Configuring Git user identity")
+    git_user_name = os.environ.get("GIT_USER_NAME", "Airflow Bot")
+    git_user_email = os.environ.get("GIT_USER_EMAIL", "airflow@mlops.com")
+    
+    subprocess.run(
+        ["git", "config", "--global", "user.name", git_user_name],
+        capture_output=True,
+        text=True
+    )
+    subprocess.run(
+        ["git", "config", "--global", "user.email", git_user_email],
+        capture_output=True,
+        text=True
+    )
+    logging.info(f"Git configured as: {git_user_name} <{git_user_email}>")
+    verify_result = subprocess.run(
+        ["git", "config", "--global", "--get-all", "safe.directory"],
+        capture_output=True,
+        text=True
+    )
+    logging.info(f"Safe directories configured: {verify_result.stdout}")
     logging.info("Running DVC and Git Commands for Versioning")
     commands = [
         ["dvc", "add", "data/metadata/goodreads_features_metadata.json"],
