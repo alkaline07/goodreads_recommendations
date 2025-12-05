@@ -37,7 +37,7 @@ jobs:
           echo '${{ secrets.GCP_CREDENTIALS }}' > config/gcp_credentials.json
           chmod -R 777 logs dags plugins config
           
-
+          # Validate credentials file
           if [ ! -f config/gcp_credentials.json ]; then
             echo "ERROR: Failed to create GCP credentials file"
             exit 1
@@ -119,15 +119,43 @@ jobs:
           
           echo "::notice title=Airflow UI Access::Access Airflow at $NGROK_URL (user: admin, pass: admin)"
 
+      - name: Verify DAG files and folder structure
+        run: |
+          echo "Checking DAG folder structure in container..."
+          docker exec airflow-webserver ls -la /opt/airflow/config/dags/ || echo "DAG folder not found!"
+          echo ""
+          echo "Checking AIRFLOW__CORE__DAGS_FOLDER setting..."
+          docker exec airflow-webserver printenv | grep DAGS_FOLDER
+          echo ""
+          echo "Checking for Python errors in DAG files..."
+          docker exec airflow-webserver python -m py_compile /opt/airflow/config/dags/*.py 2>&1 || echo "DAG has syntax errors!"
+
       - name: List available DAGs
         run: |
+          echo "Waiting for DAG to be parsed..."
+          sleep 10
+          echo ""
           echo "Available DAGs:"
           docker exec airflow-webserver airflow dags list
+          echo ""
+          echo "Checking DAG import errors..."
+          docker exec airflow-webserver airflow dags list-import-errors || echo "No import errors"
 
       - name: Trigger DAG
         id: trigger_dag
         run: |
           echo "Triggering DAG: ${{ inputs.dag_id }}"
+          
+          # Wait for DAG to be available
+          for i in {1..12}; do
+            if docker exec airflow-webserver airflow dags list | grep -q "${{ inputs.dag_id }}"; then
+              echo "DAG found!"
+              break
+            fi
+            echo "Waiting for DAG to be parsed... (attempt $i/12)"
+            sleep 5
+          done
+          
           RUN_ID=$(docker exec airflow-webserver airflow dags trigger ${{ inputs.dag_id }} --output json | jq -r '.run_id')
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "DAG triggered with run_id: $RUN_ID"
