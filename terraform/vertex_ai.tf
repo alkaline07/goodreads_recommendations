@@ -4,7 +4,7 @@ resource "google_vertex_ai_endpoint" "recommendation_endpoint" {
   name         = var.endpoint_display_name
   display_name = var.endpoint_display_name
   description  = "Endpoint for Goodreads book recommendation model"
-  location     = "var.region"
+  location     = var.region
   labels       = local.labels
 
   network = null
