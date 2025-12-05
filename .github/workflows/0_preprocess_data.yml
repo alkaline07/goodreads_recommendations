@@ -48,7 +48,6 @@ jobs:
           
           echo "DAG file verified: config/dags/data_pipeline_dag.py"
           
-          # Verify GCP credentials
           if [ ! -f config/gcp_credentials.json ]; then
             echo "ERROR: Failed to create GCP credentials file"
             exit 1
@@ -157,7 +156,6 @@ jobs:
         run: |
           echo "Triggering DAG: ${{ inputs.dag_id }}"
           
-          # Wait for DAG to be available
           for i in {1..12}; do
             if docker exec airflow-webserver airflow dags list | grep -q "${{ inputs.dag_id }}"; then
               echo "DAG found!"
@@ -166,7 +164,15 @@ jobs:
             echo "Waiting for DAG to be parsed... (attempt $i/12)"
             sleep 5
           done
+
+          echo "Unpausing DAG..."
+          docker exec airflow-webserver airflow dags unpause ${{ inputs.dag_id }}
           
+          echo "Triggering DAG run..."
+          TRIGGER_OUTPUT=$(docker exec airflow-webserver airflow dags trigger ${{ inputs.dag_id }} --output json 2>&1)
+          echo "Trigger output: $TRIGGER_OUTPUT"
+
+
           RUN_ID=$(docker exec airflow-webserver airflow dags trigger ${{ inputs.dag_id }} --output json | jq -r '.run_id')
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "DAG triggered with run_id: $RUN_ID"
