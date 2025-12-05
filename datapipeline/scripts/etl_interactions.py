@@ -93,7 +93,7 @@ class ETLInteractions:
                 '' as started_at,
                 
                 CASE 
-                    WHEN event_type IN ('read', 'already_read') THEN TRUE 
+                    WHEN event_type = 'read' THEN TRUE 
                     ELSE FALSE 
                 END as is_read,
                 0 as rating,          
@@ -110,7 +110,7 @@ class ETLInteractions:
                 PARTITION BY user_id, book_id 
                 ORDER BY 
                     CASE 
-                        WHEN event_type IN ('read', 'already_read') THEN 4
+                        WHEN event_type = 'read' THEN 4
                         WHEN event_type = 'like' THEN 3
                         WHEN event_type = 'add_to_list' THEN 2
                         WHEN event_type = 'click' THEN 1
