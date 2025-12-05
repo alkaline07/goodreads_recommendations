@@ -6,9 +6,9 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ../src ./src
+COPY src ./src
 
-COPY . ./api
+COPY api ./api
 
 ENV PORT=8080
 EXPOSE 8080
