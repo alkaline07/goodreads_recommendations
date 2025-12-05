@@ -32,9 +32,12 @@ x-airflow-common: &airflow-common
     GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/config/gcp_credentials.json
 
   volumes:
-    - .:/opt/airflow
-    - ./config/gcp_credentials.json:/opt/airflow/gcp_credentials.json
+    - ./config/dags:/opt/airflow/config/dags  
+    - ./config/gcp_credentials.json:/opt/airflow/gcp_credentials.json:ro
     - ./config/gcp_credentials.json:/gcp_credentials.json
+    - ./logs:/opt/airflow/logs        
+    - ./plugins:/opt/airflow/plugins  
+  user: "0:0"  
   depends_on:
     postgres:
       condition: service_started
@@ -65,20 +68,40 @@ services:
     <<: *airflow-common
     container_name: airflow-init
     entrypoint: /bin/bash
+    user: "0:0" 
     command:
       - -c
       - |
-        airflow db init && \
+        set -e
+        echo "Starting Airflow initialization..."
+        
+        mkdir -p /opt/airflow/logs /opt/airflow/config/dags /opt/airflow/plugins
+        chmod -R 777 /opt/airflow/logs /opt/airflow/config/dags /opt/airflow/plugins
+        
+        if [ ! -f /opt/airflow/config/gcp_credentials.json ]; then
+          echo "ERROR: GCP credentials file not found at /opt/airflow/config/gcp_credentials.json"
+          exit 1
+        fi
+        
+        echo "Initializing database..."
+        airflow db init
+        
+        echo "Creating admin user..."
         airflow users create \
           --username admin \
           --password admin \
           --firstname Admin \
           --lastname User \
           --role Admin \
-          --email admin@example.com &&
-          airflow connections add 'goodreads_conn' \
-         --conn-type 'google_cloud_platform' \
-         --conn-extra '/opt/airflow/config/gcp_credentials.json'
+          --email admin@example.com 2>/dev/null || echo "Admin user already exists"
+        
+        echo "Setting up GCP connection..."
+        airflow connections delete 'goodreads_conn' 2>/dev/null || true
+        airflow connections add 'goodreads_conn' \
+          --conn-type 'google_cloud_platform' \
+          --conn-extra '{"key_path": "/opt/airflow/config/gcp_credentials.json"}'
+        
+        echo "Initialization complete!"
     depends_on:
       postgres:
         condition: service_started
