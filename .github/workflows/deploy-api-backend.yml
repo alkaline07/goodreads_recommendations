@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - 'api/**'
-      - 'terraform/**'        
+      - 'terraform/**'
   workflow_dispatch:
 
 concurrency:
