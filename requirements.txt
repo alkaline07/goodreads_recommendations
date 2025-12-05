@@ -29,4 +29,8 @@ httptools
 orjson
 google-cloud-aiplatform>=1.38.0
 google-cloud-logging
+google-cloud-monitoring
+scipy
+numpy
+python-dotenv
 

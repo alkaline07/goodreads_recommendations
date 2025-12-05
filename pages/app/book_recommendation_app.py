@@ -3,14 +3,56 @@ import requests
 from typing import List, Dict
 import json
 import os
+import time
+from datetime import datetime
 
 API_BASE_URL = "https://recommendation-service-491512947755.us-central1.run.app"
 # Mock data - Replace these functions with actual REST API calls
+def track_api_call(endpoint: str, method: str, duration_ms: float, status_code: int, error: str = None):
+    """Track API call metrics to backend monitoring"""
+    try:
+        if 'api_call_count' not in st.session_state:
+            st.session_state.api_call_count = 0
+        if 'total_api_latency' not in st.session_state:
+            st.session_state.total_api_latency = 0.0
+        
+        st.session_state.api_call_count += 1
+        st.session_state.total_api_latency += duration_ms
+        
+        metrics_payload = {
+            "sessionId": st.session_state.get('session_id', 'unknown'),
+            "timestamp": datetime.utcnow().isoformat(),
+            "url": endpoint,
+            "metrics": {
+                "apiCalls": [{
+                    "endpoint": endpoint,
+                    "method": method,
+                    "latency": duration_ms,
+                    "status": "success" if status_code == 200 else "error",
+                    "error": error,
+                    "timestamp": datetime.utcnow().isoformat()
+                }]
+            }
+        }
+        
+        requests.post(
+            f"{API_BASE_URL}/frontend-metrics",
+            json=metrics_payload,
+            timeout=2
+        )
+    except:
+        pass
+
+
 def get_recommendations(user_id: str) -> List[Dict]:
     """Call FastAPI /load-recommendation"""
+    start_time = time.time()
     try:
         url = f"{API_BASE_URL}/load-recommendation"
         resp = requests.post(url, json={"user_id": user_id}, timeout=15)
+        duration_ms = (time.time() - start_time) * 1000
+        
+        track_api_call("/load-recommendation", "POST", duration_ms, resp.status_code)
 
         if resp.status_code == 200:
             return resp.json().get("recommendations", [])
@@ -18,33 +60,47 @@ def get_recommendations(user_id: str) -> List[Dict]:
             st.error(f"API Error: {resp.status_code}")
             return []
     except Exception as e:
+        duration_ms = (time.time() - start_time) * 1000
+        track_api_call("/load-recommendation", "POST", duration_ms, 500, str(e))
         st.error(f"Error fetching recommendations: {e}")
         return []
 
 
 def get_read_books(user_id: str) -> List[Dict]:
     """GET /books-read/{user_id}"""
+    start_time = time.time()
     try:
         url = f"{API_BASE_URL}/books-read/{user_id}"
         resp = requests.get(url, timeout=10)
+        duration_ms = (time.time() - start_time) * 1000
+        
+        track_api_call(f"/books-read/{user_id}", "GET", duration_ms, resp.status_code)
 
         if resp.status_code == 200:
             return resp.json().get("books_read", [])
         return []
     except Exception as e:
+        duration_ms = (time.time() - start_time) * 1000
+        track_api_call(f"/books-read/{user_id}", "GET", duration_ms, 500, str(e))
         st.error(f"Error fetching read books: {e}")
         return []
 
 def get_unread_books(user_id: str) -> List[Dict]:
     """GET /books-unread/{user_id}"""
+    start_time = time.time()
     try:
         url = f"{API_BASE_URL}/books-unread/{user_id}"
         resp = requests.get(url, timeout=10)
+        duration_ms = (time.time() - start_time) * 1000
+        
+        track_api_call(f"/books-unread/{user_id}", "GET", duration_ms, resp.status_code)
 
         if resp.status_code == 200:
             return resp.json().get("books_unread", [])
         return []
     except Exception as e:
+        duration_ms = (time.time() - start_time) * 1000
+        track_api_call(f"/books-unread/{user_id}", "GET", duration_ms, 500, str(e))
         st.error(f"Error fetching unread books: {e}")
         return []
 
@@ -217,6 +273,13 @@ if 'search_results' not in st.session_state:
     st.session_state.search_results = []
 if 'show_admin_modal' not in st.session_state:
     st.session_state.show_admin_modal = False
+if 'session_id' not in st.session_state:
+    import uuid
+    st.session_state.session_id = str(uuid.uuid4())
+if 'api_call_count' not in st.session_state:
+    st.session_state.api_call_count = 0
+if 'total_api_latency' not in st.session_state:
+    st.session_state.total_api_latency = 0.0
 
 # Page configuration
 st.set_page_config(
@@ -280,6 +343,20 @@ st.markdown("""
 # Sidebar with navigation
 with st.sidebar:
     st.title("📚 Navigation")
+    
+    if st.session_state.api_call_count > 0:
+        avg_latency = st.session_state.total_api_latency / st.session_state.api_call_count
+        
+        latency_color = "green" if avg_latency < 500 else "orange" if avg_latency < 1000 else "red"
+        st.markdown(f"""
+            <div style='background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px;'>
+                <div style='font-size: 12px; color: #666;'>API Performance</div>
+                <div style='font-size: 18px; font-weight: bold; color: {latency_color};'>{avg_latency:.0f} ms</div>
+                <div style='font-size: 11px; color: #888;'>{st.session_state.api_call_count} calls</div>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
 
     if st.session_state.current_user:
         st.markdown(f"**User:** {st.session_state.current_user}")
@@ -369,11 +446,11 @@ if st.session_state.view_mode == 'user_selection':
             with col1:
                 if st.button("Login", type="primary", use_container_width=True):
                     if admin_username == "admin" and admin_password == "admin":
-                        st.success("Login successful! Redirecting...")
-                        # Redirect to admin panel URL (replace with your actual URL)
-                        st.markdown('<meta http-equiv="refresh" content="1;url=https://admin-panel.example.com" />',
+                        st.success("Login successful! Redirecting to monitoring dashboard...")
+                        admin_url = f"{API_BASE_URL}/report"
+                        st.markdown(f'<meta http-equiv="refresh" content="1;url={admin_url}" />',
                                     unsafe_allow_html=True)
-                        st.markdown("[Click here if not redirected](https://admin-panel.example.com)")
+                        st.markdown(f"[Click here if not redirected]({admin_url})")
                     else:
                         st.error("Invalid credentials!")
 

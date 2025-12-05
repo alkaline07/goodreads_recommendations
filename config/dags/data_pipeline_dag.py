@@ -38,6 +38,7 @@ from datapipeline.scripts.promote_staging_tables import main as promote_staging_
 from datapipeline.scripts.feature_metadata import main as feature_metadata_main
 from datapipeline.scripts.train_test_val import main as train_test_split_main
 from datapipeline.scripts.author_gender_mapper import main as author_gender_mapping_main
+from src.model_monitoring import run_full_monitoring, ModelMonitor
 
 # Default arguments for all DAG tasks
 default_args = {
@@ -229,6 +230,78 @@ def train_test_split_run():
     
     logging.info("Splitting Tests Passed Successfully")
 
+
+def model_monitoring_run():
+    """
+    Run model monitoring to detect decay and data drift.
+    This task logs metrics, checks for model decay, and detects data drift.
+    """
+    logging.info("Starting Model Monitoring...")
+    
+    try:
+        results = run_full_monitoring(model_name="boosted_tree_regressor")
+        
+        if results['decay_results'].get('decay_detected'):
+            logging.warning("MODEL DECAY DETECTED!")
+            for alert in results['decay_results'].get('alerts', []):
+                logging.warning(f"  - {alert}")
+        else:
+            logging.info("No model decay detected")
+        
+        if results['drift_results'].get('overall_drift_detected'):
+            logging.warning("DATA DRIFT DETECTED!")
+            drifted = [f for f, r in results['drift_results'].get('features', {}).items() 
+                      if r.get('drift_detected')]
+            logging.warning(f"  Drifted features: {drifted}")
+        else:
+            logging.info("No data drift detected")
+        
+        logging.info("Model Monitoring completed successfully")
+        return results
+        
+    except Exception as e:
+        logging.error(f"Model Monitoring failed: {e}")
+        raise
+
+
+def data_drift_check_run():
+    """
+    Run data drift detection on feature distributions.
+    Compares current data against training baseline.
+    """
+    logging.info("Starting Data Drift Check...")
+    
+    try:
+        monitor = ModelMonitor()
+        
+        drift_results = monitor.detect_data_drift(
+            baseline_table=f"{monitor.project_id}.{monitor.dataset_id}.goodreads_train_set",
+            current_table=f"{monitor.project_id}.{monitor.dataset_id}.goodreads_features",
+            features=[
+                'avg_rating',
+                'ratings_count',
+                'book_age_years',
+                'text_reviews_count'
+            ]
+        )
+        
+        if drift_results.get('overall_drift_detected'):
+            logging.warning("DATA DRIFT DETECTED - Review drift reports")
+            for feature, result in drift_results.get('features', {}).items():
+                if result.get('drift_detected'):
+                    logging.warning(f"  {feature}: PSI={result['psi_score']:.4f}, "
+                                  f"KS p-value={result['ks_pvalue']:.4f}")
+        else:
+            logging.info("No significant data drift detected")
+        
+        logging.info("Data Drift Check completed")
+        return drift_results
+        
+    except Exception as e:
+        logging.error(f"Data Drift Check failed: {e}")
+        raise
+
+
 # -----------------------------
 #  DAG DEFINITION
 # -----------------------------
@@ -317,10 +390,21 @@ with DAG(
         python_callable=train_test_split_run,
     )
 
+    model_monitoring_task = PythonOperator(
+        task_id='model_monitoring',
+        python_callable=model_monitoring_run,
+    )
+
+    data_drift_check_task = PythonOperator(
+        task_id='data_drift_check',
+        python_callable=data_drift_check_run,
+    )
+
     end = EmptyOperator(task_id='end')
 
     start >> data_reading_task >> log_results_task >> data_validation_task >> data_cleaning_task
     data_cleaning_task >> post_cleaning_validation_task >> feature_engg_task >> normalization_task
-    normalization_task >> promote_staging_task >> data_versioning_task >> train_test_split_task >> end
+    normalization_task >> promote_staging_task >> data_versioning_task >> train_test_split_task
+    train_test_split_task >> data_drift_check_task >> model_monitoring_task >> end
 
     start >> author_gender_mapping_task >> end
