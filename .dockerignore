@@ -74,8 +74,8 @@ mlartifacts/
 .dvc/
 
 # Test files
-**/test_*.py
-datapipeline/tests/
+# **/test_*.py
+# datapipeline/tests/
 
 # Logs
 *.log
