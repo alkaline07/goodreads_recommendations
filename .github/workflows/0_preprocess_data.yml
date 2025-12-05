@@ -173,7 +173,7 @@ jobs:
           echo "Trigger output: $TRIGGER_OUTPUT"
 
 
-          RUN_ID=$(docker exec airflow-webserver airflow dags trigger ${{ inputs.dag_id }} --output json | jq -r '.run_id')
+          RUN_ID=$(echo "$TRIGGER_OUTPUT" | grep -o '"dag_run_id": "[^"]*"' | cut -d'"' -f4)
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "DAG triggered with run_id: $RUN_ID"
           echo ""
@@ -285,12 +285,35 @@ jobs:
       - name: Capture logs as artifacts
         if: always()
         run: |
-          mkdir -p logs
-          docker logs airflow-scheduler > logs/scheduler.log 2>&1 || true
-          docker logs airflow-worker > logs/worker.log 2>&1 || true
-          docker logs airflow-webserver > logs/webserver.log 2>&1 || true
-          docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --limit 5 > logs/dag-runs.log 2>&1 || true
-          docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} > logs/task-states.log 2>&1 || true
+          mkdir -p artifact-logs
+          
+          # Capture container logs
+          docker logs airflow-scheduler > artifact-logs/scheduler.log 2>&1 || true
+          docker logs airflow-worker > artifact-logs/worker.log 2>&1 || true
+          docker logs airflow-webserver > artifact-logs/webserver.log 2>&1 || true
+          
+          # Capture DAG execution info
+          docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --limit 5 > artifact-logs/dag-runs.log 2>&1 || true
+          docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} > artifact-logs/task-states.log 2>&1 || true
+          
+          # Copy task logs with sanitized filenames (replace : with -)
+          if [ -d "logs" ]; then
+            echo "Copying task logs with sanitized filenames..."
+            find logs -name "*.log" -type f | while read -r logfile; do
+              # Replace colons and other invalid chars with dashes
+              sanitized=$(echo "$logfile" | sed 's/://g' | sed 's/[<>"|?*]/-/g')
+              mkdir -p "artifact-logs/$(dirname "$sanitized")"
+              cp "$logfile" "artifact-logs/$sanitized" 2>/dev/null || true
+            done
+          fi
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: airflow-pipeline-logs-${{ github.run_number }}
+          path: artifact-logs/
+          retention-days: 7
 
       - name: Upload logs
         if: always()
