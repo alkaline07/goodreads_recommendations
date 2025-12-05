@@ -55,17 +55,36 @@ book_stats AS (
 )
 
 -- 4. Combine Recommendations, Metadata, and Stats
+combined AS (
+  SELECT 
+    r.user_id_clean,
+    r.book_id as book_id,
+    d.title as title,
+    COALESCE(d.author_names, 'Unknown Author') AS author_names,
+    s.average_rating as rating,
+    r.predicted_rating,
+    ROW_NUMBER() OVER (
+      PARTITION BY d.title, COALESCE(d.author_names, 'Unknown Author')
+      ORDER BY r.predicted_rating DESC
+    ) AS title_author_rank,
+    ROW_NUMBER() OVER (
+      ORDER BY r.predicted_rating DESC
+    ) AS distinct_rank
+  FROM recommendations r
+  LEFT JOIN book_details d
+    ON CAST(r.book_id AS STRING) = d.book_id_join_key
+  LEFT JOIN book_stats s
+    ON CAST(r.book_id AS STRING) = s.book_id_join_key
+)
+
 SELECT 
-  r.user_id_clean,
-  r.book_id as book_id,
-  d.title as title,
-  COALESCE(d.author_names, 'Unknown Author') AS author_names,
-  s.average_rating as rating,
-  r.predicted_rating
-FROM recommendations r
-LEFT JOIN book_details d
-  ON CAST(r.book_id AS STRING) = d.book_id_join_key
-LEFT JOIN book_stats s
-  ON CAST(r.book_id AS STRING) = s.book_id_join_key
-ORDER BY r.predicted_rating DESC
-LIMIT 50;
+  user_id_clean,
+  book_id,
+  title,
+  author_names,
+  rating,
+  predicted_rating
+FROM combined
+WHERE title_author_rank = 1
+  AND distinct_rank <= 50
+ORDER BY distinct_rank;

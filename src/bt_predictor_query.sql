@@ -195,22 +195,49 @@ predictions AS (
     AND pred.book_id = feat.book_id
 )
  
+distinct_predictions AS (
+  SELECT
+    p.user_id_clean,
+    p.book_id,
+    p.title_clean,
+    auth.author_names,
+    p.predicted_rating,
+    p.rank,
+    p.average_rating,
+    p.ratings_count,
+    p.num_pages,
+    p.publication_year,
+    p.book_popularity_normalized,
+    p.book_length_category,
+    p.book_era,
+    ROW_NUMBER() OVER (
+      PARTITION BY p.title_clean, auth.author_names
+      ORDER BY p.predicted_rating DESC
+    ) AS title_author_rank,
+    ROW_NUMBER() OVER (
+      ORDER BY p.predicted_rating DESC
+    ) AS distinct_rank
+  FROM predictions p
+  LEFT JOIN book_author_names auth
+    ON CAST(p.book_id AS STRING) = auth.book_id
+  WHERE TRUE
+)
+
 SELECT
-  p.user_id_clean,
-  p.book_id as book_id,
-  COALESCE(auth.author_names, 'Unknown Author') AS author_names,
-  p.predicted_rating,
-  p.rank as rank,
-  p.title_clean as title,
-  p.average_rating as rating,
-  p.ratings_count,
-  p.num_pages,
-  p.publication_year,
-  p.book_popularity_normalized,
-  p.book_length_category,
-  p.book_era
-FROM predictions p
-LEFT JOIN book_author_names auth
-  ON CAST(p.book_id AS STRING) = auth.book_id
-WHERE p.rank <= 50
-ORDER BY p.rank;
+  user_id_clean,
+  book_id,
+  COALESCE(author_names, 'Unknown Author') AS author_names,
+  predicted_rating,
+  distinct_rank as rank,
+  title_clean as title,
+  average_rating as rating,
+  ratings_count,
+  num_pages,
+  publication_year,
+  book_popularity_normalized,
+  book_length_category,
+  book_era
+FROM distinct_predictions
+WHERE title_author_rank = 1
+  AND distinct_rank <= 50
+ORDER BY distinct_rank;
