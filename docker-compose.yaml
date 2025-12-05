@@ -32,9 +32,11 @@ x-airflow-common: &airflow-common
     GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/config/gcp_credentials.json
 
   volumes:
-    - .:/opt/airflow
-    - ./config/gcp_credentials.json:/opt/airflow/config/gcp_credentials.json
-  user: "${AIRFLOW_UID:-50000}:0"
+    - ./config:/opt/airflow/config:ro  
+    - ./dags:/opt/airflow/config/dags  
+    - ./logs:/opt/airflow/logs         
+    - ./plugins:/opt/airflow/plugins  
+  user: "0:0"  
   depends_on:
     postgres:
       condition: service_started
@@ -72,11 +74,9 @@ services:
         set -e
         echo "Starting Airflow initialization..."
         
-        # Create necessary directories with correct permissions
-        mkdir -p /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
-        chown -R 50000:0 /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
+        mkdir -p /opt/airflow/logs /opt/airflow/config/dags /opt/airflow/plugins
+        chmod -R 777 /opt/airflow/logs /opt/airflow/config/dags /opt/airflow/plugins
         
-        # Check if GCP credentials file exists
         if [ ! -f /opt/airflow/config/gcp_credentials.json ]; then
           echo "ERROR: GCP credentials file not found at /opt/airflow/config/gcp_credentials.json"
           exit 1
