@@ -1,0 +1,52 @@
+name: Monitor Model Decay
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # every day at midnight UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  workflows: write
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run monitor script
+        id: monitor
+        continue-on-error: true
+        run: |
+          set +e
+          python src/monitor_decay.py
+          ec=$?
+          echo "exit_code=$ec" >> $GITHUB_OUTPUT
+
+      - name: Trigger 0th workflow on decay
+        if: steps.monitor.outputs.exit_code == '1'
+        env:
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ github.ref_name }}
+        run: |
+          echo "Model decay detected (exit code 1). Triggering 0th workflow..."
+          WORKFLOW_FILE="0_preprocess_data.yml"
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches \
+            -d "{\"ref\": \"${REF}\", \"inputs\": { \"dag_id\": \"goodreads_ctr_data_pipeline\", \"wait_for_completion\": \"true\" }}"
