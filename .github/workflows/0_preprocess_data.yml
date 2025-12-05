@@ -33,11 +33,22 @@ jobs:
 
       - name: Create GCP credentials file
         run: |
-          mkdir -p config logs dags plugins
+          # Don't create config/dags - it already exists from git checkout
+          mkdir -p logs plugins
           echo '${{ secrets.GCP_CREDENTIALS }}' > config/gcp_credentials.json
-          chmod -R 777 logs dags plugins config
+          chmod -R 777 logs plugins config
           
-          # Validate credentials file
+          # Verify DAG file exists
+          if [ ! -f config/dags/data_pipeline_dag.py ]; then
+            echo "ERROR: DAG file not found after checkout!"
+            echo "Directory contents:"
+            ls -la config/dags/
+            exit 1
+          fi
+          
+          echo "DAG file verified: config/dags/data_pipeline_dag.py"
+          
+          # Verify GCP credentials
           if [ ! -f config/gcp_credentials.json ]; then
             echo "ERROR: Failed to create GCP credentials file"
             exit 1
