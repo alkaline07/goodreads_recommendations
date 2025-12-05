@@ -27,3 +27,6 @@ google-cloud-core
 uvloop
 httptools
 orjson
+google-cloud-aiplatform>=1.38.0
+google-cloud-logging
+

@@ -1,5 +1,7 @@
 from google.cloud import bigquery
 from .database import get_bq_client
+from src.generate_predictions import GeneratePredictions
+
 
 _client = None
 _project = None
@@ -33,22 +35,30 @@ def check_user_exists(user_id: str) -> bool:
 # GET TOP 10 RECOMMENDATIONS FOR EXISTING USER
 # ---------------------------------------------------------------------
 def get_top_recommendations(user_id: str):
-    client, project = _get_client()
-    query = f"""
-    SELECT
-        pred.book_id,
-        pred.predicted_rating,
-        b.title_clean AS title,
-        IFNULL(b.authors_flat[OFFSET(0)], "Unknown") AS author
-    FROM `{project}.{dataset}.boosted_tree_rating_predictions` AS pred
-    LEFT JOIN `{project}.{dataset}.goodreads_books_cleaned` AS b
-        ON pred.book_id = b.book_id
-    WHERE pred.user_id_clean = '{user_id}'
-    ORDER BY pred.predicted_rating DESC
-    LIMIT 10
     """
-    job = client.query(query)
-    return [dict(row) for row in job.result()]
+    Return model-generated recommendations (MF or BT) using GeneratePredictions.
+    No fallback to BQ predictions table.
+    """
+
+    generator = GeneratePredictions()
+    df = generator.get_predictions(user_id)
+
+    # If model returns NO recommendations, return empty list.
+    # (This will only happen if model can't score this user.)
+    if df is None or len(df) == 0:
+        return []
+
+    # Convert DataFrame → list of dicts for main.py
+    results = []
+    for _, row in df.iterrows():
+        results.append({
+            "book_id": row["book_id"],
+            "title": row["title"],
+            "author": row.get("author_names", "Unknown"),
+            "predicted_rating": row["rating"]
+        })
+
+    return results
 
 
 # ---------------------------------------------------------------------
@@ -111,19 +121,49 @@ def get_book_details(book_id: int):
 def get_books_read_by_user(user_id: str):
     client, project = _get_client()
     query = f"""
+    -- First extract authors from books_cleaned
+    WITH exploded_authors AS (
+        SELECT
+            b.book_id,
+            CAST(JSON_EXTRACT_SCALAR(a, '$.author_id') AS INT64) AS author_id
+        FROM `{project}.{dataset}.goodreads_books_cleaned` b,
+        UNNEST(b.authors_flat) a
+    ),
+    enriched_authors AS (
+        SELECT
+            ea.book_id,
+            ARRAY_AGG(auth.name IGNORE NULLS)[OFFSET(0)] AS author
+        FROM exploded_authors ea
+        LEFT JOIN `{project}.{dataset}.goodreads_book_authors` auth
+            ON ea.author_id = auth.author_id
+        GROUP BY ea.book_id
+    )
+
     SELECT
         inter.book_id,
         b.title_clean AS title,
         b.average_rating,
-        b.ratings_count
-    FROM `{project}.{dataset}.goodreads_interactions_cleaned` AS inter
-    LEFT JOIN `{project}.{dataset}.goodreads_books_cleaned` AS b
+        b.ratings_count,
+        ea.author,
+        CASE
+            WHEN inter.read_at_clean = 'Unknown' THEN NULL
+            ELSE FORMAT_TIMESTAMP('%A, %B %d %Y',
+                PARSE_TIMESTAMP('%a %b %d %H:%M:%S %z %Y', inter.read_at_clean)
+            ) 
+        END AS date_read
+    FROM `{project}.{dataset}.goodreads_interactions_cleaned` inter
+    LEFT JOIN `{project}.{dataset}.goodreads_books_cleaned` b
         ON inter.book_id = b.book_id
+    LEFT JOIN enriched_authors ea
+        ON inter.book_id = ea.book_id
     WHERE inter.user_id_clean = '{user_id}'
       AND inter.is_read = TRUE
+    ORDER BY inter.read_at_clean DESC
     """
+
     job = client.query(query)
-    return [dict(row) for row in job.result()]   # FIXED
+    return [dict(row) for row in job.result()]
+
 
 
 # ---------------------------------------------------------------------
@@ -137,19 +177,38 @@ def get_books_not_read_by_user(user_id: str):
         FROM `{project}.{dataset}.goodreads_interactions_cleaned`
         WHERE user_id_clean = '{user_id}'
           AND is_read = TRUE
+    ),
+    exploded_authors AS (
+        SELECT
+            b.book_id,
+            CAST(JSON_EXTRACT_SCALAR(a, '$.author_id') AS INT64) AS author_id
+        FROM `{project}.{dataset}.goodreads_books_cleaned` b,
+        UNNEST(b.authors_flat) a
+    ),
+    enriched_authors AS (
+        SELECT
+            ea.book_id,
+            ARRAY_AGG(auth.name IGNORE NULLS)[OFFSET(0)] AS author
+        FROM exploded_authors ea
+        LEFT JOIN `{project}.{dataset}.goodreads_book_authors` auth
+            ON ea.author_id = auth.author_id
+        GROUP BY ea.book_id
     )
     SELECT
         b.book_id,
         b.title_clean AS title,
         b.average_rating,
-        b.ratings_count
-    FROM `{project}.{dataset}.goodreads_books_cleaned` AS b
+        b.ratings_count,
+        ea.author
+    FROM `{project}.{dataset}.goodreads_books_cleaned` b
+    LEFT JOIN enriched_authors ea ON b.book_id = ea.book_id
     WHERE b.book_id NOT IN (SELECT book_id FROM read_books)
     ORDER BY b.average_rating DESC
     LIMIT 50
     """
     job = client.query(query)
-    return [dict(row) for row in job.result()]   # FIXED
+    return [dict(row) for row in job.result()]
+
 
 
 # ---------------------------------------------------------------------

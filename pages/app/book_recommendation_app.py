@@ -4,117 +4,49 @@ from typing import List, Dict
 import json
 import os
 
-
+API_BASE_URL = "https://recommendation-service-491512947755.us-central1.run.app"
 # Mock data - Replace these functions with actual REST API calls
-def mock_get_recommendations(user_id: str) -> List[Dict]:
-    """Mock function to get top 10 book recommendations for a user"""
-    # Replace this with: requests.get(f"{API_BASE_URL}/recommendations/{user_id}")
-    mock_books = [
-        {
-            "book_id": "1",
-            "title": "The Great Gatsby",
-            "author": "F. Scott Fitzgerald",
-            "rating": 4.5,
-            "isbn": "9780743273565"
-        },
-        {
-            "book_id": "2",
-            "title": "To Kill a Mockingbird",
-            "author": "Harper Lee",
-            "rating": 4.8,
-            "isbn": "9780061120084"
-        },
-        {
-            "book_id": "3",
-            "title": "1984",
-            "author": "George Orwell",
-            "rating": 4.7,
-            "isbn": "9780451524935"
-        },
-        {
-            "book_id": "4",
-            "title": "Pride and Prejudice",
-            "author": "Jane Austen",
-            "rating": 4.6,
-            "isbn": "9780141439518"
-        },
-        {
-            "book_id": "5",
-            "title": "The Catcher in the Rye",
-            "author": "J.D. Salinger",
-            "rating": 4.3,
-            "isbn": "9780316769174"
-        },
-        {
-            "book_id": "6",
-            "title": "The Hobbit",
-            "author": "J.R.R. Tolkien",
-            "rating": 4.7,
-            "isbn": "9780547928227"
-        },
-        {
-            "book_id": "7",
-            "title": "Harry Potter and the Sorcerer's Stone",
-            "author": "J.K. Rowling",
-            "rating": 4.8,
-            "isbn": "9780439708180"
-        },
-        {
-            "book_id": "8",
-            "title": "The Lord of the Rings",
-            "author": "J.R.R. Tolkien",
-            "rating": 4.9,
-            "isbn": "9780544003415"
-        },
-        {
-            "book_id": "9",
-            "title": "Animal Farm",
-            "author": "George Orwell",
-            "rating": 4.4,
-            "isbn": "9780451526342"
-        },
-        {
-            "book_id": "10",
-            "title": "Brave New World",
-            "author": "Aldous Huxley",
-            "rating": 4.5,
-            "isbn": "9780060850524"
-        }
-    ]
-    return mock_books
+def get_recommendations(user_id: str) -> List[Dict]:
+    """Call FastAPI /load-recommendation"""
+    try:
+        url = f"{API_BASE_URL}/load-recommendation"
+        resp = requests.post(url, json={"user_id": user_id}, timeout=15)
+
+        if resp.status_code == 200:
+            return resp.json().get("recommendations", [])
+        else:
+            st.error(f"API Error: {resp.status_code}")
+            return []
+    except Exception as e:
+        st.error(f"Error fetching recommendations: {e}")
+        return []
 
 
-def mock_get_read_books(user_id: str) -> List[Dict]:
-    """Mock function to get user's read books"""
-    # Replace this with: requests.get(f"{API_BASE_URL}/users/{user_id}/read_books")
-    mock_read_books = [
-        {
-            "book_id": "read_1",
-            "title": "The Alchemist",
-            "author": "Paulo Coelho",
-            "rating": 4.6,
-            "isbn": "9780062315007",
-            "date_read": "2024-01-15"
-        },
-        {
-            "book_id": "read_2",
-            "title": "Sapiens",
-            "author": "Yuval Noah Harari",
-            "rating": 4.7,
-            "isbn": "9780062316097",
-            "date_read": "2024-02-20"
-        },
-        {
-            "book_id": "read_3",
-            "title": "Educated",
-            "author": "Tara Westover",
-            "rating": 4.8,
-            "isbn": "9780399590504",
-            "date_read": "2024-03-10"
-        }
-    ]
-    return mock_read_books
+def get_read_books(user_id: str) -> List[Dict]:
+    """GET /books-read/{user_id}"""
+    try:
+        url = f"{API_BASE_URL}/books-read/{user_id}"
+        resp = requests.get(url, timeout=10)
 
+        if resp.status_code == 200:
+            return resp.json().get("books_read", [])
+        return []
+    except Exception as e:
+        st.error(f"Error fetching read books: {e}")
+        return []
+
+def get_unread_books(user_id: str) -> List[Dict]:
+    """GET /books-unread/{user_id}"""
+    try:
+        url = f"{API_BASE_URL}/books-unread/{user_id}"
+        resp = requests.get(url, timeout=10)
+
+        if resp.status_code == 200:
+            return resp.json().get("books_unread", [])
+        return []
+    except Exception as e:
+        st.error(f"Error fetching unread books: {e}")
+        return []
 
 def load_books_database():
     """Load books database from JSON file"""
@@ -358,7 +290,7 @@ with st.sidebar:
             st.rerun()
 
         if st.button("📖 My Read Books", use_container_width=True, key="nav_read"):
-            st.session_state.read_books = mock_get_read_books(st.session_state.current_user)
+            st.session_state.read_books = get_read_books(st.session_state.current_user)
             st.session_state.view_mode = 'read_books'
             st.rerun()
 
@@ -383,7 +315,7 @@ def display_book_card(book: Dict, col, button_prefix: str = "btn"):
             <div class="book-card">
                 <div class="book-title">{book['title']}</div>
                 <div class="book-author">by {book['author']}</div>
-                <div class="rating">⭐ {book['rating']:.1f}</div>
+                <div class="rating">⭐ {book['predicted_rating']:.1f}</div>
             </div>
         """, unsafe_allow_html=True)
 
@@ -463,7 +395,7 @@ if st.session_state.view_mode == 'user_selection':
         if st.button("Get Recommendations", type="primary", use_container_width=True):
             if user_input:
                 st.session_state.current_user = user_input
-                st.session_state.recommendations = mock_get_recommendations(user_input)
+                st.session_state.recommendations = get_recommendations(user_input)
                 st.session_state.view_mode = 'recommendations'
 
                 # Track that user viewed recommendations
@@ -482,7 +414,7 @@ if st.session_state.view_mode == 'user_selection':
         with cols[idx]:
             if st.button(user, use_container_width=True):
                 st.session_state.current_user = user
-                st.session_state.recommendations = mock_get_recommendations(user)
+                st.session_state.recommendations = get_recommendations(user)
                 st.session_state.view_mode = 'recommendations'
 
                 # Track views
@@ -522,7 +454,7 @@ elif st.session_state.view_mode == 'read_books':
                             <div class="book-card">
                                 <div class="book-title">{book['title']}</div>
                                 <div class="book-author">by {book['author']}</div>
-                                <div class="rating">⭐ {book['rating']:.1f}</div>
+                                <div class="rating">⭐ {book['average_rating']:.1f}</div>
                                 <div style="color: #27ae60; font-size: 12px; margin-top: 5px;">
                                     ✓ Read on {book.get('date_read', 'N/A')}
                                 </div>
