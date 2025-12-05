@@ -1,4 +1,4 @@
-name: 0. Terraform Infrastructure
+name: Terraform Infrastructure
 run-name: Deploy infrastructure with Terraform
 
 on:
