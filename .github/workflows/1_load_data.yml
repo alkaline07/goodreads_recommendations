@@ -3,6 +3,9 @@ run-name: Load Data
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["0. Run Airflow Pipeline"]
+    types: [completed]
 
 jobs:
   build:
