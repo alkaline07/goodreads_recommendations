@@ -73,7 +73,6 @@ class FeatureEngineering:
 
         Updates:
         - derived 'interaction_weight' from 'interaction_type' (5=read, 4=like, 3=add_to_list, 1=click)
-        - derived 'is_read' flag from 'interaction_type'
         """
         try:
             self.logger.info(f"Starting feature engineering pipeline")
