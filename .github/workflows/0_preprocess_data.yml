@@ -192,45 +192,41 @@ jobs:
           INTERVAL=15
           
           while [ $ELAPSED -lt $MAX_WAIT ]; do
-            # Check container health
-            RUNNING_CONTAINERS=$(docker compose ps --services --filter "status=running" 2>/dev/null | wc -l)
-            EXPECTED_CONTAINERS=5
+            # Get task states
+            TASK_STATES=$(docker exec airflow-scheduler airflow tasks states-for-dag-run \
+              ${{ inputs.dag_id }} \
+              ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null)
             
-            if [ $RUNNING_CONTAINERS -lt $EXPECTED_CONTAINERS ]; then
-              echo "ERROR: Some containers stopped running!"
-              docker ps -a
-              echo ""
-              for container in airflow-webserver airflow-scheduler airflow-worker; do
-                if ! docker ps --format '{{.Names}}' | grep -q "^${container}$"; then
-                  echo "=== Logs for stopped container: $container ==="
-                  docker logs $container --tail 100
-                fi
-              done
-              exit 1
-            fi
-            
-            STATE=$(docker exec airflow-webserver airflow dags state ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null || echo "running")
+            # Count task states
+            TOTAL_TASKS=$(echo "$TASK_STATES" | grep -c "^" || echo "0")
+            SUCCESS_TASKS=$(echo "$TASK_STATES" | grep -c "success" || echo "0")
+            FAILED_TASKS=$(echo "$TASK_STATES" | grep -c "failed" || echo "0")
+            RUNNING_TASKS=$(echo "$TASK_STATES" | grep -c "running" || echo "0")
             
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "Time elapsed: ${ELAPSED}s / ${MAX_WAIT}s"
-            echo "Overall state: $STATE"
+            echo "Tasks: $SUCCESS_TASKS success, $RUNNING_TASKS running, $FAILED_TASKS failed (Total: $TOTAL_TASKS)"
             echo ""
             echo "Task status:"
-            docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null | grep -E "(success|running|failed|queued)" || echo "  Initializing..."
+            echo "$TASK_STATES" | grep -E "(success|running|failed|queued)" || echo "  Initializing..."
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo ""
             
-            if [ "$STATE" = "success" ]; then
-              echo "DAG completed successfully!"
-              echo ""
-              docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --state success --limit 1
-              exit 0
-            elif [ "$STATE" = "failed" ]; then
-              echo "DAG failed!"
+            # Check if any tasks failed
+            if [ "$FAILED_TASKS" -gt 0 ]; then
+              echo "DAG failed! $FAILED_TASKS task(s) failed"
               echo ""
               echo "Failed tasks:"
-              docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} | grep failed || true
+              echo "$TASK_STATES" | grep failed
               exit 1
+            fi
+            
+            # Check if all tasks succeeded (exclude start/end tasks from count if needed)
+            if [ "$SUCCESS_TASKS" -ge 13 ] && [ "$RUNNING_TASKS" -eq 0 ]; then
+              echo "DAG completed successfully!"
+              echo ""
+              docker exec airflow-scheduler airflow dags list-runs -d ${{ inputs.dag_id }} --state success --limit 1
+              exit 0
             fi
             
             sleep $INTERVAL
