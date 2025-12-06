@@ -143,7 +143,7 @@ class GeneratePredictions:
             predictions = self.get_bt_predictions(bq_model_id, user_id)
         else:
             raise ValueError(f"Model type for {model_name} not recognized.")     
-        return predictions
+        return predictions[:10]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate book predictions for a user")
