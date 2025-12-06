@@ -1,6 +1,7 @@
 from google.cloud import bigquery
 from .database import get_bq_client
 from src.generate_predictions import GeneratePredictions
+from src.log_click_event import LogClickEvent
 
 
 _client = None
@@ -82,12 +83,22 @@ def get_global_top_recommendations():
 # ---------------------------------------------------------------------
 # LOG CTR EVENT
 # ---------------------------------------------------------------------
-def log_ctr_event(user_id: str, book_id: int):
-    client, project = _get_client()
-    table_id = f"{project}.{dataset}.user_ctr_events"
-    rows = [{"user_id": user_id, "book_id": book_id}]
-    errors = client.insert_rows_json(table_id, rows)
-    return len(errors) == 0
+def log_ctr_event(user_id: str, book_id: str, event_type: str = "click", book_title: str = None):
+    """
+    Wrapper around LogClickEvent so API does NOT change.
+    """
+    logger = LogClickEvent()
+    try:
+        return logger.log_user_event(
+            user_id=user_id,
+            book_id=str(book_id),     # BigQuery table uses STRING
+            event_type=event_type,
+            book_title=book_title
+        )
+    except Exception as e:
+        print(f"CTR logging failed: {e}")
+        return False
+
 
 
 # ---------------------------------------------------------------------
