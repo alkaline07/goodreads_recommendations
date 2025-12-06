@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from src.generate_predictions import GeneratePredictions
+from api.generate_predictions import GeneratePredictions
 import pandas as pd
 
 
