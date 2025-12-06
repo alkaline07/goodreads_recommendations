@@ -11,8 +11,14 @@ Date: 2025
 """
 
 import os
+import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any, Callable
+from functools import wraps
+from threading import Lock
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+import asyncio
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -20,6 +26,116 @@ from google.cloud import bigquery
 import secrets
 
 from .database import get_bq_client
+
+logger = logging.getLogger(__name__)
+
+
+class MonitoringBQClientCache:
+    """
+    Cached BigQuery client singleton for monitoring endpoints.
+    Reuses the same client instance to avoid connection overhead.
+    """
+    _instance: Optional[bigquery.Client] = None
+    _lock = Lock()
+    _last_refresh: Optional[datetime] = None
+    _refresh_interval = timedelta(hours=1)
+    
+    @classmethod
+    def get_client(cls) -> bigquery.Client:
+        with cls._lock:
+            now = datetime.utcnow()
+            should_refresh = (
+                cls._instance is None or
+                cls._last_refresh is None or
+                (now - cls._last_refresh) > cls._refresh_interval
+            )
+            
+            if should_refresh:
+                try:
+                    cls._instance = get_bq_client()
+                    cls._last_refresh = now
+                except Exception as e:
+                    logger.error(f"Failed to create BQ client: {e}")
+                    if cls._instance is None:
+                        raise
+            
+            return cls._instance
+
+
+class TTLCache:
+    """
+    Simple in-memory cache with TTL for monitoring query results.
+    Thread-safe implementation.
+    """
+    def __init__(self, default_ttl_seconds: int = 300):
+        self._cache: Dict[str, Dict[str, Any]] = {}
+        self._lock = Lock()
+        self._default_ttl = default_ttl_seconds
+    
+    def get(self, key: str) -> Optional[Any]:
+        with self._lock:
+            if key not in self._cache:
+                return None
+            
+            entry = self._cache[key]
+            if datetime.utcnow() > entry['expires_at']:
+                del self._cache[key]
+                return None
+            
+            return entry['value']
+    
+    def set(self, key: str, value: Any, ttl_seconds: Optional[int] = None) -> None:
+        ttl = ttl_seconds if ttl_seconds is not None else self._default_ttl
+        with self._lock:
+            self._cache[key] = {
+                'value': value,
+                'expires_at': datetime.utcnow() + timedelta(seconds=ttl),
+                'cached_at': datetime.utcnow()
+            }
+    
+    def invalidate(self, key: str) -> None:
+        with self._lock:
+            self._cache.pop(key, None)
+    
+    def clear(self) -> None:
+        with self._lock:
+            self._cache.clear()
+
+
+monitoring_cache = TTLCache(default_ttl_seconds=300)
+
+QUERY_TIMEOUT_SECONDS = 30
+QUERY_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="monitoring_bq_")
+
+
+def get_cached_bq_client() -> bigquery.Client:
+    """Get cached BigQuery client for monitoring."""
+    return MonitoringBQClientCache.get_client()
+
+
+def run_query_with_timeout(
+    client: bigquery.Client,
+    query: str,
+    timeout_seconds: int = QUERY_TIMEOUT_SECONDS
+) -> Any:
+    """
+    Run a BigQuery query with timeout protection.
+    Returns DataFrame or raises TimeoutError.
+    """
+    job_config = bigquery.QueryJobConfig(
+        use_query_cache=True,
+        maximum_bytes_billed=10 * 1024 * 1024 * 1024  # 10GB limit
+    )
+    
+    query_job = client.query(query, job_config=job_config)
+    
+    try:
+        return query_job.result(timeout=timeout_seconds).to_dataframe()
+    except Exception as e:
+        if 'timeout' in str(e).lower() or 'deadline' in str(e).lower():
+            query_job.cancel()
+            raise TimeoutError(f"Query timed out after {timeout_seconds}s")
+        raise
 
 router = APIRouter(prefix="/report", tags=["Monitoring"])
 
@@ -44,7 +160,12 @@ def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
 
 
 def get_metrics_history(client: bigquery.Client, days: int = 30) -> List[Dict]:
-    """Fetch model metrics history from BigQuery."""
+    """Fetch model metrics history from BigQuery with caching and timeout."""
+    cache_key = f"metrics_history_{days}"
+    cached = monitoring_cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
     project_id = client.project
     
     query = f"""
@@ -59,58 +180,87 @@ def get_metrics_history(client: bigquery.Client, days: int = 30) -> List[Dict]:
     WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {days} DAY)
     GROUP BY date, model_name, metric_name
     ORDER BY date DESC, model_name, metric_name
-    LIMIT 1500
+    LIMIT 500
     """
     
     try:
-        df = client.query(query).to_dataframe()
-        return df.to_dict('records')
+        df = run_query_with_timeout(client, query)
+        result = df.to_dict('records')
+        monitoring_cache.set(cache_key, result, ttl_seconds=300)
+        return result
+    except TimeoutError as e:
+        logger.error(f"Metrics history query timed out: {e}")
+        return []
     except Exception as e:
         if '404' in str(e) or 'not found' in str(e).lower():
-            print(f"Table not found: model_metrics_history. Run 'python scripts/init_monitoring.py' to create tables.")
+            logger.warning(f"Table not found: model_metrics_history. Run 'python scripts/init_monitoring.py' to create tables.")
         else:
-            print(f"Error fetching metrics history: {e}")
+            logger.error(f"Error fetching metrics history: {e}")
         return []
 
 
 def get_latest_metrics(client: bigquery.Client) -> Dict[str, Dict]:
-    """Get the most recent metrics for each model."""
+    """Get the most recent metrics for each model with caching and timeout."""
+    cache_key = "latest_metrics"
+    cached = monitoring_cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
     project_id = client.project
     
     query = f"""
-    WITH latest AS (
+    WITH recent_data AS (
+        SELECT 
+            model_name,
+            metric_name,
+            metric_value,
+            timestamp
+        FROM `{project_id}.books.model_metrics_history`
+        WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
+    ),
+    latest AS (
         SELECT 
             model_name,
             metric_name,
             metric_value,
             timestamp,
             ROW_NUMBER() OVER (PARTITION BY model_name, metric_name ORDER BY timestamp DESC) as rn
-        FROM `{project_id}.books.model_metrics_history`
+        FROM recent_data
     )
     SELECT model_name, metric_name, metric_value, timestamp
     FROM latest
     WHERE rn = 1
+    LIMIT 100
     """
     
     try:
-        df = client.query(query).to_dataframe()
+        df = run_query_with_timeout(client, query)
         result = {}
         for _, row in df.iterrows():
             model = row['model_name']
             if model not in result:
                 result[model] = {'timestamp': str(row['timestamp']), 'metrics': {}}
             result[model]['metrics'][row['metric_name']] = round(row['metric_value'], 4)
+        monitoring_cache.set(cache_key, result, ttl_seconds=300)
         return result
+    except TimeoutError as e:
+        logger.error(f"Latest metrics query timed out: {e}")
+        return {}
     except Exception as e:
         if '404' in str(e) or 'not found' in str(e).lower():
-            print(f"Table not found: model_metrics_history. Run 'python scripts/init_monitoring.py' to create tables.")
+            logger.warning(f"Table not found: model_metrics_history. Run 'python scripts/init_monitoring.py' to create tables.")
         else:
-            print(f"Error fetching latest metrics: {e}")
+            logger.error(f"Error fetching latest metrics: {e}")
         return {}
 
 
 def get_drift_history(client: bigquery.Client, days: int = 7) -> List[Dict]:
-    """Fetch data drift history from BigQuery."""
+    """Fetch data drift history from BigQuery with caching and timeout."""
+    cache_key = f"drift_history_{days}"
+    cached = monitoring_cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
     project_id = client.project
     
     query = f"""
@@ -125,21 +275,32 @@ def get_drift_history(client: bigquery.Client, days: int = 7) -> List[Dict]:
     FROM `{project_id}.books.data_drift_history`
     WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {days} DAY)
     ORDER BY timestamp DESC
+    LIMIT 500
     """
     
     try:
-        df = client.query(query).to_dataframe()
-        return df.to_dict('records')
+        df = run_query_with_timeout(client, query)
+        result = df.to_dict('records')
+        monitoring_cache.set(cache_key, result, ttl_seconds=300)
+        return result
+    except TimeoutError as e:
+        logger.error(f"Drift history query timed out: {e}")
+        return []
     except Exception as e:
         if '404' in str(e) or 'not found' in str(e).lower():
-            print(f"Table not found: data_drift_history. Run 'python scripts/init_monitoring.py' to create tables.")
+            logger.warning(f"Table not found: data_drift_history. Run 'python scripts/init_monitoring.py' to create tables.")
         else:
-            print(f"Error fetching drift history: {e}")
+            logger.error(f"Error fetching drift history: {e}")
         return []
 
 
 def get_prediction_stats(client: bigquery.Client) -> Dict:
-    """Get prediction statistics from the latest predictions table."""
+    """Get prediction statistics from the latest predictions table with caching and timeout."""
+    cache_key = "prediction_stats"
+    cached = monitoring_cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
     project_id = client.project
     
     query = f"""
@@ -157,11 +318,11 @@ def get_prediction_stats(client: bigquery.Client) -> Dict:
     """
     
     try:
-        df = client.query(query).to_dataframe()
+        df = run_query_with_timeout(client, query, timeout_seconds=45)
         if df.empty:
             return {}
         row = df.iloc[0]
-        return {
+        result = {
             'model_name': row['model_name'],
             'total_predictions': int(row['total_predictions']),
             'avg_predicted': round(float(row['avg_predicted']), 4),
@@ -171,8 +332,13 @@ def get_prediction_stats(client: bigquery.Client) -> Dict:
             'accuracy_within_0_5': round(float(row['accuracy_0_5']), 2),
             'accuracy_within_1_0': round(float(row['accuracy_1_0']), 2)
         }
+        monitoring_cache.set(cache_key, result, ttl_seconds=300)
+        return result
+    except TimeoutError as e:
+        logger.error(f"Prediction stats query timed out: {e}")
+        return {}
     except Exception as e:
-        print(f"Error fetching prediction stats: {e}")
+        logger.error(f"Error fetching prediction stats: {e}")
         return {}
 
 
@@ -1010,13 +1176,38 @@ async def get_metrics_api(username: str = Depends(verify_admin)):
     """
     Get metrics data for the dashboard.
     Returns current stats, latest metrics, and historical data.
+    Runs queries in parallel for better performance.
     """
     try:
-        client = get_bq_client()
+        client = get_cached_bq_client()
+        loop = asyncio.get_event_loop()
         
-        current_stats = get_prediction_stats(client)
-        latest_metrics = get_latest_metrics(client)
-        history = get_metrics_history(client, days=30)
+        current_stats_future = loop.run_in_executor(
+            QUERY_EXECUTOR, get_prediction_stats, client
+        )
+        latest_metrics_future = loop.run_in_executor(
+            QUERY_EXECUTOR, get_latest_metrics, client
+        )
+        history_future = loop.run_in_executor(
+            QUERY_EXECUTOR, lambda: get_metrics_history(client, days=30)
+        )
+        
+        current_stats, latest_metrics, history = await asyncio.gather(
+            current_stats_future,
+            latest_metrics_future,
+            history_future,
+            return_exceptions=True
+        )
+        
+        if isinstance(current_stats, Exception):
+            logger.error(f"Error fetching prediction stats: {current_stats}")
+            current_stats = {}
+        if isinstance(latest_metrics, Exception):
+            logger.error(f"Error fetching latest metrics: {latest_metrics}")
+            latest_metrics = {}
+        if isinstance(history, Exception):
+            logger.error(f"Error fetching history: {history}")
+            history = []
         
         return {
             "current_stats": current_stats,
@@ -1025,6 +1216,7 @@ async def get_metrics_api(username: str = Depends(verify_admin)):
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
+        logger.error(f"Metrics API error: {e}")
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
@@ -1035,16 +1227,26 @@ async def get_metrics_api(username: str = Depends(verify_admin)):
 async def get_drift_api(username: str = Depends(verify_admin)):
     """
     Get drift detection data for the dashboard.
+    Uses cached client and query timeout protection.
     """
     try:
-        client = get_bq_client()
-        drift_history = get_drift_history(client, days=7)
+        client = get_cached_bq_client()
+        loop = asyncio.get_event_loop()
+        
+        drift_history = await loop.run_in_executor(
+            QUERY_EXECUTOR, lambda: get_drift_history(client, days=7)
+        )
+        
+        if isinstance(drift_history, Exception):
+            logger.error(f"Error fetching drift history: {drift_history}")
+            drift_history = []
         
         return {
             "drift_history": drift_history,
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
+        logger.error(f"Drift API error: {e}")
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
@@ -1055,6 +1257,36 @@ async def get_drift_api(username: str = Depends(verify_admin)):
 async def monitoring_health():
     """Health check for monitoring endpoints (no auth required)."""
     return {"status": "healthy", "service": "monitoring"}
+
+
+@router.get("/api/cache-status")
+async def get_cache_status(username: str = Depends(verify_admin)):
+    """Get monitoring cache status for debugging."""
+    with monitoring_cache._lock:
+        cache_entries = {}
+        for key, entry in monitoring_cache._cache.items():
+            cache_entries[key] = {
+                "cached_at": entry['cached_at'].isoformat(),
+                "expires_at": entry['expires_at'].isoformat(),
+                "is_expired": datetime.utcnow() > entry['expires_at']
+            }
+    
+    return {
+        "cache_entries": cache_entries,
+        "bq_client_cached": MonitoringBQClientCache._instance is not None,
+        "bq_client_last_refresh": MonitoringBQClientCache._last_refresh.isoformat() if MonitoringBQClientCache._last_refresh else None,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
+@router.post("/api/cache-clear")
+async def clear_cache(username: str = Depends(verify_admin)):
+    """Clear monitoring cache (useful for debugging or forcing fresh data)."""
+    monitoring_cache.clear()
+    return {
+        "status": "cache_cleared",
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 
 @router.get("/api/api-metrics")
