@@ -84,7 +84,7 @@ def get_frontend_metrics():
     
     all_api_calls = []
     all_errors = []
-    web_vitals = {"lcp": [], "fid": [], "cls": []}
+    web_vitals = {"lcp": [], "inp": [], "cls": [], "fcp": [], "ttfb": []}
     
     for entry in frontend_metrics_store[-100:]:
         metrics = entry.get("metrics", {})
@@ -94,10 +94,14 @@ def get_frontend_metrics():
         vitals = metrics.get("webVitals", {})
         if vitals.get("lcp"):
             web_vitals["lcp"].append(vitals["lcp"])
-        if vitals.get("fid"):
-            web_vitals["fid"].append(vitals["fid"])
-        if vitals.get("cls"):
+        if vitals.get("inp"):
+            web_vitals["inp"].append(vitals["inp"])
+        if vitals.get("cls") is not None:
             web_vitals["cls"].append(vitals["cls"])
+        if vitals.get("fcp"):
+            web_vitals["fcp"].append(vitals["fcp"])
+        if vitals.get("ttfb"):
+            web_vitals["ttfb"].append(vitals["ttfb"])
     
     latencies = [c["latency"] for c in all_api_calls if "latency" in c]
     
@@ -108,8 +112,10 @@ def get_frontend_metrics():
         "avg_latency_ms": sum(latencies) / len(latencies) if latencies else 0,
         "web_vitals": {
             "lcp_avg": sum(web_vitals["lcp"]) / len(web_vitals["lcp"]) if web_vitals["lcp"] else None,
-            "fid_avg": sum(web_vitals["fid"]) / len(web_vitals["fid"]) if web_vitals["fid"] else None,
+            "inp_avg": sum(web_vitals["inp"]) / len(web_vitals["inp"]) if web_vitals["inp"] else None,
             "cls_avg": sum(web_vitals["cls"]) / len(web_vitals["cls"]) if web_vitals["cls"] else None,
+            "fcp_avg": sum(web_vitals["fcp"]) / len(web_vitals["fcp"]) if web_vitals["fcp"] else None,
+            "ttfb_avg": sum(web_vitals["ttfb"]) / len(web_vitals["ttfb"]) if web_vitals["ttfb"] else None,
         },
         "recent_errors": all_errors[-10:],
         "timestamp": datetime.utcnow().isoformat()

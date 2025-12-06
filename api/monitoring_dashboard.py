@@ -705,11 +705,11 @@ DASHBOARD_HTML = """
                 </div>
             </div>
             <div class="chart-card">
-                <h3>Frontend Web Vitals (LCP, FID, CLS)</h3>
+                <h3>Frontend Web Vitals (LCP, INP, CLS)</h3>
                 <div class="chart-container" style="display: flex; align-items: center; justify-content: space-around; height: 300px;" id="webVitalsContainer">
                     <div id="webVitalsNoData" style="text-align: center; color: #64748b; display: none;">
                         <div style="font-size: 1.5rem; margin-bottom: 12px;">Collecting Web Vitals...</div>
-                        <div style="font-size: 0.9rem; max-width: 400px;">Web Vitals are collected after page interactions. Refresh in a few seconds or interact with the page to trigger LCP/FID/CLS metrics.</div>
+                        <div style="font-size: 0.9rem; max-width: 400px;">Web Vitals are collected after page interactions. Use the Book Recommendation app, then refresh this page.</div>
                     </div>
                     <div id="webVitalsData" style="display: flex; align-items: center; justify-content: space-around; width: 100%;">
                         <div style="text-align: center;">
@@ -718,9 +718,9 @@ DASHBOARD_HTML = """
                             <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 2500 good</div>
                         </div>
                         <div style="text-align: center;">
-                            <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="fidValue">--</div>
-                            <div style="color: #94a3b8; margin-top: 8px;">FID (ms)</div>
-                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 100 good</div>
+                            <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="inpValue">--</div>
+                            <div style="color: #94a3b8; margin-top: 8px;">INP (ms)</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 200 good</div>
                         </div>
                         <div style="text-align: center;">
                             <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="clsValue">--</div>
@@ -1129,19 +1129,19 @@ DASHBOARD_HTML = """
             const webVitalsData = document.getElementById('webVitalsData');
             
             if (frontendMetrics.length > 0) {
-                const recentMetrics = frontendMetrics.slice(-10);
+                const recentMetrics = frontendMetrics.slice(-20);
                 let lcpSum = 0, lcpCount = 0;
-                let fidSum = 0, fidCount = 0;
+                let inpSum = 0, inpCount = 0;
                 let clsSum = 0, clsCount = 0;
                 
                 recentMetrics.forEach(entry => {
                     const vitals = entry.metrics?.webVitals || {};
                     if (vitals.lcp) { lcpSum += vitals.lcp; lcpCount++; }
-                    if (vitals.fid) { fidSum += vitals.fid; fidCount++; }
-                    if (vitals.cls) { clsSum += vitals.cls; clsCount++; }
+                    if (vitals.inp) { inpSum += vitals.inp; inpCount++; }
+                    if (vitals.cls !== undefined && vitals.cls !== null) { clsSum += vitals.cls; clsCount++; }
                 });
                 
-                const hasAnyVitals = lcpCount > 0 || fidCount > 0 || clsCount > 0;
+                const hasAnyVitals = lcpCount > 0 || inpCount > 0 || clsCount > 0;
                 
                 if (hasAnyVitals) {
                     webVitalsNoData.style.display = 'none';
@@ -1154,11 +1154,11 @@ DASHBOARD_HTML = """
                         lcpEl.style.color = lcpAvg < 2500 ? '#4ade80' : lcpAvg < 4000 ? '#fbbf24' : '#f87171';
                     }
                     
-                    if (fidCount > 0) {
-                        const fidAvg = fidSum / fidCount;
-                        const fidEl = document.getElementById('fidValue');
-                        fidEl.textContent = fidAvg.toFixed(0);
-                        fidEl.style.color = fidAvg < 100 ? '#4ade80' : fidAvg < 300 ? '#fbbf24' : '#f87171';
+                    if (inpCount > 0) {
+                        const inpAvg = inpSum / inpCount;
+                        const inpEl = document.getElementById('inpValue');
+                        inpEl.textContent = inpAvg.toFixed(0);
+                        inpEl.style.color = inpAvg < 200 ? '#4ade80' : inpAvg < 500 ? '#fbbf24' : '#f87171';
                     }
                     
                     if (clsCount > 0) {
