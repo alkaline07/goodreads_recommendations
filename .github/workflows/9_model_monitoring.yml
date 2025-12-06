@@ -1,0 +1,109 @@
+name: 9. Model Monitoring
+run-name: Run Model Monitoring & Drift Detection
+
+on:
+  workflow_run:
+    workflows: ["8. Deploy Model"]
+    types: [completed]
+
+jobs:
+  model-monitoring:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Install dependencies
+      run: |
+        pip install google-cloud-bigquery
+        pip install google-cloud-bigquery-storage
+        pip install pandas pyarrow db-dtypes
+        pip install scipy numpy
+        pip install mlflow
+        pip install python-dotenv
+
+    - name: Run Model Monitoring
+      env:
+        MLFLOW_TRACKING_URI: file:///tmp/mlruns
+      run: |
+        echo "=========================================="
+        echo "Running Model Monitoring"
+        echo "=========================================="
+        
+        python -c "
+        from src.model_monitoring import run_full_monitoring
+        
+        try:
+            results = run_full_monitoring(model_name='boosted_tree_regressor')
+            
+            print('\nMonitoring completed successfully')
+            
+            if results['decay_results'].get('decay_detected'):
+                print('MODEL DECAY DETECTED!')
+                exit(1)
+            
+            if results['drift_results'].get('overall_drift_detected'):
+                print('DATA DRIFT DETECTED!')
+                exit(1)
+                
+        except Exception as e:
+            print(f'Monitoring failed: {e}')
+            exit(1)
+        "
+
+    - name: Upload Monitoring Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: monitoring-reports
+        path: docs/monitoring_reports/
+        retention-days: 30
+
+    - name: Commit monitoring reports
+      if: always()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        
+        if [ -d "docs/monitoring_reports" ] && [ "$(ls -A docs/monitoring_reports)" ]; then
+          git add docs/monitoring_reports/*.json || true
+          git commit -m "Add monitoring reports from $(date +%Y-%m-%d)" || echo "No new reports to commit"
+          git push || echo "Push failed or nothing to push"
+        fi
+
+    - name: Notify on success
+      if: success()
+      run: echo "Model monitoring completed successfully - No issues detected"
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Model monitoring detected issues - Check reports"
+
+  notify:
+    needs: model-monitoring
+    if: always()
+    uses: ./.github/workflows/send_email.yml
+    with:
+      status: ${{ needs.model-monitoring.result }}
+      workflow_name: ${{ github.workflow }}
+    secrets: inherit
