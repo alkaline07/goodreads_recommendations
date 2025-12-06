@@ -309,18 +309,22 @@ def create_fallback_book_details(title: str, author: str) -> Dict:
 
 
 def send_click_event(user_id: str, book_id: str, event_type: str, book_title: str = None):
-    """Mock function to send click/interaction events for CTR tracking"""
-    # Replace this with: requests.post(f"{API_BASE_URL}/events", json={...})
+    """function to send click/interaction events for CTR tracking"""
     event_data = {
         "user_id": user_id,
         "book_id": book_id,
         "book_title": book_title,
         "event_type": event_type,  # "view", "click", "like", "add_to_list", "similar", "mark_read"
-        "timestamp": "2024-01-01T00:00:00Z"
+        "timestamp": datetime.utcnow().isoformat()
     }
-    # In production: response = requests.post(f"{API_BASE_URL}/events", json=event_data)
-    print(f"Event tracked: {event_data}")
-    return {"status": "success"}
+    try:
+        response = requests.post(f"{API_BASE_URL}/book-click", json=event_data, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error tracking event: {e}")
+        return {"status": "error", "message": str(e)}
+
 
 
 # Initialize session state
