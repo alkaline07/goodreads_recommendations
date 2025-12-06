@@ -193,7 +193,7 @@ def book_click(request: ClickRequest):
     book_id = request.book_id
 
     # Log CTR
-    log_ctr_event(user_id, book_id)
+    log_ctr_event(user_id, str(book_id))
 
     # Get book details
     details = get_book_details(book_id)
