@@ -4,6 +4,7 @@ from google.cloud import bigquery
 from google.api_core.exceptions import GoogleAPIError, NotFound
 import os
 import argparse
+import time
 
 class LogClickEvent:
     def __init__(self):
@@ -38,6 +39,15 @@ class LogClickEvent:
             )
             self.client.create_table(table)
             print("Table created successfully.")
+    
+    def _wait_for_table(self):
+        for i in range(10):
+            try:
+                self.client.get_table(self.full_table_id)
+                return True
+            except NotFound:
+                time.sleep(1)
+        return False
 
     def log_user_event(self, user_id: str, book_id: int, event_type: str, book_title: str = None):
         """
@@ -45,6 +55,8 @@ class LogClickEvent:
         """
         # 1. Ensure table exists (You might want to move this to app startup to save time per request)
         self._create_table_if_not_exists()
+        if not self._wait_for_table():
+            raise RuntimeError("Finding User Interaction table timed out.")
 
         if event_type not in ["read", "click", "view", "like", "add_to_list", "similar"]:
             raise ValueError("Invalid event_type. Must be one of read, click, view, like, add_to_list, similar")
