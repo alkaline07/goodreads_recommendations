@@ -1,9 +1,9 @@
-from src.model_deployment import get_selected_model_info
 import os
 from google.cloud import bigquery, aiplatform
-from typing import Optional
+from typing import Optional, Dict
 import datetime
 import argparse
+import json
 
 class GeneratePredictions:
     def __init__(self):
@@ -33,7 +33,7 @@ class GeneratePredictions:
             "model_name": model_name
         }
         
-        with open("src/mf_predictor_query.sql", "r") as file:
+        with open("api/mf_predictor_query.sql", "r") as file:
             query_template = file.read()
         
         query = query_template.format(**config)
@@ -55,7 +55,7 @@ class GeneratePredictions:
             "model_name": model_name
         }
         
-        with open("src/bt_predictor_query.sql", "r") as file:
+        with open("api/bt_predictor_query.sql", "r") as file:
             query_template = file.read()
         
         query = query_template.format(**config)
@@ -66,6 +66,38 @@ class GeneratePredictions:
         )
         results = self.client.query(query, job_config=job_config).to_dataframe(create_bqstorage_client=False)
         return results[['book_id', 'title', 'rating', 'author_names']]
+
+    def get_selected_model_info(self) -> Dict[str, str]:
+        """
+        Get the selected model information from the model selection report.
+        
+        Returns:
+            Dictionary with model_name and display_name
+        """
+        model_selection_path = "docs/bias_reports/model_selection_report.json"
+        
+        default_info = {
+            "model_name": "boosted_tree_regressor",
+            "display_name": "goodreads_boosted_tree_regressor"
+        }
+        
+        try:
+            with open(model_selection_path, 'r') as f:
+                report = json.load(f)
+            
+            selected = report.get('selected_model', {})
+            model_name = selected.get('model_name', 'boosted_tree_regressor')
+            
+            return {
+                "model_name": model_name,
+                "display_name": f"goodreads_{model_name}"
+            }
+        except FileNotFoundError:
+            print("Model selection report not found, using default")
+            return default_info
+        except Exception as e:
+            print(f"Error reading model selection report: {e}")
+            return default_info
     
     def get_version(self, display_name):
         try:
@@ -126,7 +158,7 @@ class GeneratePredictions:
         """
         Generate book recommendations for a given user_id using the selected model.
         """
-        model_info = get_selected_model_info()
+        model_info = self.get_selected_model_info()
         if not model_info:
             raise ValueError("No model selected for predictions.")
         
@@ -155,6 +187,6 @@ if __name__ == "__main__":
     print(predictions)
 
 # Sample runner command:
-# python -m src.generate_predictions --user_id "017fa7fa5ca764f1b912b4b1716adca5"
+# python -m api.generate_predictions --user_id "017fa7fa5ca764f1b912b4b1716adca5"
 
 
