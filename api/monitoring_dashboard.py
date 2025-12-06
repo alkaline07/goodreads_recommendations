@@ -59,6 +59,7 @@ def get_metrics_history(client: bigquery.Client, days: int = 30) -> List[Dict]:
     WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {days} DAY)
     GROUP BY date, model_name, metric_name
     ORDER BY date DESC, model_name, metric_name
+    LIMIT 1500
     """
     
     try:

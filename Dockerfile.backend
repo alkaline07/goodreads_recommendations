@@ -6,9 +6,9 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY src ./src
-
 COPY api ./api
+
+COPY docs/bias_reports/model_selection_report.json ./docs/bias_reports/model_selection_report.json
 
 ENV PORT=8080
 EXPOSE 8080

@@ -7,7 +7,16 @@ import time
 from datetime import datetime
 
 API_BASE_URL = "https://recommendation-service-491512947755.us-central1.run.app"
-# Mock data - Replace these functions with actual REST API calls
+
+def format_rating(rating):
+    """Safely format rating for display"""
+    if rating is None or rating == "N/A":
+        return "N/A"
+    try:
+        return f"{float(rating):.1f}"
+    except (ValueError, TypeError):
+        return "N/A"
+
 def track_api_call(endpoint: str, method: str, duration_ms: float, status_code: int, error: str = None):
     """Track API call metrics to backend monitoring"""
     try:
@@ -106,27 +115,24 @@ def get_unread_books(user_id: str) -> List[Dict]:
 
 def load_books_database():
     """Load books database from JSON file"""
-    import json
-    import os
-
     try:
-        # Try to load from JSON file
         json_path = 'data/books_database.json'
         if os.path.exists(json_path):
             with open(json_path, 'r', encoding='utf-8') as f:
                 raw_data = json.load(f)
 
-                # Transform the data to our required format
                 books = []
                 for item in raw_data:
                     books.append({
-                        "book_id": item.get("book_id", ""),
-                        "title": item.get("title_clean", "Unknown Title"),
-                        "author": "Various Authors",  # Will be parsed from authors_flat if needed
-                        "rating": float(item.get("average_rating", "3.5")),
-                        "isbn": item.get("isbn_clean", "")
+                        "book_id": str(item.get("book_id", "")),
+                        "title": item.get("book_title") or item.get("title_clean") or item.get("title") or "Unknown Title",
+                        "author": item.get("author_name") or item.get("authors_flat") or "Unknown Author",
+                        "rating": float(item.get("average_rating") or 3.5),
+                        "isbn": item.get("isbn") or item.get("isbn_clean") or ""
                     })
 
+                # Add fallback books for popular searchable titles
+                books.extend(load_fallback_database())
                 return books
         else:
             st.warning("books_database.json not found, using fallback data")
@@ -169,14 +175,14 @@ def load_fallback_database():
 def search_books(query: str, books_db: List[Dict]) -> List[Dict]:
     """Search books by title or author"""
     if not query:
-        return books_db[:10]  # Return first 10 if no query
+        return books_db[:10]
 
     query_lower = query.lower()
     results = [
         book for book in books_db
-        if query_lower in book['title'].lower() or query_lower in book['author'].lower()
+        if query_lower in book.get('title', '').lower() or query_lower in book.get('author', '').lower()
     ]
-    return results[:20]  # Return top 20 matches
+    return results[:20]
 
 
 def get_book_details_from_google(title: str, author: str, isbn: str = None) -> Dict:
@@ -241,7 +247,7 @@ def create_fallback_book_details(title: str, author: str) -> Dict:
     }
 
 
-def mock_send_click_event(user_id: str, book_id: str, event_type: str, book_title: str = None):
+def send_click_event(user_id: str, book_id: str, event_type: str, book_title: str = None):
     """Mock function to send click/interaction events for CTR tracking"""
     # Replace this with: requests.post(f"{API_BASE_URL}/events", json={...})
     event_data = {
@@ -280,6 +286,10 @@ if 'api_call_count' not in st.session_state:
     st.session_state.api_call_count = 0
 if 'total_api_latency' not in st.session_state:
     st.session_state.total_api_latency = 0.0
+if 'previous_view' not in st.session_state:
+    st.session_state.previous_view = 'recommendations'
+if 'last_search_query' not in st.session_state:
+    st.session_state.last_search_query = ""
 
 # Page configuration
 st.set_page_config(
@@ -359,7 +369,7 @@ with st.sidebar:
     st.markdown("---")
 
     if st.session_state.current_user:
-        st.markdown(f"**User:** {st.session_state.current_user}")
+        st.markdown(f"**User:** User-{st.session_state.current_user[:4]}")
         st.markdown("---")
 
         if st.button("🏠 Home", use_container_width=True, key="nav_home"):
@@ -392,13 +402,13 @@ def display_book_card(book: Dict, col, button_prefix: str = "btn"):
             <div class="book-card">
                 <div class="book-title">{book['title']}</div>
                 <div class="book-author">by {book['author']}</div>
-                <div class="rating">⭐ {book['predicted_rating']:.1f}</div>
+                <div class="rating">⭐ {format_rating(book.get('predicted_rating'))}</div>
             </div>
         """, unsafe_allow_html=True)
 
         if st.button(f"View Details", key=f"{button_prefix}_{book['book_id']}", use_container_width=True):
             # Track click event
-            mock_send_click_event(
+            send_click_event(
                 st.session_state.current_user,
                 book['book_id'],
                 "click",
@@ -477,31 +487,34 @@ if st.session_state.view_mode == 'user_selection':
 
                 # Track that user viewed recommendations
                 for book in st.session_state.recommendations:
-                    mock_send_click_event(user_input, book['book_id'], "view", book['title'])
+                    send_click_event(user_input, book['book_id'], "view", book['title'])
 
                 st.rerun()
             else:
                 st.error("Please enter a user ID")
 
-    # Quick select users (mock)
+    # Quick select users
     st.markdown("### Or select a sample user:")
-    quick_users = ["user_001", "user_002", "user_003", "user_004"]
-    cols = st.columns(4)
-    for idx, user in enumerate(quick_users):
+    quick_users = {
+        "User-4b1af": "4b1af908229844ec02bc4b40aa6ea4dd",
+        "User-2faa2": "2faa2ef7e9062a7339ed1e4299c7ecaf",
+        "User-4597b": "4597ba0bb52054eae1e87534c78b13b8"
+    }
+    cols = st.columns(3)
+    for idx, (display_name, user_id) in enumerate(quick_users.items()):
         with cols[idx]:
-            if st.button(user, use_container_width=True):
-                st.session_state.current_user = user
-                st.session_state.recommendations = get_recommendations(user)
+            if st.button(display_name, use_container_width=True):
+                st.session_state.current_user = user_id
+                st.session_state.recommendations = get_recommendations(user_id)
                 st.session_state.view_mode = 'recommendations'
 
-                # Track views
                 for book in st.session_state.recommendations:
-                    mock_send_click_event(user, book['book_id'], "view", book['title'])
+                    send_click_event(user_id, book['book_id'], "view", book['title'])
 
                 st.rerun()
 
 elif st.session_state.view_mode == 'recommendations':
-    st.title(f"📚 Recommendations for {st.session_state.current_user}")
+    st.title(f"📚 Recommendations for User-{st.session_state.current_user[:4]}")
     st.markdown("### Top 10 Books Just for You")
 
     # Display books in a grid (2 columns)
@@ -531,9 +544,9 @@ elif st.session_state.view_mode == 'read_books':
                             <div class="book-card">
                                 <div class="book-title">{book['title']}</div>
                                 <div class="book-author">by {book['author']}</div>
-                                <div class="rating">⭐ {book['average_rating']:.1f}</div>
+                                <div class="rating">⭐ {format_rating(book.get('average_rating'))}</div>
                                 <div style="color: #27ae60; font-size: 12px; margin-top: 5px;">
-                                    ✓ Read on {book.get('date_read', 'N/A')}
+                                   ✓ Read on {book.get('date_read') or 'N/A'}
                                 </div>
                             </div>
                         """, unsafe_allow_html=True)
@@ -559,64 +572,82 @@ elif st.session_state.view_mode == 'search':
     st.title("🔍 Search Books")
     st.markdown("### Find books to add to your reading list")
 
-    # Search bar with search button
-    col1, col2 = st.columns([5, 1])
-    with col1:
-        search_query = st.text_input("Search by title or author:", placeholder="Enter book title or author name...",
-                                     key="search_input")
-    with col2:
-        st.markdown("<br>", unsafe_allow_html=True)
-        search_button = st.button("Search", type="primary", use_container_width=True)
+    # Load user's read books if not already loaded
+    if st.session_state.current_user:
+        st.session_state.read_books = get_read_books(st.session_state.current_user)
 
-    # Trigger search on button click or if query exists
-    if search_query and (search_button or search_query):
-        # Get matching books
-        matching_books = search_books(search_query, st.session_state.books_database)
+    # Create set of read books using title + author (lowercase for matching)
+    read_books_set = {
+        (book.get('title', '').lower().strip(), book.get('author', '').lower().strip())
+        for book in st.session_state.read_books
+    }
 
-        if matching_books:
-            st.markdown(f"**{len(matching_books)} books found**")
+    # Use a form to properly handle search
+    with st.form(key="search_form"):
+        search_query = st.text_input(
+            "Search by title:",
+            placeholder="Enter book title ...",
+            key="search_input"
+        )
+        search_button = st.form_submit_button("🔍 Search", type="primary", use_container_width=True)
 
-            # Show autocomplete-style results
-            for book in matching_books[:10]:  # Show top 10 matches
-                col1, col2 = st.columns([4, 1])
-                with col1:
-                    # Display book info in a compact format
-                    st.markdown(f"**{book['title']}** by *{book['author']}* - ⭐ {book['rating']}")
-                with col2:
-                    # Button to view details
-                    if st.button("View", key=f"search_select_{book['book_id']}", use_container_width=True):
-                        # Track click event
-                        mock_send_click_event(
-                            st.session_state.current_user,
-                            book['book_id'],
-                            "click",
-                            book['title']
+    # Process search when form is submitted
+    if search_button and search_query.strip():
+        results = search_books(search_query.strip(), st.session_state.books_database)
+        st.session_state.search_results = results
+        st.session_state.last_search_query = search_query.strip()
+    elif search_button and not search_query.strip():
+        st.warning("Please enter a search query.")
+        st.session_state.search_results = []
+
+    # Display results
+    if st.session_state.search_results:
+        st.success(f"**{len(st.session_state.search_results)} books found** for '{st.session_state.get('last_search_query', '')}'")
+
+        for idx, book in enumerate(st.session_state.search_results[:10]):
+            # Check if this book has been read using title + author
+            book_title = book.get('title', '').lower().strip()
+            book_author = book.get('author', '').lower().strip()
+            is_read = (book_title, book_author) in read_books_set
+
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                if is_read:
+                    st.markdown(f"✅ **{book.get('title', 'Unknown')}** by *{book.get('author', 'Unknown')}* - ⭐ {format_rating(book.get('rating'))} *(Already Read)*")
+                else:
+                    st.markdown(f"**{book.get('title', 'Unknown')}** by *{book.get('author', 'Unknown')}* - ⭐ {format_rating(book.get('rating'))}")
+            with col2:
+                if st.button("View", key=f"search_view_{idx}_{book.get('book_id', idx)}", use_container_width=True):
+                    send_click_event(
+                        st.session_state.current_user,
+                        book.get('book_id', ''),
+                        "click",
+                        book.get('title', '')
+                    )
+
+                    with st.spinner(f'Fetching details...'):
+                        book_details = get_book_details_from_google(
+                            book.get('title', ''),
+                            book.get('author', ''),
+                            book.get('isbn')
                         )
+                        book_details['book_id'] = book.get('book_id', '')
+                        book_details['already_read'] = is_read
 
-                        # Fetch and show book details
-                        with st.spinner(f'Fetching details for "{book["title"]}"...'):
-                            book_details = get_book_details_from_google(
-                                book['title'],
-                                book['author'],
-                                book.get('isbn')
-                            )
-                            book_details['book_id'] = book['book_id']
+                        st.session_state.selected_book = book_details
+                        st.session_state.previous_view = 'search'
+                        st.session_state.view_mode = 'book_details'
 
-                            st.session_state.selected_book = book_details
-                            st.session_state.view_mode = 'book_details'
+                    st.rerun()
 
-                        st.rerun()
-
-                st.markdown("---")
-        else:
-            st.warning("No books found matching your search.")
+            st.divider()
     else:
-        st.info("Enter a search query and click 'Search' to find books...")
+        st.info("💡 Enter a search query and click 'Search' to find books.")
 
 elif st.session_state.view_mode == 'book_details':
     # Back button
     if st.button("← Back"):
-        st.session_state.view_mode = 'recommendations'
+        st.session_state.view_mode = st.session_state.get('previous_view', 'recommendations')
         st.rerun()
 
     book = st.session_state.selected_book
@@ -668,8 +699,8 @@ elif st.session_state.view_mode == 'book_details':
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            if st.button("👍 Like this book", use_container_width=True):
-                mock_send_click_event(
+            if st.button("❤️ Like this book", use_container_width=True):
+                send_click_event(
                     st.session_state.current_user,
                     book['book_id'],
                     "like",
@@ -679,7 +710,7 @@ elif st.session_state.view_mode == 'book_details':
 
         with col2:
             if st.button("📚 Add to Reading List", use_container_width=True):
-                mock_send_click_event(
+                send_click_event(
                     st.session_state.current_user,
                     book['book_id'],
                     "add_to_list",
@@ -689,7 +720,7 @@ elif st.session_state.view_mode == 'book_details':
 
         with col3:
             if st.button("✅ Mark as Read", use_container_width=True):
-                mock_send_click_event(
+                send_click_event(
                     st.session_state.current_user,
                     book['book_id'],
                     "mark_read",
