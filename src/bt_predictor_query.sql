@@ -193,7 +193,7 @@ predictions AS (
   INNER JOIN unread_features feat
     ON pred.user_id_clean = feat.user_id_clean
     AND pred.book_id = feat.book_id
-)
+),
  
 distinct_predictions AS (
   SELECT
