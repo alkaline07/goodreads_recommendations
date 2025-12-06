@@ -26,7 +26,7 @@ class LogClickEvent:
             schema = [
                 bigquery.SchemaField("event_id", "STRING", mode="REQUIRED"),
                 bigquery.SchemaField("user_id", "STRING", mode="REQUIRED"),
-                bigquery.SchemaField("book_id", "STRING", mode="REQUIRED"),
+                bigquery.SchemaField("book_id", "INT64", mode="REQUIRED"),
                 bigquery.SchemaField("book_title", "STRING", mode="NULLABLE"),
                 bigquery.SchemaField("event_type", "STRING", mode="REQUIRED"),
                 bigquery.SchemaField("event_timestamp", "TIMESTAMP", mode="REQUIRED"),
@@ -39,7 +39,7 @@ class LogClickEvent:
             self.client.create_table(table)
             print("Table created successfully.")
 
-    def log_user_event(self, user_id: str, book_id: str, event_type: str, book_title: str = None):
+    def log_user_event(self, user_id: str, book_id: int, event_type: str, book_title: str = None):
         """
         Call this function from your API backend to log data to BigQuery.
         """
@@ -78,7 +78,7 @@ class LogClickEvent:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Log click events to BigQuery")
     parser.add_argument("--user_id", type=str, required=True, help="User ID")
-    parser.add_argument("--book_id", type=str, required=True, help="Book ID")
+    parser.add_argument("--book_id", type=int, required=True, help="Book ID")
     parser.add_argument("--event_type", type=str, required=True, help="Event type")
     parser.add_argument("--book_title", type=str, default=None, help="Book title (optional)")
     
