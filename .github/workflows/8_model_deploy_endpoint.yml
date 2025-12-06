@@ -1,4 +1,4 @@
-name: 8. Deploy Model
+name: 8. Deploy Model Endpoint
 run-name: Deploy model to Vertex AI Endpoint
 
 on:
