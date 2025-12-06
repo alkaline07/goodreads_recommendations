@@ -117,3 +117,25 @@ variable "image" {
   description = "Container image URL (Artifact Registry)"
   default     = ""
 }
+
+variable "cloud_run_cpu" {
+  type        = string
+  description = "CPU allocation for Cloud Run (1, 2, 4, 6, 8)"
+  default     = "4"
+  
+  validation {
+    condition     = contains(["1", "2", "4", "6", "8"], var.cloud_run_cpu)
+    error_message = "CPU must be one of: 1, 2, 4, 6, 8."
+  }
+}
+
+variable "cloud_run_memory" {
+  type        = string
+  description = "Memory allocation for Cloud Run (512Mi, 1Gi, 2Gi, 4Gi, 8Gi, 16Gi, 32Gi)"
+  default     = "8Gi"
+  
+  validation {
+    condition     = can(regex("^[0-9]+(Mi|Gi)$", var.cloud_run_memory))
+    error_message = "Memory must be in format like 512Mi, 1Gi, 2Gi, etc."
+  }
+}

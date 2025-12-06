@@ -115,6 +115,12 @@ resource "google_cloud_run_v2_service" "recommendation_service" {
     }
     containers {
       image = var.image   # passed from GitHub Actions via TF_VAR_image
+      resources {
+        limits = {
+          cpu    = var.cloud_run_cpu
+          memory = var.cloud_run_memory
+      }
+    }
     }
   }
 
