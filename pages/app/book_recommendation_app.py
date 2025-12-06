@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import requests
 from typing import List, Dict
 import json
@@ -7,6 +8,66 @@ import time
 from datetime import datetime
 
 API_BASE_URL = "https://recommendation-service-491512947755.us-central1.run.app"
+
+
+def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
+    """Inject Web Vitals monitoring script into the Streamlit app."""
+    web_vitals_script = f"""
+    <script type="module">
+        import {{onCLS, onFID, onLCP, onFCP, onTTFB, onINP}} from 'https://unpkg.com/web-vitals@3/dist/web-vitals.attribution.js?module';
+        
+        const sessionId = '{session_id}';
+        const apiBaseUrl = '{api_base_url}';
+        const vitals = {{}};
+        let vitalsSent = false;
+        let lastSendTime = 0;
+        
+        function sendVitals() {{
+            const now = Date.now();
+            if (now - lastSendTime < 5000) return;
+            if (Object.keys(vitals).length === 0) return;
+            
+            lastSendTime = now;
+            
+            const payload = {{
+                sessionId: sessionId,
+                page: window.location.pathname,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                metrics: {{
+                    webVitals: {{...vitals}},
+                    apiCalls: [],
+                    errors: []
+                }}
+            }};
+            
+            fetch(apiBaseUrl + '/frontend-metrics', {{
+                method: 'POST',
+                headers: {{'Content-Type': 'application/json'}},
+                body: JSON.stringify(payload),
+                keepalive: true
+            }}).catch(e => console.warn('Failed to send vitals:', e));
+        }}
+        
+        onLCP(metric => {{ vitals.lcp = Math.round(metric.value); sendVitals(); }});
+        onFID(metric => {{ vitals.fid = Math.round(metric.value); sendVitals(); }});
+        onCLS(metric => {{ vitals.cls = parseFloat(metric.value.toFixed(4)); sendVitals(); }});
+        onFCP(metric => {{ vitals.fcp = Math.round(metric.value); sendVitals(); }});
+        onTTFB(metric => {{ vitals.ttfb = Math.round(metric.value); sendVitals(); }});
+        onINP(metric => {{ vitals.inp = Math.round(metric.value); sendVitals(); }});
+        
+        setTimeout(sendVitals, 3000);
+        setInterval(sendVitals, 30000);
+        
+        document.addEventListener('visibilitychange', () => {{
+            if (document.visibilityState === 'hidden') sendVitals();
+        }});
+        window.addEventListener('pagehide', sendVitals);
+        
+        console.log('[Web Vitals] Monitoring initialized for session:', sessionId);
+    </script>
+    """
+    components.html(web_vitals_script, height=0, width=0)
 
 def format_rating(rating):
     """Safely format rating for display"""
@@ -290,6 +351,8 @@ if 'previous_view' not in st.session_state:
     st.session_state.previous_view = 'recommendations'
 if 'last_search_query' not in st.session_state:
     st.session_state.last_search_query = ""
+if 'vitals_injected' not in st.session_state:
+    st.session_state.vitals_injected = False
 
 # Page configuration
 st.set_page_config(
@@ -349,6 +412,9 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+# Inject Web Vitals monitoring (runs once per page load)
+inject_web_vitals_monitoring(st.session_state.session_id, API_BASE_URL)
 
 # Sidebar with navigation
 with st.sidebar:

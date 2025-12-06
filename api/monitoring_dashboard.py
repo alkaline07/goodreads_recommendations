@@ -350,6 +350,50 @@ DASHBOARD_HTML = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Goodreads ML Monitoring Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import {onCLS, onFID, onLCP, onFCP, onTTFB, onINP} from 'https://unpkg.com/web-vitals@3/dist/web-vitals.attribution.js?module';
+        
+        const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const vitals = {};
+        let vitalsSent = false;
+        
+        function sendVitals() {
+            if (vitalsSent || Object.keys(vitals).length === 0) return;
+            vitalsSent = true;
+            
+            const payload = {
+                sessionId: sessionId,
+                page: '/report',
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                metrics: {
+                    webVitals: vitals,
+                    apiCalls: [],
+                    errors: []
+                }
+            };
+            
+            fetch('/frontend-metrics', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload),
+                keepalive: true
+            }).catch(e => console.warn('Failed to send vitals:', e));
+        }
+        
+        onLCP(metric => { vitals.lcp = Math.round(metric.value); });
+        onFID(metric => { vitals.fid = Math.round(metric.value); });
+        onCLS(metric => { vitals.cls = parseFloat(metric.value.toFixed(4)); });
+        onFCP(metric => { vitals.fcp = Math.round(metric.value); });
+        onTTFB(metric => { vitals.ttfb = Math.round(metric.value); });
+        onINP(metric => { vitals.inp = Math.round(metric.value); });
+        
+        setTimeout(sendVitals, 5000);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') sendVitals();
+        });
+        window.addEventListener('pagehide', sendVitals);
+    </script>
     <style>
         * {
             margin: 0;
@@ -662,21 +706,27 @@ DASHBOARD_HTML = """
             </div>
             <div class="chart-card">
                 <h3>Frontend Web Vitals (LCP, FID, CLS)</h3>
-                <div class="chart-container" style="display: flex; align-items: center; justify-content: space-around; height: 300px;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="lcpValue">--</div>
-                        <div style="color: #94a3b8; margin-top: 8px;">LCP (ms)</div>
-                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 2500 good</div>
+                <div class="chart-container" style="display: flex; align-items: center; justify-content: space-around; height: 300px;" id="webVitalsContainer">
+                    <div id="webVitalsNoData" style="text-align: center; color: #64748b; display: none;">
+                        <div style="font-size: 1.5rem; margin-bottom: 12px;">Collecting Web Vitals...</div>
+                        <div style="font-size: 0.9rem; max-width: 400px;">Web Vitals are collected after page interactions. Refresh in a few seconds or interact with the page to trigger LCP/FID/CLS metrics.</div>
                     </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="fidValue">--</div>
-                        <div style="color: #94a3b8; margin-top: 8px;">FID (ms)</div>
-                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 100 good</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="clsValue">--</div>
-                        <div style="color: #94a3b8; margin-top: 8px;">CLS</div>
-                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 0.1 good</div>
+                    <div id="webVitalsData" style="display: flex; align-items: center; justify-content: space-around; width: 100%;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="lcpValue">--</div>
+                            <div style="color: #94a3b8; margin-top: 8px;">LCP (ms)</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 2500 good</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="fidValue">--</div>
+                            <div style="color: #94a3b8; margin-top: 8px;">FID (ms)</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 100 good</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; font-weight: bold; color: #4ade80;" id="clsValue">--</div>
+                            <div style="color: #94a3b8; margin-top: 8px;">CLS</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">< 0.1 good</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1075,6 +1125,9 @@ DASHBOARD_HTML = """
                 });
             }
             
+            const webVitalsNoData = document.getElementById('webVitalsNoData');
+            const webVitalsData = document.getElementById('webVitalsData');
+            
             if (frontendMetrics.length > 0) {
                 const recentMetrics = frontendMetrics.slice(-10);
                 let lcpSum = 0, lcpCount = 0;
@@ -1088,26 +1141,39 @@ DASHBOARD_HTML = """
                     if (vitals.cls) { clsSum += vitals.cls; clsCount++; }
                 });
                 
-                if (lcpCount > 0) {
-                    const lcpAvg = lcpSum / lcpCount;
-                    const lcpEl = document.getElementById('lcpValue');
-                    lcpEl.textContent = lcpAvg.toFixed(0);
-                    lcpEl.style.color = lcpAvg < 2500 ? '#4ade80' : lcpAvg < 4000 ? '#fbbf24' : '#f87171';
-                }
+                const hasAnyVitals = lcpCount > 0 || fidCount > 0 || clsCount > 0;
                 
-                if (fidCount > 0) {
-                    const fidAvg = fidSum / fidCount;
-                    const fidEl = document.getElementById('fidValue');
-                    fidEl.textContent = fidAvg.toFixed(0);
-                    fidEl.style.color = fidAvg < 100 ? '#4ade80' : fidAvg < 300 ? '#fbbf24' : '#f87171';
+                if (hasAnyVitals) {
+                    webVitalsNoData.style.display = 'none';
+                    webVitalsData.style.display = 'flex';
+                    
+                    if (lcpCount > 0) {
+                        const lcpAvg = lcpSum / lcpCount;
+                        const lcpEl = document.getElementById('lcpValue');
+                        lcpEl.textContent = lcpAvg.toFixed(0);
+                        lcpEl.style.color = lcpAvg < 2500 ? '#4ade80' : lcpAvg < 4000 ? '#fbbf24' : '#f87171';
+                    }
+                    
+                    if (fidCount > 0) {
+                        const fidAvg = fidSum / fidCount;
+                        const fidEl = document.getElementById('fidValue');
+                        fidEl.textContent = fidAvg.toFixed(0);
+                        fidEl.style.color = fidAvg < 100 ? '#4ade80' : fidAvg < 300 ? '#fbbf24' : '#f87171';
+                    }
+                    
+                    if (clsCount > 0) {
+                        const clsAvg = clsSum / clsCount;
+                        const clsEl = document.getElementById('clsValue');
+                        clsEl.textContent = clsAvg.toFixed(3);
+                        clsEl.style.color = clsAvg < 0.1 ? '#4ade80' : clsAvg < 0.25 ? '#fbbf24' : '#f87171';
+                    }
+                } else {
+                    webVitalsNoData.style.display = 'block';
+                    webVitalsData.style.display = 'none';
                 }
-                
-                if (clsCount > 0) {
-                    const clsAvg = clsSum / clsCount;
-                    const clsEl = document.getElementById('clsValue');
-                    clsEl.textContent = clsAvg.toFixed(3);
-                    clsEl.style.color = clsAvg < 0.1 ? '#4ade80' : clsAvg < 0.25 ? '#fbbf24' : '#f87171';
-                }
+            } else {
+                webVitalsNoData.style.display = 'block';
+                webVitalsData.style.display = 'none';
             }
         }
         
