@@ -1,7 +1,7 @@
 from google.cloud import bigquery
 from .database import get_bq_client
-from src.generate_predictions import GeneratePredictions
-from src.log_click_event import LogClickEvent
+from .generate_predictions import GeneratePredictions
+from .log_click_event import LogClickEvent
 
 
 _client = None
