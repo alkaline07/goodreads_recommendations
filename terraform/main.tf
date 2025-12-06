@@ -109,9 +109,18 @@ resource "google_cloud_run_v2_service" "recommendation_service" {
 
   template {
     service_account = google_service_account.cloud_run_sa.email
-
+    scaling {
+      min_instance_count = var.min_replica_count
+      max_instance_count = var.max_replica_count
+    }
     containers {
       image = var.image   # passed from GitHub Actions via TF_VAR_image
+      resources {
+        limits = {
+          cpu    = var.cloud_run_cpu
+          memory = var.cloud_run_memory
+      }
+    }
     }
   }
 
