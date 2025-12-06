@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: read
-  workflows: write
+  actions: write
 
 jobs:
   run-monitor:
