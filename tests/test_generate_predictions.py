@@ -184,7 +184,7 @@ class TestGeneratePredictions:
             'author_names': ['Author 1', 'Author 2', 'Author 3']
         })
         
-        with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
             with patch.object(generator, 'get_mf_predictions') as mock_mf:
@@ -205,7 +205,7 @@ class TestGeneratePredictions:
             'author_names': ['Author 1', 'Author 2', 'Author 3']
         })
         
-        with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
             with patch.object(generator, 'get_bt_predictions') as mock_bt:
@@ -218,7 +218,7 @@ class TestGeneratePredictions:
 
     def test_get_predictions_no_model_selected(self, generator):
         """Test get_predictions raises error when no model is selected"""
-        with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = None
             
             with pytest.raises(ValueError, match="No model selected"):
@@ -228,7 +228,7 @@ class TestGeneratePredictions:
         """Test get_predictions raises error for invalid model type"""
         mock_model_info = {'display_name': 'invalid_model_type'}
         
-        with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
             with pytest.raises(ValueError, match="Could not retrieve"):
@@ -256,7 +256,7 @@ class TestGeneratePredictionsIntegration:
             'author_names': ['Author 1', 'Author 2']
         })
         
-        with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
             with patch.object(generator, 'get_mf_predictions') as mock_mf:
