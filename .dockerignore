@@ -1,5 +1,5 @@
 # Git
-.git
+
 .gitignore
 .github
 
@@ -50,7 +50,7 @@ Thumbs.db
 # Airflow specific (we're excluding Airflow from model container)
 config/airflow.cfg
 config/airflow.db
-config/dags/
+
 
 # Docker
 docker-compose.yaml
@@ -70,12 +70,6 @@ data/metadata/*.dvc
 mlruns/
 mlartifacts/
 
-# DVC
-.dvc/
-
-# Test files
-# **/test_*.py
-# datapipeline/tests/
 
 # Logs
 *.log

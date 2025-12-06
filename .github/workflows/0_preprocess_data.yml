@@ -193,45 +193,47 @@ jobs:
           INTERVAL=15
           
           while [ $ELAPSED -lt $MAX_WAIT ]; do
-            # Check container health
-            RUNNING_CONTAINERS=$(docker compose ps --services --filter "status=running" 2>/dev/null | wc -l)
-            EXPECTED_CONTAINERS=5
+            # Get task states
+            TASK_STATES=$(docker exec airflow-scheduler airflow tasks states-for-dag-run \
+              ${{ inputs.dag_id }} \
+              ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null)
             
-            if [ $RUNNING_CONTAINERS -lt $EXPECTED_CONTAINERS ]; then
-              echo "ERROR: Some containers stopped running!"
-              docker ps -a
-              echo ""
-              for container in airflow-webserver airflow-scheduler airflow-worker; do
-                if ! docker ps --format '{{.Names}}' | grep -q "^${container}$"; then
-                  echo "=== Logs for stopped container: $container ==="
-                  docker logs $container --tail 100
-                fi
-              done
-              exit 1
-            fi
+            # Count task states (FIX: strip newlines and spaces)
+            SUCCESS_TASKS=$(echo "$TASK_STATES" | grep -c "success" 2>/dev/null | tr -d ' \n' || echo "0")
+            FAILED_TASKS=$(echo "$TASK_STATES" | grep -c "failed" 2>/dev/null | tr -d ' \n' || echo "0")
+            RUNNING_TASKS=$(echo "$TASK_STATES" | grep -c "running" 2>/dev/null | tr -d ' \n' || echo "0")
+            TOTAL_TASKS=$(echo "$TASK_STATES" | wc -l | tr -d ' \n' || echo "0")
             
-            STATE=$(docker exec airflow-webserver airflow dags state ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null || echo "running")
+            # Ensure variables are numeric (default to 0 if empty)
+            SUCCESS_TASKS=${SUCCESS_TASKS:-0}
+            FAILED_TASKS=${FAILED_TASKS:-0}
+            RUNNING_TASKS=${RUNNING_TASKS:-0}
+            TOTAL_TASKS=${TOTAL_TASKS:-0}
             
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "Time elapsed: ${ELAPSED}s / ${MAX_WAIT}s"
-            echo "Overall state: $STATE"
+            echo "Tasks: $SUCCESS_TASKS success, $RUNNING_TASKS running, $FAILED_TASKS failed (Total: $TOTAL_TASKS)"
             echo ""
             echo "Task status:"
-            docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null | grep -E "(success|running|failed|queued)" || echo "  Initializing..."
+            echo "$TASK_STATES" | head -20
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo ""
             
-            if [ "$STATE" = "success" ]; then
-              echo "DAG completed successfully!"
-              echo ""
-              docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --state success --limit 1
-              exit 0
-            elif [ "$STATE" = "failed" ]; then
-              echo "DAG failed!"
+            # Check if any tasks failed
+            if [ "$FAILED_TASKS" -gt 0 ]; then
+              echo "DAG failed! $FAILED_TASKS task(s) failed"
               echo ""
               echo "Failed tasks:"
-              docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} | grep failed || true
+              echo "$TASK_STATES" | grep failed
               exit 1
+            fi
+            
+            # Check if all tasks succeeded (13 tasks in your DAG)
+            if [ "$SUCCESS_TASKS" -ge 13 ] && [ "$RUNNING_TASKS" -eq 0 ]; then
+              echo "DAG completed successfully!"
+              echo ""
+              docker exec airflow-scheduler airflow dags list-runs -d ${{ inputs.dag_id }} --state success --limit 1 || true
+              exit 0
             fi
             
             sleep $INTERVAL
@@ -240,6 +242,7 @@ jobs:
           
           echo ""
           echo "Timeout waiting for DAG completion after ${MAX_WAIT}s"
+          echo "Current status: $SUCCESS_TASKS success, $RUNNING_TASKS running, $FAILED_TASKS failed"
           echo "Check status at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
           exit 1
 
@@ -282,47 +285,6 @@ jobs:
           echo ""
           echo "Full logs available at: $NGROK_URL"
           echo "=========================================="
-
-      - name: Capture logs as artifacts
-        if: always()
-        run: |
-          mkdir -p artifact-logs
-          
-          # Capture container logs
-          docker logs airflow-scheduler > artifact-logs/scheduler.log 2>&1 || true
-          docker logs airflow-worker > artifact-logs/worker.log 2>&1 || true
-          docker logs airflow-webserver > artifact-logs/webserver.log 2>&1 || true
-          
-          # Capture DAG execution info
-          docker exec airflow-webserver airflow dags list-runs -d ${{ inputs.dag_id }} --limit 5 > artifact-logs/dag-runs.log 2>&1 || true
-          docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} > artifact-logs/task-states.log 2>&1 || true
-          
-          # Copy task logs with sanitized filenames (replace : with -)
-          if [ -d "logs" ]; then
-            echo "Copying task logs with sanitized filenames..."
-            find logs -name "*.log" -type f | while read -r logfile; do
-              # Replace colons and other invalid chars with dashes
-              sanitized=$(echo "$logfile" | sed 's/://g' | sed 's/[<>"|?*]/-/g')
-              mkdir -p "artifact-logs/$(dirname "$sanitized")"
-              cp "$logfile" "artifact-logs/$sanitized" 2>/dev/null || true
-            done
-          fi
-
-      - name: Upload logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: airflow-pipeline-logs-${{ github.run_number }}
-          path: artifact-logs/
-          retention-days: 7
-
-      - name: Upload logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: airflow-pipeline-logs-${{ github.run_number }}
-          path: logs/
-          retention-days: 7
 
       - name: Keep ngrok alive for debugging
         if: failure()
