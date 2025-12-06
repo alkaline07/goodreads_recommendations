@@ -1,6 +1,6 @@
 from google.cloud import bigquery
 from .database import get_bq_client
-from .generate_predictions import GeneratePredictions
+from src.generate_predictions import GeneratePredictions
 
 
 _client = None

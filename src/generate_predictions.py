@@ -1,9 +1,9 @@
+from src.model_deployment import get_selected_model_info
 import os
 from google.cloud import bigquery, aiplatform
-from typing import Optional, Dict
+from typing import Optional
 import datetime
 import argparse
-import json
 
 class GeneratePredictions:
     def __init__(self):
@@ -66,41 +66,6 @@ class GeneratePredictions:
         )
         results = self.client.query(query, job_config=job_config).to_dataframe(create_bqstorage_client=False)
         return results[['book_id', 'title', 'rating', 'author_names']]
-
-    def get_selected_model_info(self) -> Dict[str, str]:
-        """
-        Get the selected model information from the model selection report.
-        
-        Returns:
-            Dictionary with model_name and display_name
-        """
-        PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        model_selection_path = os.path.join(
-            PROJECT_ROOT, "docs", "bias_reports", "model_selection_report.json"
-        )
-        
-        default_info = {
-            "model_name": "boosted_tree_regressor",
-            "display_name": "goodreads_boosted_tree_regressor"
-        }
-        
-        try:
-            with open(model_selection_path, 'r') as f:
-                report = json.load(f)
-            
-            selected = report.get('selected_model', {})
-            model_name = selected.get('model_name', 'boosted_tree_regressor')
-            
-            return {
-                "model_name": model_name,
-                "display_name": f"goodreads_{model_name}"
-            }
-        except FileNotFoundError:
-            print("Model selection report not found, using default")
-            return default_info
-        except Exception as e:
-            print(f"Error reading model selection report: {e}")
-            return default_info
     
     def get_version(self, display_name):
         try:
@@ -161,7 +126,7 @@ class GeneratePredictions:
         """
         Generate book recommendations for a given user_id using the selected model.
         """
-        model_info = self.get_selected_model_info()
+        model_info = get_selected_model_info()
         if not model_info:
             raise ValueError("No model selected for predictions.")
         
