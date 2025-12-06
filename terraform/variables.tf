@@ -47,7 +47,7 @@ variable "max_replica_count" {
 variable "machine_type" {
   description = "Machine type for serving predictions"
   type        = string
-  default     = "n1-standard-2"
+  default     = "n1-standard-4"
 }
 
 variable "accelerator_type" {
