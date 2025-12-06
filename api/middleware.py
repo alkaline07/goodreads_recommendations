@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Callable
 from collections import defaultdict
 from dataclasses import dataclass, field
-from threading import Lock
+from threading import Lock, RLock
 import statistics
 
 from fastapi import Request, Response
@@ -69,7 +69,7 @@ class APIMetricsCollector:
         }
         self.recent_errors: List[Dict] = []
         self.request_timeline: List[Dict] = []
-        self._lock = Lock()
+        self._lock = RLock()
         self._initialized = True
     
     def record_request(

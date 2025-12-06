@@ -1291,13 +1291,22 @@ async def clear_cache(username: str = Depends(verify_admin)):
 
 @router.get("/api/api-metrics")
 async def get_api_metrics_api(username: str = Depends(verify_admin)):
-    """Get API performance metrics."""
+    """Get API performance metrics with timeout protection."""
     try:
         from .middleware import get_metrics_collector
         from .main import get_frontend_metrics_store
         
         collector = get_metrics_collector()
-        api_stats = collector.get_all_stats()
+        
+        loop = asyncio.get_event_loop()
+        try:
+            api_stats = await asyncio.wait_for(
+                loop.run_in_executor(QUERY_EXECUTOR, collector.get_all_stats),
+                timeout=10.0
+            )
+        except asyncio.TimeoutError:
+            logger.error("API metrics collection timed out")
+            api_stats = {"error": "Metrics collection timed out", "summary": {"total_requests": 0, "total_errors": 0, "error_rate": 0, "active_requests": 0, "uptime_seconds": 0, "uptime_human": "--", "requests_per_minute": 0, "avg_latency_ms": 0, "p95_latency_ms": 0, "p99_latency_ms": 0}, "endpoints": [], "recent_errors": []}
         
         frontend_metrics_store = get_frontend_metrics_store()
         frontend_metrics = frontend_metrics_store[-20:] if frontend_metrics_store else []
@@ -1308,6 +1317,7 @@ async def get_api_metrics_api(username: str = Depends(verify_admin)):
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
+        logger.error(f"API metrics error: {e}")
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
