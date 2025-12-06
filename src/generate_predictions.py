@@ -65,7 +65,6 @@ class GeneratePredictions:
             ]
         )
         results = self.client.query(query, job_config=job_config).to_dataframe(create_bqstorage_client=False)
-        print(results.columns)
         return results[['book_id', 'title', 'rating', 'author_names']]
     
     def get_version(self, display_name):
