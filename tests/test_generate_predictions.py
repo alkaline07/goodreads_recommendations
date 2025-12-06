@@ -17,12 +17,12 @@ class TestGeneratePredictions:
     @pytest.fixture
     def mock_aiplatform(self):
         """Mock AI Platform"""
-        with patch('src.generate_predictions.aiplatform') as mock_ai:
+        with patch('api.generate_predictions.aiplatform') as mock_ai:
             yield mock_ai
 
     @pytest.fixture
-    @patch('src.generate_predictions.bigquery.Client')
-    @patch('src.generate_predictions.aiplatform')
+    @patch('api.generate_predictions.bigquery.Client')
+    @patch('api.generate_predictions.aiplatform')
     def generator(self, mock_ai, mock_bq):
         """Create GeneratePredictions instance with mocked dependencies"""
         mock_bq.return_value.project = "test-project"
@@ -30,7 +30,7 @@ class TestGeneratePredictions:
 
     def test_init(self, mock_aiplatform):
         """Test initialization of GeneratePredictions"""
-        with patch('src.generate_predictions.bigquery.Client') as mock_bq:
+        with patch('api.generate_predictions.bigquery.Client') as mock_bq:
             mock_bq.return_value.project = "test-project"
             generator = GeneratePredictions()
             
@@ -48,7 +48,7 @@ class TestGeneratePredictions:
         mock_model = Mock()
         mock_model.versioning_registry.list_versions.return_value = [mock_version]
         
-        with patch('src.generate_predictions.aiplatform.Model.list') as mock_list:
+        with patch('api.generate_predictions.aiplatform.Model.list') as mock_list:
             mock_list.return_value = [mock_model]
             
             result = generator.get_version("test-model")
@@ -56,7 +56,7 @@ class TestGeneratePredictions:
 
     def test_get_version_not_found(self, generator):
         """Test get_version when no models exist"""
-        with patch('src.generate_predictions.aiplatform.Model.list') as mock_list:
+        with patch('api.generate_predictions.aiplatform.Model.list') as mock_list:
             mock_list.return_value = []
             
             result = generator.get_version("nonexistent-model")
@@ -64,7 +64,7 @@ class TestGeneratePredictions:
 
     def test_get_version_exception(self, generator):
         """Test get_version handles exceptions gracefully"""
-        with patch('src.generate_predictions.aiplatform.Model.list') as mock_list:
+        with patch('api.generate_predictions.aiplatform.Model.list') as mock_list:
             mock_list.side_effect = Exception("API Error")
             
             result = generator.get_version("test-model")
@@ -72,7 +72,7 @@ class TestGeneratePredictions:
 
     def test_get_bq_model_id_by_version_boosted_tree(self, generator):
         """Test get_bq_model_id_by_version for boosted tree model"""
-        with patch('src.generate_predictions.aiplatform.Model') as mock_model:
+        with patch('api.generate_predictions.aiplatform.Model') as mock_model:
             mock_instance = Mock()
             mock_instance.to_dict.return_value = {
                 'versionCreateTime': '2025-12-04T10:30:00+00:00'
@@ -86,7 +86,7 @@ class TestGeneratePredictions:
 
     def test_get_bq_model_id_by_version_matrix_factorization(self, generator):
         """Test get_bq_model_id_by_version for matrix factorization model"""
-        with patch('src.generate_predictions.aiplatform.Model') as mock_model:
+        with patch('api.generate_predictions.aiplatform.Model') as mock_model:
             mock_instance = Mock()
             mock_instance.to_dict.return_value = {
                 'versionCreateTime': '2025-12-04T10:30:00+00:00'
@@ -100,7 +100,7 @@ class TestGeneratePredictions:
 
     def test_get_bq_model_id_by_version_invalid_model(self, generator):
         """Test get_bq_model_id_by_version with invalid model type"""
-        with patch('src.generate_predictions.aiplatform.Model') as mock_model:
+        with patch('api.generate_predictions.aiplatform.Model') as mock_model:
             mock_instance = Mock()
             mock_instance.to_dict.return_value = {
                 'versionCreateTime': '2025-12-04T10:30:00+00:00'
@@ -184,7 +184,7 @@ class TestGeneratePredictions:
             'author_names': ['Author 1', 'Author 2', 'Author 3']
         })
         
-        with patch('src.generate_predictions.get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
             with patch.object(generator, 'get_mf_predictions') as mock_mf:
@@ -205,7 +205,7 @@ class TestGeneratePredictions:
             'author_names': ['Author 1', 'Author 2', 'Author 3']
         })
         
-        with patch('src.generate_predictions.get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
             with patch.object(generator, 'get_bt_predictions') as mock_bt:
@@ -218,7 +218,7 @@ class TestGeneratePredictions:
 
     def test_get_predictions_no_model_selected(self, generator):
         """Test get_predictions raises error when no model is selected"""
-        with patch('src.generate_predictions.get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = None
             
             with pytest.raises(ValueError, match="No model selected"):
@@ -228,7 +228,7 @@ class TestGeneratePredictions:
         """Test get_predictions raises error for invalid model type"""
         mock_model_info = {'display_name': 'invalid_model_type'}
         
-        with patch('src.generate_predictions.get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
             with pytest.raises(ValueError, match="Could not retrieve"):
@@ -239,8 +239,8 @@ class TestGeneratePredictionsIntegration:
     """Integration tests for GeneratePredictions"""
 
     @pytest.fixture
-    @patch('src.generate_predictions.bigquery.Client')
-    @patch('src.generate_predictions.aiplatform')
+    @patch('api.generate_predictions.bigquery.Client')
+    @patch('api.generate_predictions.aiplatform')
     def generator(self, mock_ai, mock_bq):
         """Create GeneratePredictions instance for integration tests"""
         mock_bq.return_value.project = "test-project"
@@ -256,7 +256,7 @@ class TestGeneratePredictionsIntegration:
             'author_names': ['Author 1', 'Author 2']
         })
         
-        with patch('src.generate_predictions.get_selected_model_info') as mock_get_model:
+        with patch('api.generate_predictions.get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
             with patch.object(generator, 'get_mf_predictions') as mock_mf:
