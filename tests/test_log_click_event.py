@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from google.api_core.exceptions import NotFound
-from src.log_click_event import LogClickEvent
+from api.log_click_event import LogClickEvent
 
 class TestLogClickEvent(unittest.TestCase):
 
