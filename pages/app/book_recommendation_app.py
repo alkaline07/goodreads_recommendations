@@ -585,8 +585,8 @@ elif st.session_state.view_mode == 'search':
     # Use a form to properly handle search
     with st.form(key="search_form"):
         search_query = st.text_input(
-            "Search by title or author:",
-            placeholder="Enter book title or author name...",
+            "Search by title:",
+            placeholder="Enter book title ...",
             key="search_input"
         )
         search_button = st.form_submit_button("🔍 Search", type="primary", use_container_width=True)
