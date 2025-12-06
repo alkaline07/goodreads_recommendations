@@ -1,4 +1,5 @@
 name: 0. Run Airflow Pipeline
+run-name: Airflow Data Pipeline Execution
 
 on:
   workflow_dispatch: 

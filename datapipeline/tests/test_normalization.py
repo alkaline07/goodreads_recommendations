@@ -185,3 +185,6 @@ def test_log_transform_features_contains_edge_case_clauses(normalization_instanc
     assert "WHEN num_books_read > 0 THEN CAST(LN(num_books_read + 1) AS INT64)" in sql
     assert "user_days_to_read = CASE" in sql
     assert "WHEN user_days_to_read > 0 THEN CAST(LN(user_days_to_read) AS INT64)" in sql
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-q"])
