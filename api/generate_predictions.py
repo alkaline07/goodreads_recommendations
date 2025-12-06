@@ -33,7 +33,7 @@ class GeneratePredictions:
             "model_name": model_name
         }
         
-        with open("src/mf_predictor_query.sql", "r") as file:
+        with open("api/mf_predictor_query.sql", "r") as file:
             query_template = file.read()
         
         query = query_template.format(**config)
@@ -55,7 +55,7 @@ class GeneratePredictions:
             "model_name": model_name
         }
         
-        with open("src/bt_predictor_query.sql", "r") as file:
+        with open("api/bt_predictor_query.sql", "r") as file:
             query_template = file.read()
         
         query = query_template.format(**config)
@@ -74,10 +74,7 @@ class GeneratePredictions:
         Returns:
             Dictionary with model_name and display_name
         """
-        PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        model_selection_path = os.path.join(
-            PROJECT_ROOT, "docs", "bias_reports", "model_selection_report.json"
-        )
+        model_selection_path = "docs/bias_reports/model_selection_report.json"
         
         default_info = {
             "model_name": "boosted_tree_regressor",
@@ -190,6 +187,6 @@ if __name__ == "__main__":
     print(predictions)
 
 # Sample runner command:
-# python -m src.generate_predictions --user_id "017fa7fa5ca764f1b912b4b1716adca5"
+# python -m api.generate_predictions --user_id "017fa7fa5ca764f1b912b4b1716adca5"
 
 
