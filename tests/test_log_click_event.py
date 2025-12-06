@@ -5,7 +5,7 @@ from api.log_click_event import LogClickEvent
 
 class TestLogClickEvent(unittest.TestCase):
 
-    @patch('api.log_click_event.bigquery.Client')
+    @patch('src.log_click_event.bigquery.Client')
     def test_create_table_if_not_exists(self, mock_bq_client):
         """Test that create_table is called if get_table raises NotFound."""
         mock_client_instance = mock_bq_client.return_value
@@ -21,7 +21,7 @@ class TestLogClickEvent(unittest.TestCase):
         # Assert create_table was called
         mock_client_instance.create_table.assert_called_once()
 
-    @patch('api.log_click_event.bigquery.Client')
+    @patch('src.log_click_event.bigquery.Client')
     def test_log_valid_event(self, mock_bq_client):
         """Test logging a valid event inserts rows."""
         mock_client_instance = mock_bq_client.return_value
@@ -34,7 +34,7 @@ class TestLogClickEvent(unittest.TestCase):
         self.assertTrue(result)
         mock_client_instance.insert_rows_json.assert_called_once()
 
-    @patch('api.log_click_event.bigquery.Client')
+    @patch('src.log_click_event.bigquery.Client')
     def test_invalid_event_type(self, mock_bq_client):
         """Test that ValueError is raised for invalid event types."""
         logger = LogClickEvent()
@@ -43,7 +43,7 @@ class TestLogClickEvent(unittest.TestCase):
         with self.assertRaises(ValueError):
             logger.log_user_event("user_123", "book_456", "purchase")
 
-    @patch('api.log_click_event.bigquery.Client')
+    @patch('src.log_click_event.bigquery.Client')
     def test_similar_event_ignored(self, mock_bq_client):
         """Test that 'similar' events return True but do NOT log to BQ."""
         mock_client_instance = mock_bq_client.return_value
