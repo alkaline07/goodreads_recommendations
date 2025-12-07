@@ -471,7 +471,7 @@ def main_post_validation():
     anomaly_detector = AnomalyDetection()
     return anomaly_detector.run_post_validation()
 
-def main(use_cleaned_tables=True):
+def main(use_cleaned_tables=False):
     """
     Main function called by Airflow DAG for data validation.
     
