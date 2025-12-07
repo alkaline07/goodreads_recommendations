@@ -39,7 +39,7 @@ class TestMonitorDecay(unittest.TestCase):
         mock_row = MagicMock()
         mock_row.views = 1000
         mock_row.clicks = 50
-        mock_row.ctr = 0.05  # 5.0% which is > 1.5% threshold
+        mock_row.ctr = 0.25  # 25.0% which is > 20% threshold
         
         mock_job = MagicMock()
         mock_job.result.return_value = [mock_row]
