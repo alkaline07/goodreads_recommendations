@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List
+from typing import Optional, Literal
 
 
 class LoginRequest(BaseModel):
@@ -21,6 +22,8 @@ class LoginResponse(BaseModel):
 class ClickRequest(BaseModel):
     user_id: str
     book_id: int
+    event_type: str
+    book_title: Optional[str] = None
 
 
 class BookDetails(BaseModel):

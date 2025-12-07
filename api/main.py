@@ -21,7 +21,7 @@ from .queries import (
 )
 from .monitoring_dashboard import router as monitoring_router
 from .middleware import MonitoringMiddleware, get_metrics_collector
-
+from fastapi import HTTPException
 app = FastAPI(title="Goodreads Recommendation API")
 
 app.add_middleware(
@@ -193,20 +193,23 @@ def login(request: LoginRequest):
 # ------------------------------------------------------
 # 2. BOOK CLICK - CTR EVENT
 # ------------------------------------------------------
-@app.post("/book-click", response_model=BookDetails)
+@app.post("/book-click")
 def book_click(request: ClickRequest):
-    user_id = request.user_id
-    book_id = request.book_id
 
-    # Log CTR
-    log_ctr_event(user_id, str(book_id))
+    success = log_ctr_event(
+        user_id=request.user_id,
+        book_id=request.book_id,
+        event_type=request.event_type,
+        book_title=request.book_title
+    )
 
-    # Get book details
-    details = get_book_details(book_id)
-    if not details:
-        return JSONResponse(status_code=404, content={"message": "book not found"})
+    if not success:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to log CTR event"
+        )
 
-    return BookDetails(**details)
+    return {"success": True}
 
 
 # ------------------------------------------------------
