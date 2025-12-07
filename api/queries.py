@@ -83,7 +83,7 @@ def get_global_top_recommendations():
 # ---------------------------------------------------------------------
 # LOG CTR EVENT
 # ---------------------------------------------------------------------
-def log_ctr_event(user_id: str, book_id: str, event_type: str = "click", book_title: str = None):
+def log_ctr_event(user_id: str, book_id: int, event_type: str = "click", book_title: str = None):
     """
     Wrapper around LogClickEvent so API does NOT change.
     """
@@ -91,7 +91,7 @@ def log_ctr_event(user_id: str, book_id: str, event_type: str = "click", book_ti
     try:
         return logger.log_user_event(
             user_id=user_id,
-            book_id=str(book_id),     # BigQuery table uses STRING
+            book_id=int(book_id),     # BigQuery table uses STRING
             event_type=event_type,
             book_title=book_title
         )
@@ -110,11 +110,16 @@ def get_book_details(book_id: int):
     SELECT
         book_id,
         title_clean AS title,
-        description,
+        description_clean AS description,
         ARRAY(
-            SELECT SAFE_CAST(JSON_EXTRACT_SCALAR(author, '$.author_name') AS STRING)
-            FROM UNNEST(authors_flat) AS author
+            SELECT name
+            FROM (
+                SELECT SAFE_CAST(JSON_EXTRACT_SCALAR(author, '$.author_name') AS STRING) AS name
+                FROM UNNEST(authors_flat) AS author
+            )
+            WHERE name IS NOT NULL
         ) AS authors,
+
         average_rating,
         ratings_count
     FROM `{project}.{dataset}.goodreads_books_cleaned`
@@ -122,8 +127,9 @@ def get_book_details(book_id: int):
     LIMIT 1
     """
     job = client.query(query)
-    rows = [dict(row) for row in job.result()]   # FIXED
+    rows = [dict(row) for row in job.result()]
     return rows[0] if rows else None
+
 
 
 # ---------------------------------------------------------------------

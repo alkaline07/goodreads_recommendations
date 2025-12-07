@@ -198,8 +198,13 @@ def book_click(request: ClickRequest):
     user_id = request.user_id
     book_id = request.book_id
 
-    # Log CTR
-    log_ctr_event(user_id, str(book_id))
+    # Log CTR WITH all required parameters
+    log_ctr_event(
+        user_id=user_id,
+        book_id=book_id,
+        event_type=request.event_type,
+        book_title=request.book_title
+    )
 
     # Get book details
     details = get_book_details(book_id)
@@ -207,6 +212,7 @@ def book_click(request: ClickRequest):
         return JSONResponse(status_code=404, content={"message": "book not found"})
 
     return BookDetails(**details)
+
 
 
 # ------------------------------------------------------

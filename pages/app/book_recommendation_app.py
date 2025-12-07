@@ -142,10 +142,10 @@ def track_api_call(endpoint: str, method: str, duration_ms: float, status_code: 
             st.session_state.api_call_count = 0
         if 'total_api_latency' not in st.session_state:
             st.session_state.total_api_latency = 0.0
-        
+
         st.session_state.api_call_count += 1
         st.session_state.total_api_latency += duration_ms
-        
+
         metrics_payload = {
             "sessionId": st.session_state.get('session_id', 'unknown'),
             "timestamp": datetime.utcnow().isoformat(),
@@ -161,7 +161,7 @@ def track_api_call(endpoint: str, method: str, duration_ms: float, status_code: 
                 }]
             }
         }
-        
+
         requests.post(
             f"{API_BASE_URL}/frontend-metrics",
             json=metrics_payload,
@@ -178,7 +178,7 @@ def get_recommendations(user_id: str) -> List[Dict]:
         url = f"{API_BASE_URL}/load-recommendation"
         resp = requests.post(url, json={"user_id": user_id}, timeout=15)
         duration_ms = (time.time() - start_time) * 1000
-        
+
         track_api_call("/load-recommendation", "POST", duration_ms, resp.status_code)
 
         if resp.status_code == 200:
@@ -200,7 +200,7 @@ def get_read_books(user_id: str) -> List[Dict]:
         url = f"{API_BASE_URL}/books-read/{user_id}"
         resp = requests.get(url, timeout=10)
         duration_ms = (time.time() - start_time) * 1000
-        
+
         track_api_call(f"/books-read/{user_id}", "GET", duration_ms, resp.status_code)
 
         if resp.status_code == 200:
@@ -219,7 +219,7 @@ def get_unread_books(user_id: str) -> List[Dict]:
         url = f"{API_BASE_URL}/books-unread/{user_id}"
         resp = requests.get(url, timeout=10)
         duration_ms = (time.time() - start_time) * 1000
-        
+
         track_api_call(f"/books-unread/{user_id}", "GET", duration_ms, resp.status_code)
 
         if resp.status_code == 200:
@@ -365,7 +365,8 @@ def create_fallback_book_details(title: str, author: str) -> Dict:
     }
 
 
-def send_click_event(user_id: str, book_id: str, event_type: str, book_title: str = None):
+
+def send_click_event(user_id: str, book_id: int, event_type: str, book_title: str = None):
     """function to send click/interaction events for CTR tracking"""
     event_data = {
         "user_id": user_id,
@@ -480,10 +481,10 @@ inject_web_vitals_monitoring(st.session_state.session_id, API_BASE_URL)
 # Sidebar with navigation
 with st.sidebar:
     st.title("📚 Navigation")
-    
+
     if st.session_state.api_call_count > 0:
         avg_latency = st.session_state.total_api_latency / st.session_state.api_call_count
-        
+
         latency_color = "green" if avg_latency < 500 else "orange" if avg_latency < 1000 else "red"
         st.markdown(f"""
             <div style='background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px;'>
@@ -492,7 +493,7 @@ with st.sidebar:
                 <div style='font-size: 11px; color: #888;'>{st.session_state.api_call_count} calls</div>
             </div>
         """, unsafe_allow_html=True)
-    
+
     st.markdown("---")
 
     if st.session_state.current_user:
@@ -850,7 +851,7 @@ elif st.session_state.view_mode == 'book_details':
                 send_click_event(
                     st.session_state.current_user,
                     book['book_id'],
-                    "mark_read",
+                    "read",
                     book['title']
                 )
                 st.success("Marked as read!")
