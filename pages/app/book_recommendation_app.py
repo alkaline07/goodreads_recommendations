@@ -11,60 +11,117 @@ API_BASE_URL = "https://recommendation-service-491512947755.us-central1.run.app"
 
 
 def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
-    """Inject Web Vitals monitoring script into the Streamlit app."""
+    """Inject Web Vitals monitoring script into the Streamlit app's parent window."""
     web_vitals_script = f"""
     <script type="module">
-        import {{onCLS, onFID, onLCP, onFCP, onTTFB, onINP}} from 'https://unpkg.com/web-vitals@3/dist/web-vitals.attribution.js?module';
-        
         const sessionId = '{session_id}';
         const apiBaseUrl = '{api_base_url}';
-        const vitals = {{}};
-        let vitalsSent = false;
-        let lastSendTime = 0;
         
-        function sendVitals() {{
-            const now = Date.now();
-            if (now - lastSendTime < 5000) return;
-            if (Object.keys(vitals).length === 0) return;
+        // Check if already initialized in parent window
+        const parentWin = window.parent || window;
+        if (parentWin._webVitalsInitialized) {{
+            console.log('[Web Vitals] Already initialized');
+        }} else {{
+            parentWin._webVitalsInitialized = true;
+            parentWin._webVitals = {{}};
+            parentWin._lastVitalsSend = 0;
             
-            lastSendTime = now;
+            // Function to send vitals to backend
+            function sendVitals() {{
+                const now = Date.now();
+                if (now - parentWin._lastVitalsSend < 5000) return;
+                
+                const vitals = parentWin._webVitals || {{}};
+                if (Object.keys(vitals).length === 0) return;
+                
+                parentWin._lastVitalsSend = now;
+                
+                const payload = {{
+                    sessionId: sessionId,
+                    page: parentWin.location.pathname || '/streamlit',
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString(),
+                    metrics: {{
+                        webVitals: {{...vitals}},
+                        apiCalls: [],
+                        errors: []
+                    }}
+                }};
+                
+                fetch(apiBaseUrl + '/frontend-metrics', {{
+                    method: 'POST',
+                    headers: {{'Content-Type': 'application/json'}},
+                    body: JSON.stringify(payload),
+                    keepalive: true
+                }}).then(() => console.log('[Web Vitals] Sent:', vitals))
+                  .catch(e => console.warn('[Web Vitals] Failed to send:', e));
+            }}
             
-            const payload = {{
-                sessionId: sessionId,
-                page: window.location.pathname,
-                userAgent: navigator.userAgent,
-                timestamp: new Date().toISOString(),
-                metrics: {{
-                    webVitals: {{...vitals}},
-                    apiCalls: [],
-                    errors: []
+            // Use PerformanceObserver for more reliable metrics in Streamlit
+            try {{
+                // LCP Observer
+                new PerformanceObserver((list) => {{
+                    const entries = list.getEntries();
+                    const lastEntry = entries[entries.length - 1];
+                    parentWin._webVitals.lcp = Math.round(lastEntry.startTime);
+                    sendVitals();
+                }}).observe({{type: 'largest-contentful-paint', buffered: true}});
+                
+                // CLS Observer
+                let clsValue = 0;
+                new PerformanceObserver((list) => {{
+                    for (const entry of list.getEntries()) {{
+                        if (!entry.hadRecentInput) {{
+                            clsValue += entry.value;
+                        }}
+                    }}
+                    parentWin._webVitals.cls = parseFloat(clsValue.toFixed(4));
+                    sendVitals();
+                }}).observe({{type: 'layout-shift', buffered: true}});
+                
+                // FCP Observer
+                new PerformanceObserver((list) => {{
+                    const entries = list.getEntries();
+                    if (entries.length > 0) {{
+                        parentWin._webVitals.fcp = Math.round(entries[0].startTime);
+                        sendVitals();
+                    }}
+                }}).observe({{type: 'paint', buffered: true}});
+                
+                // INP Observer (Interaction to Next Paint)
+                let maxINP = 0;
+                new PerformanceObserver((list) => {{
+                    for (const entry of list.getEntries()) {{
+                        if (entry.duration > maxINP) {{
+                            maxINP = entry.duration;
+                            parentWin._webVitals.inp = Math.round(maxINP);
+                        }}
+                    }}
+                    sendVitals();
+                }}).observe({{type: 'event', buffered: true, durationThreshold: 16}});
+                
+                // TTFB from Navigation Timing
+                const navEntry = performance.getEntriesByType('navigation')[0];
+                if (navEntry) {{
+                    parentWin._webVitals.ttfb = Math.round(navEntry.responseStart);
                 }}
-            }};
+                
+                console.log('[Web Vitals] Monitoring initialized for session:', sessionId);
+                
+            }} catch (e) {{
+                console.warn('[Web Vitals] PerformanceObserver not fully supported:', e);
+            }}
             
-            fetch(apiBaseUrl + '/frontend-metrics', {{
-                method: 'POST',
-                headers: {{'Content-Type': 'application/json'}},
-                body: JSON.stringify(payload),
-                keepalive: true
-            }}).catch(e => console.warn('Failed to send vitals:', e));
+            // Send on various triggers
+            setTimeout(sendVitals, 3000);
+            setInterval(sendVitals, 30000);
+            
+            parentWin.addEventListener('visibilitychange', () => {{
+                if (parentWin.document.visibilityState === 'hidden') sendVitals();
+            }});
+            parentWin.addEventListener('pagehide', sendVitals);
+            parentWin.addEventListener('beforeunload', sendVitals);
         }}
-        
-        onLCP(metric => {{ vitals.lcp = Math.round(metric.value); sendVitals(); }});
-        onFID(metric => {{ vitals.fid = Math.round(metric.value); sendVitals(); }});
-        onCLS(metric => {{ vitals.cls = parseFloat(metric.value.toFixed(4)); sendVitals(); }});
-        onFCP(metric => {{ vitals.fcp = Math.round(metric.value); sendVitals(); }});
-        onTTFB(metric => {{ vitals.ttfb = Math.round(metric.value); sendVitals(); }});
-        onINP(metric => {{ vitals.inp = Math.round(metric.value); sendVitals(); }});
-        
-        setTimeout(sendVitals, 3000);
-        setInterval(sendVitals, 30000);
-        
-        document.addEventListener('visibilitychange', () => {{
-            if (document.visibilityState === 'hidden') sendVitals();
-        }});
-        window.addEventListener('pagehide', sendVitals);
-        
-        console.log('[Web Vitals] Monitoring initialized for session:', sessionId);
     </script>
     """
     components.html(web_vitals_script, height=0, width=0)
