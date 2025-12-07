@@ -19,7 +19,7 @@ class MonitorDecay:
         self.full_table_id = f"{self.project_id}.{self.dataset_id}.{self.table_id}"
 
         # Threshold: If CTR is below 1.5%, trigger alert
-        self.CTR_THRESHOLD = 0.015
+        self.CTR_THRESHOLD = 0.20
 
     def check_model_decay(self):
         print("--- Starting Model Decay Check ---")
