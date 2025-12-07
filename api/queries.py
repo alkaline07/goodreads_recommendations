@@ -157,10 +157,12 @@ def get_books_read_by_user(user_id: str):
         b.ratings_count,
         ea.author,
         CASE
-            WHEN inter.read_at_clean = 'Unknown' THEN NULL
-            ELSE FORMAT_TIMESTAMP('%A, %B %d %Y',
-                PARSE_TIMESTAMP('%a %b %d %H:%M:%S %z %Y', inter.read_at_clean)
-            ) 
+            WHEN inter.read_at_clean = 'Unknown' THEN 
+                FORMAT_TIMESTAMP('%A, %B %d %Y', TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 DAY))
+            ELSE 
+                FORMAT_TIMESTAMP('%A, %B %d %Y',
+                    PARSE_TIMESTAMP('%a %b %d %H:%M:%S %z %Y', inter.read_at_clean)
+                )
         END AS date_read
     FROM `{project}.{dataset}.goodreads_interactions_cleaned` inter
     LEFT JOIN `{project}.{dataset}.goodreads_books_cleaned` b
