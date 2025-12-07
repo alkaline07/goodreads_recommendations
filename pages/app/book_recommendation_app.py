@@ -25,11 +25,13 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
             parentWin._webVitalsInitialized = true;
             parentWin._webVitals = {{}};
             parentWin._lastVitalsSend = 0;
+            parentWin._clsValue = 0;
+            parentWin._inpEntries = [];
             
             // Function to send vitals to backend
-            function sendVitals() {{
+            function sendVitals(force = false) {{
                 const now = Date.now();
-                if (now - parentWin._lastVitalsSend < 5000) return;
+                if (!force && now - parentWin._lastVitalsSend < 5000) return;
                 
                 const vitals = parentWin._webVitals || {{}};
                 if (Object.keys(vitals).length === 0) return;
@@ -57,6 +59,19 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                   .catch(e => console.warn('[Web Vitals] Failed to send:', e));
             }}
             
+            // Calculate INP from interaction entries (P98 of all interactions)
+            function calculateINP() {{
+                const entries = parentWin._inpEntries;
+                if (entries.length === 0) return;
+                
+                // Sort by duration descending
+                entries.sort((a, b) => b - a);
+                
+                // INP is the P98 (or worst if fewer than 50 interactions)
+                const p98Index = Math.min(Math.floor(entries.length * 0.02), entries.length - 1);
+                parentWin._webVitals.inp = Math.round(entries[p98Index]);
+            }}
+            
             // Use PerformanceObserver for more reliable metrics in Streamlit
             try {{
                 // LCP Observer
@@ -67,15 +82,14 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                     sendVitals();
                 }}).observe({{type: 'largest-contentful-paint', buffered: true}});
                 
-                // CLS Observer
-                let clsValue = 0;
+                // CLS Observer - accumulate in parent window to persist across Streamlit rerenders
                 new PerformanceObserver((list) => {{
                     for (const entry of list.getEntries()) {{
                         if (!entry.hadRecentInput) {{
-                            clsValue += entry.value;
+                            parentWin._clsValue += entry.value;
                         }}
                     }}
-                    parentWin._webVitals.cls = parseFloat(clsValue.toFixed(4));
+                    parentWin._webVitals.cls = parseFloat(parentWin._clsValue.toFixed(4));
                     sendVitals();
                 }}).observe({{type: 'layout-shift', buffered: true}});
                 
@@ -88,17 +102,16 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                     }}
                 }}).observe({{type: 'paint', buffered: true}});
                 
-                // INP Observer (Interaction to Next Paint)
-                let maxINP = 0;
+                // INP Observer (Interaction to Next Paint) - lowered threshold to 0 to capture all interactions
                 new PerformanceObserver((list) => {{
                     for (const entry of list.getEntries()) {{
-                        if (entry.duration > maxINP) {{
-                            maxINP = entry.duration;
-                            parentWin._webVitals.inp = Math.round(maxINP);
+                        if (entry.duration > 0) {{
+                            parentWin._inpEntries.push(entry.duration);
+                            calculateINP();
                         }}
                     }}
                     sendVitals();
-                }}).observe({{type: 'event', buffered: true, durationThreshold: 16}});
+                }}).observe({{type: 'event', buffered: true, durationThreshold: 0}});
                 
                 // TTFB from Navigation Timing
                 const navEntry = performance.getEntriesByType('navigation')[0];
@@ -112,15 +125,57 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                 console.warn('[Web Vitals] PerformanceObserver not fully supported:', e);
             }}
             
+            // Explicit interaction tracking for common user actions
+            function trackInteraction(event) {{
+                const start = performance.now();
+                requestAnimationFrame(() => {{
+                    requestAnimationFrame(() => {{
+                        const duration = performance.now() - start;
+                        if (duration > 0) {{
+                            parentWin._inpEntries.push(duration);
+                            calculateINP();
+                            sendVitals();
+                        }}
+                    }});
+                }});
+            }}
+            
+            // Attach interaction listeners to parent window for comprehensive tracking
+            ['click', 'keydown', 'pointerdown'].forEach(eventType => {{
+                parentWin.document.addEventListener(eventType, trackInteraction, {{passive: true, capture: true}});
+            }});
+            
+            // Also track in iframes (Streamlit components)
+            try {{
+                document.addEventListener('click', trackInteraction, {{passive: true, capture: true}});
+                document.addEventListener('keydown', trackInteraction, {{passive: true, capture: true}});
+            }} catch (e) {{}}
+            
+            // Force CLS measurement on dynamic content by observing mutations
+            const mutationObserver = new MutationObserver(() => {{
+                // Trigger a layout shift check after DOM changes
+                if (parentWin._webVitals.cls === undefined) {{
+                    parentWin._webVitals.cls = 0;
+                }}
+            }});
+            mutationObserver.observe(parentWin.document.body, {{
+                childList: true,
+                subtree: true,
+                attributes: true
+            }});
+            
             // Send on various triggers
             setTimeout(sendVitals, 3000);
             setInterval(sendVitals, 30000);
             
             parentWin.addEventListener('visibilitychange', () => {{
-                if (parentWin.document.visibilityState === 'hidden') sendVitals();
+                if (parentWin.document.visibilityState === 'hidden') {{
+                    calculateINP();
+                    sendVitals(true);
+                }}
             }});
-            parentWin.addEventListener('pagehide', sendVitals);
-            parentWin.addEventListener('beforeunload', sendVitals);
+            parentWin.addEventListener('pagehide', () => {{ calculateINP(); sendVitals(true); }});
+            parentWin.addEventListener('beforeunload', () => {{ calculateINP(); sendVitals(true); }});
         }}
     </script>
     """
