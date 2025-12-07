@@ -311,7 +311,7 @@ class AnomalyDetection:
                         "query": f"""
                         SELECT COUNT(*) as null_count
                         FROM `{self.project_id}.{self.dataset}.{table_name}`
-                        WHERE interaction_type IS NULL OR interaction_type = 'view'
+                        WHERE interaction_type_clean IS NULL OR interaction_type_clean = 'view'
                         """,
                         "max_allowed": 0
                     },
@@ -471,7 +471,7 @@ def main_post_validation():
     anomaly_detector = AnomalyDetection()
     return anomaly_detector.run_post_validation()
 
-def main(use_cleaned_tables=False):
+def main(use_cleaned_tables=True):
     """
     Main function called by Airflow DAG for data validation.
     

@@ -262,10 +262,10 @@ def test_interaction_weight_logic_in_sql():
                     generated_sql = call_args[0][0]
                     
                     # Validate the hierarchy logic exists exactly as defined
-                    assert "WHEN interaction_type = 'read' THEN 5" in generated_sql
-                    assert "WHEN interaction_type = 'like' THEN 4" in generated_sql
-                    assert "WHEN interaction_type = 'add_to_list' THEN 3" in generated_sql
-                    assert "WHEN interaction_type = 'click' THEN 1" in generated_sql
+                    assert "WHEN interaction_type_clean = 'read' THEN 5" in generated_sql
+                    assert "WHEN interaction_type_clean = 'like' THEN 4" in generated_sql
+                    assert "WHEN interaction_type_clean = 'add_to_list' THEN 3" in generated_sql
+                    assert "WHEN interaction_type_clean = 'click' THEN 1" in generated_sql
                     
                     # Validate the column is aliased correctly
                     assert "END as interaction_weight" in generated_sql

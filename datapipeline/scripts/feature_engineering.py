@@ -262,10 +262,10 @@ class FeatureEngineering:
                 -- Feature: Explicit Interaction Score
                 -- Based on the hierarchy: read > like > add_to_list > click
                 CASE 
-                    WHEN interaction_type = 'read' THEN 5
-                    WHEN interaction_type = 'like' THEN 4
-                    WHEN interaction_type = 'add_to_list' THEN 3
-                    WHEN interaction_type = 'click' THEN 1
+                    WHEN interaction_type_clean = 'read' THEN 5
+                    WHEN interaction_type_clean = 'like' THEN 4
+                    WHEN interaction_type_clean = 'add_to_list' THEN 3
+                    WHEN interaction_type_clean = 'click' THEN 1
                     ELSE 0
                 END as interaction_weight,
 
