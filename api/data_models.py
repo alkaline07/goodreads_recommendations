@@ -22,9 +22,8 @@ class LoginResponse(BaseModel):
 class ClickRequest(BaseModel):
     user_id: str
     book_id: int
+    event_type: str
     book_title: Optional[str] = None
-    event_type: Literal["view", "click", "like", "add_to_list", "read"]
-    timestamp: Optional[str] = None
 
 
 class BookDetails(BaseModel):

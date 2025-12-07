@@ -89,12 +89,14 @@ def log_ctr_event(user_id: str, book_id: int, event_type: str = "click", book_ti
     """
     logger = LogClickEvent()
     try:
-        return logger.log_user_event(
+        result = logger.log_user_event(
             user_id=user_id,
             book_id=int(book_id),     # BigQuery table uses STRING
             event_type=event_type,
             book_title=book_title
         )
+        return bool(result)
+
     except Exception as e:
         print(f"CTR logging failed: {e}")
         return False
