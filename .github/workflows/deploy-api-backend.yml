@@ -7,7 +7,6 @@ on:
     paths:
       - 'api/**'
       - 'terraform/**'
-      - 'src/**'
   workflow_dispatch:
 
 concurrency:
