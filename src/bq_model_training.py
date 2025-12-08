@@ -308,7 +308,7 @@ class BigQueryMLModelTraining:
             all_columns = [field.name for field in table.schema]
            
             exclude_columns = {
-                'user_id_clean', 'book_id', 'rating',
+                'user_id_clean', 'book_id', 'rating', 'is_read',
                 'user_days_to_read', 'user_book_recency'
             }
            
@@ -331,7 +331,7 @@ class BigQueryMLModelTraining:
                 'book_era', 'avg_pages_per_day', 'avg_book_reading_time_days',
                 'num_readers_with_reading_time', 'reading_pace_category',
                 'user_avg_rating_vs_book', 'user_reading_speed_ratio',
-                'user_pages_per_day_this_book', 'is_read', 'interaction_weight'
+                'user_pages_per_day_this_book', 'interaction_weight'
             ]
 
     def evaluate_model(self, model_name, model_type):
