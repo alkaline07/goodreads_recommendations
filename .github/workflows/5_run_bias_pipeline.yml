@@ -15,6 +15,7 @@ jobs:
 
     permissions:
       contents: write
+      pull-requests: write
       actions: read
 
     steps:
@@ -40,29 +41,39 @@ jobs:
         echo "Starting Bias Audit Pipeline"
         python -m src.bias_pipeline
 
-    - name: Generate Branch Name
-      run: echo "BRANCH_NAME=artifacts_bot_$(date +%s)" >> $GITHUB_ENV
-    
-    - name: Commit and push new files
+    - name: Create and merge PR with updated artifacts
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |                 
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
-          
-        # Switch to the new branch
+        
+        BRANCH_NAME="bias-pipeline-artifacts-$(date +%Y%m%d-%H%M%S)"
         git checkout -b $BRANCH_NAME
           
         git add -A
-        # Commit the changes
-        git commit -m "Add auto generated model artifacts and outputs" || echo "No changes to commit"
+        git commit -m "Update model selection report and bias artifacts" || echo "No changes to commit"
+        
+        if git diff --cached --quiet && git diff HEAD~1 --quiet 2>/dev/null; then
+          echo "No changes to commit"
+          exit 0
+        fi
           
-        # Push the new branch, not master
         git push -u origin $BRANCH_NAME
+        
+        PR_URL=$(gh pr create \
+          --title "Update model selection report and bias artifacts" \
+          --body "Automated update from Bias Pipeline workflow." \
+          --base master \
+          --head $BRANCH_NAME)
+        
+        echo "PR created: $PR_URL"
+        
+        gh pr merge $PR_URL --merge --delete-branch
 
     - name: Notify on success
       if: success()
-      run: echo "Bias Pipeline executed successfully!"
+      run: echo "Bias Pipeline executed successfully! PR created and merged."
 
     - name: Notify on failure
       if: failure()
