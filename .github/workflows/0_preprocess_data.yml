@@ -17,6 +17,7 @@ on:
   push:
     paths:
       - 'datapipeline/**'
+      - 'config/dags/data_pipeline_dag.py'
     branches:
       - main
       - master
