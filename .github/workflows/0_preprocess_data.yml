@@ -178,9 +178,6 @@ jobs:
             echo "Waiting for DAG to be parsed... (attempt $i/12)"
             sleep 5
           done
-
-          echo "Unpausing DAG..."
-          docker exec airflow-webserver airflow dags unpause $DAG_ID
           
           echo "Triggering DAG run..."
           TRIGGER_OUTPUT=$(docker exec airflow-webserver airflow dags trigger $DAG_ID --output json 2>&1)
