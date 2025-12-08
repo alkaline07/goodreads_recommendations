@@ -368,7 +368,7 @@ def etl_interactions_run():
 # -----------------------------
 #  CTR DAG DEFINITION
 # -----------------------------
-# Test Auto trigger
+       
 with DAG(
     dag_id='goodreads_ctr_data_pipeline',
     default_args=default_args,
