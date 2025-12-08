@@ -69,6 +69,8 @@ jobs:
         
         echo "PR created: $PR_URL"
         
+        gh pr review $PR_URL --approve
+        
         gh pr merge $PR_URL --merge --delete-branch
 
     - name: Notify on success
