@@ -33,3 +33,10 @@ class BookDetails(BaseModel):
     authors: List[str]
     average_rating: float
     ratings_count: int
+
+class MarkReadRequest(BaseModel):
+    user_id: str
+    book_id: int
+    rating: Optional[int] = 0
+
+

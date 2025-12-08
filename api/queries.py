@@ -2,6 +2,8 @@ from google.cloud import bigquery
 from .database import get_bq_client
 from .generate_predictions import GeneratePredictions
 from .log_click_event import LogClickEvent
+from datetime import datetime
+
 
 
 _client = None
@@ -230,6 +232,38 @@ def get_books_not_read_by_user(user_id: str):
     job = client.query(query)
     return [dict(row) for row in job.result()]
 
+# ---------------------------------------------------------------------
+# INSERT NEW BOOK INTO INTERACTIONS TABLE WHEN MARKED AS READ
+# ---------------------------------------------------------------------
+def insert_read_interaction(user_id: str, book_id: int, rating: int = None):
+    client, project = _get_client()
+    table = f"{project}.{dataset}.goodreads_interactions_mystery_thriller_crime"
+
+    now = datetime.utcnow().strftime("%a %b %d %H:%M:%S +0000 %Y")
+
+    row = [{
+        "user_id": user_id,
+        "book_id": int(book_id),
+        "review_id": None,
+        "date_added": now,
+        "date_updated": now,
+        "read_at": now,
+        "started_at": None,
+        "review_text_incomplete": "",
+        "rating": rating if rating is not None else 0,
+        "is_read": True,
+        "interaction_type": "read"
+    }]
+
+    try:
+        errors = client.insert_rows_json(table, row)
+        if errors:
+            print("BQ insert errors:", errors)
+            return False
+        return True
+    except Exception as e:
+        print("BQ insert exception:", e)
+        return False
 
 
 # ---------------------------------------------------------------------
