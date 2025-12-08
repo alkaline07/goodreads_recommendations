@@ -311,7 +311,7 @@ class AnomalyDetection:
                         "query": f"""
                         SELECT COUNT(*) as null_count
                         FROM `{self.project_id}.{self.dataset}.{table_name}`
-                        WHERE interaction_type IS NULL OR interaction_type = 'view'
+                        WHERE interaction_type_clean IS NULL OR interaction_type_clean = 'view'
                         """,
                         "max_allowed": 0
                     },
