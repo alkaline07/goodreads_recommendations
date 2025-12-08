@@ -257,6 +257,7 @@ with DAG(
     catchup=False,
     on_failure_callback=send_failure_email,
     on_success_callback=send_success_email,
+    is_paused_upon_creation=True
 ) as dag:
 
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("AIRFLOW_HOME") + "/gcp_credentials.json"

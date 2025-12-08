@@ -14,6 +14,12 @@ on:
         required: false
         type: boolean
         default: true
+  push:
+    paths:
+      - 'datapipeline/**'
+    branches:
+      - main
+      - master
 
 env:
   COMPOSE_FILE: docker-compose.yaml
@@ -176,6 +182,8 @@ jobs:
           echo "Unpausing DAG..."
           docker exec airflow-webserver airflow dags unpause $DAG_ID
           
+          echo "Triggering DAG run..."
+          TRIGGER_OUTPUT=$(docker exec airflow-webserver airflow dags trigger $DAG_ID --output json 2>&1)
           echo "Trigger output: $TRIGGER_OUTPUT"
 
           RUN_ID=$(echo "$TRIGGER_OUTPUT" | grep -o '"dag_run_id": "[^"]*"' | cut -d'"' -f4)
