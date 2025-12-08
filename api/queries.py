@@ -159,26 +159,25 @@ def get_books_read_by_user(user_id: str):
 
     SELECT
         inter.book_id,
-        b.title_clean AS title,
+        b.title_clean as title ,
         b.average_rating,
         b.ratings_count,
         ea.author,
-        CASE
-            WHEN inter.read_at_clean = 'Unknown' THEN 
-                FORMAT_TIMESTAMP('%A, %B %d %Y', TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 DAY))
-            ELSE 
-                FORMAT_TIMESTAMP('%A, %B %d %Y',
-                    PARSE_TIMESTAMP('%a %b %d %H:%M:%S %z %Y', inter.read_at_clean)
-                )
-        END AS date_read
-    FROM `{project}.{dataset}.goodreads_interactions_cleaned` inter
+    FORMAT_TIMESTAMP(
+        '%A, %B %d %Y',
+        COALESCE(
+            SAFE.PARSE_TIMESTAMP('%a %b %d %H:%M:%S %z %Y', NULLIF(inter.read_at, "")),
+            TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 DAY)
+        )
+    ) AS date_read
+    FROM `{project}.{dataset}.goodreads_interactions_mystery_thriller_crime` inter
     LEFT JOIN `{project}.{dataset}.goodreads_books_cleaned` b
         ON inter.book_id = b.book_id
     LEFT JOIN enriched_authors ea
         ON inter.book_id = ea.book_id
-    WHERE inter.user_id_clean = '{user_id}'
+    WHERE inter.user_id = '{user_id}'
       AND inter.is_read = TRUE
-    ORDER BY inter.read_at_clean DESC
+    ORDER BY inter.read_at DESC
     """
 
     job = client.query(query)
@@ -194,8 +193,8 @@ def get_books_not_read_by_user(user_id: str):
     query = f"""
     WITH read_books AS (
         SELECT book_id
-        FROM `{project}.{dataset}.goodreads_interactions_cleaned`
-        WHERE user_id_clean = '{user_id}'
+        FROM `{project}.{dataset}.goodreads_interactions_mystery_thriller_crime`
+        WHERE user_id = '{user_id}'
           AND is_read = TRUE
     ),
     exploded_authors AS (
