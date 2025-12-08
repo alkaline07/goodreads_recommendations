@@ -184,11 +184,7 @@ jobs:
           RUN_ID=$(echo "$TRIGGER_OUTPUT" | grep -o '"dag_run_id": "[^"]*"' | cut -d'"' -f4)
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "dag_id=$DAG_ID" >> $GITHUB_OUTPUT
-          echo "DAG triggered with run_id: $RUN_ID"
-          echo ""
-          echo "Pausing DAG to prevent scheduled runs..."
-          docker exec airflow-webserver airflow dags pause $DAG_ID
-          
+          echo "DAG triggered with run_id: $RUN_ID" 
           echo ""
           echo "Monitor progress at: $NGROK_URL/dags/$DAG_ID/grid"
           echo "::notice title=DAG Triggered::Monitor at $NGROK_URL/dags/$DAG_ID/grid"
