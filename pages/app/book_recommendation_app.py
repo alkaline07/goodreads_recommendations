@@ -470,6 +470,10 @@ if 'last_search_query' not in st.session_state:
     st.session_state.last_search_query = ""
 if 'vitals_injected' not in st.session_state:
     st.session_state.vitals_injected = False
+if 'show_rating_modal' not in st.session_state:
+    st.session_state.show_rating_modal = False
+if 'rating_book_info' not in st.session_state:
+    st.session_state.rating_book_info = None
 
 # Page configuration
 st.set_page_config(
@@ -557,15 +561,18 @@ with st.sidebar:
 
         if st.button("🏠 Home", use_container_width=True, key="nav_home"):
             st.session_state.view_mode = 'recommendations'
+            st.session_state.show_rating_modal = False
             st.rerun()
 
         if st.button("📖 My Read Books", use_container_width=True, key="nav_read"):
             st.session_state.read_books = get_read_books(st.session_state.current_user)
             st.session_state.view_mode = 'read_books'
+            st.session_state.show_rating_modal = False
             st.rerun()
 
         if st.button("🔍 Search Books", use_container_width=True, key="nav_search"):
             st.session_state.view_mode = 'search'
+            st.session_state.show_rating_modal = False
             st.rerun()
 
         st.markdown("---")
@@ -573,6 +580,7 @@ with st.sidebar:
         if st.button("🚪 Logout", use_container_width=True, key="nav_logout"):
             st.session_state.current_user = None
             st.session_state.view_mode = 'user_selection'
+            st.session_state.show_rating_modal = False
             st.rerun()
     else:
         st.info("Please login to access features")
@@ -609,6 +617,7 @@ def display_book_card(book: Dict, col, button_prefix: str = "btn"):
                 book_details['book_id'] = book['book_id']
 
                 st.session_state.selected_book = book_details
+                st.session_state.previous_view = 'recommendations'
                 st.session_state.view_mode = 'book_details'
 
             st.rerun()
@@ -801,12 +810,6 @@ elif st.session_state.view_mode == 'search':
                     st.markdown(f"**{book.get('title', 'Unknown')}** by *{book.get('author', 'Unknown')}* - ⭐ {format_rating(book.get('rating'))}")
             with col2:
                 if st.button("View", key=f"search_view_{idx}_{book.get('book_id', idx)}", use_container_width=True):
-                    send_click_event(
-                        st.session_state.current_user,
-                        book.get('book_id', ''),
-                        "click",
-                        book.get('title', '')
-                    )
 
                     with st.spinner(f'Fetching details...'):
                         book_details = get_book_details_from_google(
@@ -831,6 +834,7 @@ elif st.session_state.view_mode == 'book_details':
     # Back button
     if st.button("← Back"):
         st.session_state.view_mode = st.session_state.get('previous_view', 'recommendations')
+        st.session_state.show_rating_modal = False
         st.rerun()
 
     book = st.session_state.selected_book
@@ -879,37 +883,82 @@ elif st.session_state.view_mode == 'book_details':
     if already_read:
         st.success("✅ You've already read this book!")
     else:
-        col1, col2, col3 = st.columns(3)
+        if st.session_state.show_rating_modal and st.session_state.rating_book_info:
+            st.markdown("---")
+            st.markdown("#### ⭐ Rate this book before marking as read")
 
-        with col1:
-            if st.button("❤️ Like this book", use_container_width=True):
-                send_click_event(
-                    st.session_state.current_user,
-                    book['book_id'],
-                    "like",
-                    book['title']
-                )
-                st.success("Preference recorded!")
+            rating = st.slider(
+                "How would you rate this book?",
+                min_value=1,
+                max_value=5,
+                value=3,
+                step=1,
+                format="%d ⭐",
+                key="rating_slider"
+            )
 
-        with col2:
-            if st.button("📚 Add to Reading List", use_container_width=True):
-                send_click_event(
-                    st.session_state.current_user,
-                    book['book_id'],
-                    "add_to_list",
-                    book['title']
-                )
-                st.success("Added to your reading list!")
+            # Display star rating visually
+            stars_display = "⭐" * rating + "☆" * (5 - rating)
+            st.markdown(f"**Your rating:** {stars_display} ({rating}/5)")
+            col_submit, col_cancel = st.columns(2)
+            with col_submit:
+                if st.button("✅ Submit Rating & Mark as Read", type="primary", use_container_width=True):
+                    try:
+                        requests.post(
+                            f"{API_BASE_URL}/mark-read",
+                            json={
+                                "user_id": st.session_state.current_user,
+                                "book_id": st.session_state.rating_book_info['book_id'],
+                                "book_title": st.session_state.rating_book_info['title'],
+                                "rating": rating
+                            },
+                            timeout=10
+                        )
+                        st.success(f"Marked as read with {rating}⭐ rating!")
+                        st.balloons()
+                    except Exception as e:
+                        st.error(f"Error marking book as read: {e}")
+                    st.session_state.show_rating_modal = False
+                    st.session_state.rating_book_info = None
 
-        with col3:
-            if st.button("✅ Mark as Read", use_container_width=True):
-                send_click_event(
-                    st.session_state.current_user,
-                    book['book_id'],
-                    "read",
-                    book['title']
-                )
-                st.success("Marked as read!")
+            with col_cancel:
+                if st.button("❌ Cancel", use_container_width=True):
+                    st.session_state.show_rating_modal = False
+                    st.session_state.rating_book_info = None
+                    st.rerun()
+        else:
+            # Normal action buttons
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                if st.button("❤️ Like this book", use_container_width=True):
+                    send_click_event(
+                        st.session_state.current_user,
+                        book['book_id'],
+                        "like",
+                        book['title']
+                    )
+                    st.success("Preference recorded!")
+
+            with col2:
+                if st.button("📚 Add to Reading List", use_container_width=True):
+                    send_click_event(
+                        st.session_state.current_user,
+                        book['book_id'],
+                        "add_to_list",
+                        book['title']
+                    )
+                    st.success("Added to your reading list!")
+
+            with col3:
+                if st.button("✅ Mark as Read", use_container_width=True):
+                    # Show rating modal instead of directly marking as read
+                    st.session_state.show_rating_modal = True
+                    st.session_state.rating_book_info = {
+                        'book_id': book['book_id'],
+                        'title': book['title']
+                    }
+                    st.rerun()
 
 # Footer
 st.markdown("---")
