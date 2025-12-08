@@ -14,12 +14,6 @@ on:
         required: false
         type: boolean
         default: true
-  push:
-    paths:
-      - 'datapipeline/**'
-    branches:
-      - main
-      - master
 
 env:
   COMPOSE_FILE: docker-compose.yaml
