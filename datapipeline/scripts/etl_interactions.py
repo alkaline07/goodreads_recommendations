@@ -85,17 +85,14 @@ class ETLInteractions:
             SELECT
                 user_id,
                 SAFE_CAST(book_id AS INT64) as book_id,
-                event_id as review_id,
+                '' as review_id,
                 
                 CAST(event_timestamp AS STRING) as date_added,
                 CAST(event_timestamp AS STRING) as date_updated,
                 '' as read_at,
                 '' as started_at,
                 
-                CASE 
-                    WHEN event_type = 'read' THEN TRUE 
-                    ELSE FALSE 
-                END as is_read,
+                FALSE as is_read,
                 0 as rating,          
                 '' as review_text_incomplete,
                 
@@ -110,7 +107,6 @@ class ETLInteractions:
                 PARTITION BY user_id, book_id 
                 ORDER BY 
                     CASE 
-                        WHEN event_type = 'read' THEN 4
                         WHEN event_type = 'like' THEN 3
                         WHEN event_type = 'add_to_list' THEN 2
                         WHEN event_type = 'click' THEN 1
