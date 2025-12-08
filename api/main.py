@@ -236,15 +236,17 @@ def books_unread(user_id: str):
 # ------------------------------------------------------
 @app.post("/mark-read")
 def mark_read(request: MarkReadRequest):
-    try:
-        insert_read_interaction(
-            user_id=request.user_id,
-            book_id=request.book_id,
-            rating=request.rating
-        )
-        return {"success": True}
-    except Exception as e:
+
+    success = insert_read_interaction(
+        user_id=request.user_id,
+        book_id=request.book_id,
+        rating=request.rating
+    )
+
+    if not success:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to insert read event: {str(e)}"
+            detail="Failed to insert read interaction into BigQuery"
         )
+
+    return {"success": True}

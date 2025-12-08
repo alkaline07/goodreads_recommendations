@@ -4,8 +4,6 @@ from .generate_predictions import GeneratePredictions
 from .log_click_event import LogClickEvent
 from datetime import datetime
 
-
-
 _client = None
 _project = None
 dataset = "books"
@@ -17,7 +15,6 @@ def _get_client():
         _client = get_bq_client()
         _project = _client.project
     return _client, _project
-
 
 # ---------------------------------------------------------------------
 # CHECK IF USER EXISTS IN PREDICTION TABLE
@@ -248,11 +245,10 @@ def insert_read_interaction(user_id: str, book_id: int, rating: int = None):
         "date_added": now,
         "date_updated": now,
         "read_at": now,
-        "started_at": None,
+        "started_at": now,
         "review_text_incomplete": "",
         "rating": rating if rating is not None else 0,
-        "is_read": True,
-        "interaction_type": "read"
+        "is_read": True
     }]
 
     try:
