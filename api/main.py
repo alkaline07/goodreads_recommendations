@@ -8,7 +8,8 @@ from .data_models import (
     LoginResponse,
     BookRecommendation,
     ClickRequest,
-    BookDetails
+    BookDetails,
+    MarkReadRequest
 )
 from .queries import (
     check_user_exists,
@@ -17,7 +18,8 @@ from .queries import (
     log_ctr_event,
     get_book_details,
     get_books_read_by_user,
-    get_books_not_read_by_user
+    get_books_not_read_by_user,
+    insert_read_interaction
 )
 from .monitoring_dashboard import router as monitoring_router
 from .middleware import MonitoringMiddleware, get_metrics_collector
@@ -228,3 +230,21 @@ def books_read(user_id: str):
 def books_unread(user_id: str):
     rows = get_books_not_read_by_user(user_id)
     return {"user_id": user_id, "books_unread": rows}
+
+# ------------------------------------------------------
+# 5. USER HAS MARKED AS READ
+# ------------------------------------------------------
+@app.post("/mark-read")
+def mark_read(request: MarkReadRequest):
+    try:
+        insert_read_interaction(
+            user_id=request.user_id,
+            book_id=request.book_id,
+            rating=request.rating
+        )
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to insert read event: {str(e)}"
+        )
