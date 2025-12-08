@@ -173,18 +173,15 @@ jobs:
             sleep 5
           done
 
-          echo "Checking current DAG state..."
-          docker exec airflow-webserver airflow dags list | grep $DAG_ID || true
-
-          echo ""
-          echo "Triggering manual DAG run (without unpausing first)..."
-          TRIGGER_OUTPUT=$(docker exec airflow-webserver airflow dags trigger $DAG_ID --output json 2>&1)
+          echo "Unpausing DAG..."
+          docker exec airflow-webserver airflow dags unpause $DAG_ID
+          
           echo "Trigger output: $TRIGGER_OUTPUT"
 
           RUN_ID=$(echo "$TRIGGER_OUTPUT" | grep -o '"dag_run_id": "[^"]*"' | cut -d'"' -f4)
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "dag_id=$DAG_ID" >> $GITHUB_OUTPUT
-          echo "DAG triggered with run_id: $RUN_ID" 
+          echo "DAG triggered with run_id: $RUN_ID"
           echo ""
           echo "Monitor progress at: $NGROK_URL/dags/$DAG_ID/grid"
           echo "::notice title=DAG Triggered::Monitor at $NGROK_URL/dags/$DAG_ID/grid"
