@@ -14,6 +14,12 @@ on:
         required: false
         type: boolean
         default: true
+  push:
+    paths:
+      - 'datapipeline/**'
+    branches:
+      - main
+      - master
 
 env:
   COMPOSE_FILE: docker-compose.yaml
@@ -155,10 +161,17 @@ jobs:
       - name: Trigger DAG
         id: trigger_dag
         run: |
-          echo "Triggering DAG: ${{ inputs.dag_id }}"
+          # Set DAG ID based on trigger type
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            DAG_ID="${{ inputs.dag_id }}"
+          else
+            DAG_ID="goodreads_recommendation_pipeline"
+          fi
+          
+          echo "Triggering DAG: $DAG_ID"
           
           for i in {1..12}; do
-            if docker exec airflow-webserver airflow dags list | grep -q "${{ inputs.dag_id }}"; then
+            if docker exec airflow-webserver airflow dags list | grep -q "$DAG_ID"; then
               echo "DAG found!"
               break
             fi
@@ -167,25 +180,27 @@ jobs:
           done
 
           echo "Unpausing DAG..."
-          docker exec airflow-webserver airflow dags unpause ${{ inputs.dag_id }}
+          docker exec airflow-webserver airflow dags unpause $DAG_ID
           
           echo "Triggering DAG run..."
-          TRIGGER_OUTPUT=$(docker exec airflow-webserver airflow dags trigger ${{ inputs.dag_id }} --output json 2>&1)
+          TRIGGER_OUTPUT=$(docker exec airflow-webserver airflow dags trigger $DAG_ID --output json 2>&1)
           echo "Trigger output: $TRIGGER_OUTPUT"
-
 
           RUN_ID=$(echo "$TRIGGER_OUTPUT" | grep -o '"dag_run_id": "[^"]*"' | cut -d'"' -f4)
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "dag_id=$DAG_ID" >> $GITHUB_OUTPUT
           echo "DAG triggered with run_id: $RUN_ID"
           echo ""
-          echo "Monitor progress at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
-          echo "::notice title=DAG Triggered::Monitor at $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+          echo "Monitor progress at: $NGROK_URL/dags/$DAG_ID/grid"
+          echo "::notice title=DAG Triggered::Monitor at $NGROK_URL/dags/$DAG_ID/grid"
 
       - name: Wait for DAG completion
-        if: ${{ inputs.wait_for_completion }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.wait_for_completion || github.event_name == 'push' }}
         run: |
+          DAG_ID="${{ steps.trigger_dag.outputs.dag_id }}"
+          
           echo "Waiting for DAG run ${{ steps.trigger_dag.outputs.run_id }} to complete..."
-          echo "Live monitoring: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+          echo "Live monitoring: $NGROK_URL/dags/$DAG_ID/grid"
           echo ""
           
           MAX_WAIT=3600
@@ -195,7 +210,7 @@ jobs:
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             # Get task states
             TASK_STATES=$(docker exec airflow-scheduler airflow tasks states-for-dag-run \
-              ${{ inputs.dag_id }} \
+              $DAG_ID \
               ${{ steps.trigger_dag.outputs.run_id }} 2>/dev/null)
             
             # Count task states (FIX: strip newlines and spaces)
@@ -232,7 +247,7 @@ jobs:
             if [ "$SUCCESS_TASKS" -ge 13 ] && [ "$RUNNING_TASKS" -eq 0 ]; then
               echo "DAG completed successfully!"
               echo ""
-              docker exec airflow-scheduler airflow dags list-runs -d ${{ inputs.dag_id }} --state success --limit 1 || true
+              docker exec airflow-scheduler airflow dags list-runs -d $DAG_ID --state success --limit 1 || true
               exit 0
             fi
             
@@ -243,25 +258,29 @@ jobs:
           echo ""
           echo "Timeout waiting for DAG completion after ${MAX_WAIT}s"
           echo "Current status: $SUCCESS_TASKS success, $RUNNING_TASKS running, $FAILED_TASKS failed"
-          echo "Check status at: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+          echo "Check status at: $NGROK_URL/dags/$DAG_ID/grid"
           exit 1
 
       - name: Show pipeline summary
         if: success()
         run: |
+          DAG_ID="${{ steps.trigger_dag.outputs.dag_id }}"
+          
           echo "=========================================="
           echo "Pipeline Execution Summary"
           echo "=========================================="
-          echo "DAG: ${{ inputs.dag_id }}"
+          echo "DAG: $DAG_ID"
           echo "Run ID: ${{ steps.trigger_dag.outputs.run_id }}"
           echo ""
           echo "All tasks completed:"
-          docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }}
+          docker exec airflow-webserver airflow tasks states-for-dag-run $DAG_ID ${{ steps.trigger_dag.outputs.run_id }}
           echo "=========================================="
 
       - name: Show failure details
         if: failure()
         run: |
+          DAG_ID="${{ steps.trigger_dag.outputs.dag_id }}"
+          
           echo "=========================================="
           echo "PIPELINE FAILURE DETAILS"
           echo "=========================================="
@@ -281,7 +300,7 @@ jobs:
           done
           
           echo "=== Failed Tasks ==="
-          docker exec airflow-webserver airflow tasks states-for-dag-run ${{ inputs.dag_id }} ${{ steps.trigger_dag.outputs.run_id }} 2>&1 | grep -i failed || echo "Cannot access task states"
+          docker exec airflow-webserver airflow tasks states-for-dag-run $DAG_ID ${{ steps.trigger_dag.outputs.run_id }} 2>&1 | grep -i failed || echo "Cannot access task states"
           echo ""
           echo "Full logs available at: $NGROK_URL"
           echo "=========================================="
@@ -289,11 +308,13 @@ jobs:
       - name: Keep ngrok alive for debugging
         if: failure()
         run: |
+          DAG_ID="${{ steps.trigger_dag.outputs.dag_id }}"
+          
           echo "=========================================="
           echo "Workflow failed - keeping ngrok alive"
           echo "=========================================="
           echo "Access Airflow UI at: $NGROK_URL"
-          echo "Direct link to DAG: $NGROK_URL/dags/${{ inputs.dag_id }}/grid"
+          echo "Direct link to DAG: $NGROK_URL/dags/$DAG_ID/grid"
           echo ""
           echo "Keeping tunnel open for 10 minutes for debugging..."
           echo "=========================================="
