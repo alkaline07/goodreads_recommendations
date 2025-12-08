@@ -257,6 +257,9 @@ with DAG(
     catchup=False,
     on_failure_callback=send_failure_email,
     on_success_callback=send_success_email,
+    is_paused_upon_creation=True,
+    schedule_interval=None
+
 ) as dag:
 
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("AIRFLOW_HOME") + "/gcp_credentials.json"
@@ -365,7 +368,7 @@ def etl_interactions_run():
 # -----------------------------
 #  CTR DAG DEFINITION
 # -----------------------------
-
+       
 with DAG(
     dag_id='goodreads_ctr_data_pipeline',
     default_args=default_args,
