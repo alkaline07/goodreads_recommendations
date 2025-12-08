@@ -427,7 +427,7 @@ def send_click_event(user_id: str, book_id: int, event_type: str, book_title: st
         "user_id": user_id,
         "book_id": book_id,
         "book_title": book_title,
-        "event_type": event_type,  # "view", "click", "like", "add_to_list", "similar", "mark_read"
+        "event_type": event_type,  # "view", "click", "like", "add_to_list"
         "timestamp": datetime.utcnow().isoformat()
     }
     try:
@@ -909,7 +909,6 @@ elif st.session_state.view_mode == 'book_details':
                             json={
                                 "user_id": st.session_state.current_user,
                                 "book_id": st.session_state.rating_book_info['book_id'],
-                                "book_title": st.session_state.rating_book_info['title'],
                                 "rating": rating
                             },
                             timeout=10

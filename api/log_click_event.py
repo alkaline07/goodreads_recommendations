@@ -58,11 +58,8 @@ class LogClickEvent:
         if not self._wait_for_table():
             raise RuntimeError("Finding User Interaction table timed out.")
 
-        if event_type not in ["read", "click", "view", "like", "add_to_list", "similar"]:
-            raise ValueError("Invalid event_type. Must be one of read, click, view, like, add_to_list, similar")
-
-        if event_type == "similar":
-            return True  # Do not log 'similar' events type, it does not represent user action
+        if event_type not in ["click", "view", "like", "add_to_list"]:
+            raise ValueError("Invalid event_type. Must be one of click, view, like, add_to_list")
 
         # 2. Prepare data
         rows_to_insert = [{

@@ -43,18 +43,5 @@ class TestLogClickEvent(unittest.TestCase):
         with self.assertRaises(ValueError):
             logger.log_user_event("user_123", "book_456", "purchase")
 
-    @patch('api.log_click_event.bigquery.Client')
-    def test_similar_event_ignored(self, mock_bq_client):
-        """Test that 'similar' events return True but do NOT log to BQ."""
-        mock_client_instance = mock_bq_client.return_value
-        
-        logger = LogClickEvent()
-        # 'similar' events should return True immediately
-        result = logger.log_user_event("user_123", "book_456", "similar")
-
-        self.assertTrue(result)
-        # Ensure insert_rows_json was NOT called
-        mock_client_instance.insert_rows_json.assert_not_called()
-
 if __name__ == '__main__':
     unittest.main()
