@@ -235,7 +235,7 @@ For complete model development documentation, see [`README_model.md`](README_mod
 
 ## Phase 3. Model Deployment
 
-![img.png](assets/img.png)
+![img.png](assets/model_dep_arch.png)
 
 ![img_2.png](assets/img_2.png)
 
