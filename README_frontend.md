@@ -201,9 +201,9 @@ The frontend interacts with these backend endpoints:
 
 **Symptom**: "books_database.json not found, using fallback data"
 
-**Cause**: This is expected. The app uses a fallback database with sample books when the JSON file isn't present.
+**Cause**: The Docker image may not have the books database file properly copied.
 
-**Solution**: Place `books_database.json` in the `data/` directory if you have the full dataset.
+**Solution**: The file exists at `pages/data/books_database.json` and is copied to `data/` in the container. Rebuild and redeploy if needed.
 
 ### API connection errors
 
