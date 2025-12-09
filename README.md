@@ -1,0 +1,752 @@
+# Book Recommendation System (Goodreads + MLOps)
+
+This project builds a machine learning-based book recommendation system using Goodreads data, with an end-to-end MLOps-ready architecture that includes data processing, model training, recommendation logic, automated deployment, APIs for serving, Click-Through Rate calculation, and continuous monitoring.
+
+## Table of Contents
+- [Team Members](#team-members)
+- [Phase 1. Data Pipeline](#data-pipeline)
+- [Phase 2. Model Development](#model-development)
+- [Phase3. Model Deployment](#model-deployment)
+- Project Recreation 
+
+## Team Members
+
+- Ananya Asthana
+- Arpita Wagulde
+- Karan Goyal
+- Purva Agarwal
+- Shivam Sah
+- Shivani Sharma
+
+## Phase 1. Data Pipeline
+
+### Overview
+
+The data pipeline leverages **Apache Airflow** with **Google Cloud Platform (GCP)** to process Goodreads book ratings data from the mystery/thriller/crime genre subset. The pipeline transforms raw data into ML-ready features through automated processing stages.
+![architecture.jpg](assets/architecture.jpg)
+### Key Components
+
+#### Data Architecture
+- **Source**: Books and interactions data from Goodbooks dataset
+- **Storage**: Google BigQuery for scalable data processing
+- **Orchestration**: Apache Airflow DAG (`goodreads_recommendation_pipeline`)
+- **Version Control**: DVC for data versioning with GCS integration
+
+#### Pipeline Tasks
+1. **Data Reading**: Extracts data from BigQuery source tables with validation
+2. **Data Cleaning**: Removes duplicates, standardizes text, handles missing values
+3. **Feature Engineering**: Creates book-level, user-level, and interaction features
+4. **Data Normalization**: Applies Min-Max scaling for ML model consumption
+5. **Staging Promotion**: Moves processed data from staging to production tables
+6. **Data Versioning**: Tracks data evolution using DVC
+7. **Train, Test, and Validation Split**: Splits the processed data into training, testing, and validation sets for model development.
+
+#### Quality Assurance
+- **Multi-stage Validation**: Pre-cleaning and post-cleaning data quality checks
+- 1. Pre-cleaning (validate_data_quality task): Validates source data before any processing
+- 2. Post-cleaning (validate_cleaned_data task): Validates cleaned data before feature engineering
+- **Anomaly Detection**: Automated identification of data quality issues
+- **Email Monitoring**: Failure and success notifications for pipeline health
+
+### Data Processing Scale
+- **Raw Data**: Books and ratings from mystery/thriller/crime genre
+- **Cleaning**: Handles text standardization, timestamp validation, outlier removal
+- **Feature Engineering**: Computes book popularity, user activity patterns, reading times
+- **Final Dataset**: Train/val/test splits ready for ML model training
+
+### Data Analysis and Insights
+- **Raw Data Analysis**: 
+  - Zero missing values across all columns
+  - 9,599 unique titles out of 10,000 books
+  - 235 unique average rating values
+  - 1,353 unique ratings count values
+  - 7,367 unique descriptions
+  
+- **Visualizations Generated:**
+  - Average rating distribution histogram with KDE curve
+  - Ratings count distribution (log scale)
+  - Description length distribution (word count)
+  - Missing values percentage per column
+  - Sample data saved to `../raw/goodreads_sample.csv`
+
+### Bias Analysis & Fairness Assessment [(`bias_analysis.ipynb`)](https://github.com/purva-agarwal/goodreads_recommendations/blob/master/datapipeline/data/notebooks/bias_analysis.ipynb)
+- **Analysis Dimensions:**
+  - 1. **Popularity Bias** - High/Medium/Low popularity groups (based on book_popularity_normalized)
+  - 2. **Book Length Bias** - Categories based on book_length_category
+  - 3. **Book Era Bias** - Publication era groups (book_era)
+  - 4. **User Activity Bias** - High/Medium/Low activity user groups (based on user_activity_count)
+  - 5. **Reading Pace Bias** - Fast/Medium/Slow reader categories (reading_pace_category)
+  - 6. **Author Gender Bias** - Male/Female author groups (using gender_guesser library)
+
+- **Visualizations Generated:**
+  - Side-by-side bar charts comparing before/after ratings for each dimension
+  - Side-by-side bar charts showing % read behavior (unchanged)
+  - Equity index summary bar chart across all dimensions
+  - Detailed explanations for each dimension's bias patterns and mitigation effects
+  
+![db_tables_gcp.png](assets/db_tables_gcp.png)<div>
+![DAG_task_instances.jpeg](assets/DAG_task_instances.jpeg)
+
+For more detailed data pipeline documentation, see [`README_data.md`](README_data.md)
+
+## Phase 2. Model Development
+
+### ML Pipeline Overview
+This project implements an automated ML pipeline using **GitHub Actions** with **MLflow** tracking and **Vertex AI** model registry. The pipeline covers data loading, model training, bias detection, evaluation, validation, and deployment.
+It uses GitHub Actions to automate the complete ML pipeline from data loading to model deployment. The workflows are orchestrated in a sequential pipeline that ensures data quality, model training, evaluation, bias detection, validation, and version management.
+```text
+┌─────────────────┐
+│  PR Test Suite  │ (On Pull Requests)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  1. Load Data   │ (Manual Trigger)
+└────────┬────────┘
+         │
+         ▼
+┌──────────────────────┐
+│ 2. Train Model       │ (Auto: After Load Data)
+│    & Register        │
+└────────┬─────────────┘
+         │
+         ▼
+┌──────────────────────┐
+│ 3. Generate          │ (Auto: After Training)
+│    Predictions       │
+└────────┬─────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ 4. Evaluate     │ (Auto: After Predictions)
+│    Model        │
+└────────┬────────┘
+         │
+         ▼
+┌──────────────────────┐
+│ 5. Bias Detection     │ (Auto: After Evaluation)
+│    & Mitigation       │
+└────────┬──────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ 6. Model         │ (Auto: After Bias Pipeline)
+│    Validation   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ 7. Model Manager│ (Auto: After Validation)
+└─────────────────┘
+
+┌─────────────────┐
+│ Send Email      │ (Called by all workflows)
+│ Notification    │
+└─────────────────┘
+```
+**GitHub Actions Workflow Screenshots:**
+
+![PR-worflow-iii.png](assets/PR-worflow-iii.png)
+![PR-worflow-iv.png](assets/PR-worflow-iv.png)
+![PR-worflows-V.png](assets/PR-worflows-V.png)
+![PR-worflows-VI.png](assets/PR-worflows-VI.png)
+![artifacts_bot_branches.png](assets/artifacts_bot_branches.png)
+
+
+### Algorithm Selection
+
+Two recommendation algorithms were implemented and compared:
+
+#### Matrix Factorization
+- **Purpose**: Decomposes user-item rating matrix into latent factors
+- **Key Parameters**: Number of factors, L2 regularization, iterations
+- **Strengths**: Good at capturing user-item relationship patterns
+- **Performance**: Strong baseline with RMSE around 0.75-0.85
+
+#### Boosted Tree Regressor
+- **Purpose**: Gradient boosting for regression on user-item features
+- **Key Parameters**: Tree depth, number of trees, subsample ratio
+- **Decision Process**: Fed with user, book, and interaction features
+- **Performance**: Superior accuracy with RMSE around 0.60-0.70
+
+### Bias Detection & Mitigation
+
+#### 8-Dimensional Fairness Analysis
+The system analyzes bias across multiple dimensions:
+- **Demographic**: Author gender, publication era, book length
+- **Behavioral**: User activity, reading pace
+- **Content-Based**: Genre diversity, popularity, rating patterns
+
+#### Mitigation Techniques
+- **Group-level Shrinkage**: Reduces rating disparities using λ parameter
+- **Threshold Adjustment**: Balances decision boundaries per slice
+- **Re-weighting**: Updates training sample weights for problematic groups
+
+#### Fairness Metrics
+- **Equity Index**: Balances accuracy preservation with disparity reduction
+- **Performance Deltas**: MAE/RMSE change across protected groups
+- **Mitigation Validation**: Post-mitigation analysis confirms reduced bias
+
+### Model Selection Process
+**Criteria**: Accuracy + fairness trade-off
+- **Weighted Scoring**: Configurable balance between RMSE and equity metrics
+- **Threshold Enforcement**: Minimum fairness requirements
+- **Automated Selection**: Recommends best model for deployment
+
+### Experiment Tracking
+
+#### MLflow Integration
+- **Metrics Logging**: RMSE, MAE, R², SHAP feature importance
+- **Parameter Tracking**: Hyperparameters and training configurations
+- **Artifact Storage**: Evaluation reports, visualizations, model artifacts
+
+![mlflow_experiments.png](assets/mlflow_experiments.png)<div>
+![mlflow_runs.png](assets/mlflow_runs.png)
+
+#### Optimization
+- **Feature Sensitivity Analysis**: Identifies features with greatest impact using SHAP-based feature importance analysis
+  - Features Analysed:
+    - 1. book_popularity_normalized - Normalized popularity score 
+    - 2. num_genres - Number of genres associated with the book 
+    - 3. average_rating - Average rating of the book 
+    - 4. ratings_count - Total number of ratings 
+    - 5. num_pages - Book length in pages 
+    - 6. publication_year - Year the book was published 
+    - 7. book_era - Publication era category (categorical)
+    - 8. book_length_category - Book length category (Short/Medium/Long)
+    - 9. author_gender_group - Author gender grouping (categorical)
+- **Performance Trade-offs**: Visualizes accuracy vs computational cost
+- **Optimization Results**: Optimal parameter combinations documented
+
+### ML Pipeline Stages
+1. **Data Loading**: Pulls curated training data from BigQuery
+2. **Model Training**: Trains both algorithms in parallel with MLflow tracking
+3. **Bias Detection**: Comprehensive fairness analysis across 8 dimensions
+4. **Evaluation**: SHAP-based feature importance and performance metrics
+   4.1. Evaluation reports in docs/model_analysis/evaluation/
+   4.2. Feature importance analysis in docs/model_analysis/sensitivity/
+   4.3. MLflow logged evaluation metrics
+   4.4. Artifacts committed to artifacts_bot branch
+5. **Validation**: Quality gates for production readiness
+6. **Registry**: Saves models to Vertex AI Model Registry with versioning
+7. **Selection**: Compares multiple candidate models based on both performance metrics and fairness scores.
+
+For complete model development documentation, see [`README_model.md`](README_model.md).
+
+## Phase 3. Model Deployment
+![img.png](assets/img.png)![img.png](../img.png)
+![img_2.png](assets/img_2.png)![img_2.png](../img_2.png)
+### Cloud Deployment Strategy
+
+The project implements **cloud-based deployment** on **Google Cloud Platform (GCP)**, selected for its managed ML services, scalability, and integration with the existing BigQuery data pipeline. The deployment strategy leverages Vertex AI for model serving, Cloud Build for automation, and Cloud Run for the API backend.
+
+#### Cloud Deployment Components
+
+**1. Model Deployment Service**
+- **Service Used**: Vertex AI (Google Cloud Platform)
+- **Endpoint Details**: Automated endpoint creation with `goodreads-recommendation-endpoint` deployed on render for frontend and CloudRun for backend APIs
+- **Scaling**: Configurable instance counts (1-3 replicas)
+
+**2. Deployment Automation**
+- **CI/CD Pipeline**: GitHub Actions workflows trigger automated deployments
+- **Cloud Build Integration**: `cloudbuild.yaml` orchestrates deployment steps
+- **Repository Connection**: Direct integration with GitHub via service account
+- **Automated Triggers**: New model versions deploy automatically via pipeline
+
+**3. Infrastructure as Code**
+- **Terraform Configuration**: `terraform/main.tf` manages Vertex AI endpoints and service accounts
+- **Resource Management**: Automated provisioning of required GCP APIs
+- **Service Accounts**: Dedicated Cloud Run service account for secure API access
+- **Environment Management**: Supports dev/staging/prod environments
+
+## CTR (Click Through Rate) System
+
+### Overview
+The CTR system measures how users interact with the recommendations they receive.
+It tracks every view, click, and engagement event that occurs on the frontend and stores these as structured interaction logs.
+These logs are then used to:
+- Monitor real-time engagement 
+- Detect model decay 
+- Trigger alerts 
+- Automatically initiate model retraining when necessary
+
+CTR is one of the most direct indicators of how well your recommendation model is performing in real-world usage.
+### CTR Architecture
+
+```mermaid
+graph TD
+    A[Streamlit Frontend] --> B[track_api_call()]
+    A --> C[send_click_event()]
+    B --> D[FastAPI /frontend-metrics]
+    C --> E[FastAPI /book-click]
+    D --> F[(BigQuery: user_interactions)]
+    E --> F
+    F --> G[CTR Calculation Job]
+    G --> H[Monitoring Dashboard]
+    H --> I{CTR < 0.20%}
+    I --> J[Alert: Model Decay]
+    I --> K[Trigger Retraining]
+```
+
+### CTR Data Schema
+
+**Table**: `books.user_interactions`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `event_id` | STRING | UUID for each interaction |
+| `user_id` | STRING | User identifier |
+| `book_id` | INT64 | Book identifier |
+| `book_title` | STRING | Book title for analytics |
+| `event_type` | STRING | `view`, `click`, `like`, `add_to_list`, `mark_read` |
+| `event_timestamp` | TIMESTAMP | Partitioned timestamp |
+
+### How it works
+**1. User Interactions Are Logged**
+- Whenever a user sees or interacts with a recommendation on the frontend, an event is generated automatically.
+- These include:
+- - View events when a book recommendation is displayed
+- - Click or engagement events when the user interacts with a recommended book
+- These events are silently captured without affecting the user experience.
+
+**2. Events Are Sent to the Backend**
+- Each event is forwarded from the frontend to the backend API.
+- Two types of endpoints receive:
+- - View events
+- - Click / engagement events
+- The backend validates and forwards these events to storage.
+
+**3. Events Are Stored in BigQuery**
+- Every interaction is saved as a row in the user_interactions table in BigQuery. 
+- Stored fields typically include:
+- - User ID
+- - Book ID
+- - Event type (view, click, etc.)
+- - Timestamp
+- - This creates a detailed history of user engagement with recommendations.
+
+**4. CTR Is Calculated on a Rolling Basis**
+- A scheduled monitoring job regularly reads the last 24 hours of event data and computes CTR using the formula:
+- CTR = (Number of Clicks) / (Number of Views)
+- This provides a real-time measure of how engaging the recommendations are.
+
+**5. CTR Is Compared Against a Decay Threshold**
+- The system checks whether the current CTR meets an expected performance threshold.
+- Example: CTR < 0.20% → Model is considered to be decaying
+- A drop in CTR indicates that the model may no longer be producing high-quality recommendations.
+
+**6. Alerts Are Sent When CTR Drops**
+- If the CTR falls below the threshold:
+- - An alert is generated
+- - Email notifications are sent to the ML team
+- - Monitoring logs are updated
+- This ensures immediate visibility into potential declines in model performance.
+
+**7. CTR Decay Triggers Model Retraining**
+- When sustained CTR decay is detected:
+- - The monitoring workflow flags the issue
+- - The ML pipeline is automatically triggered
+- - The model is retrained using the latest data
+- - Evaluation, bias detection, and validation are rerun
+- - Model Manager decides whether to promote the new version
+- This creates a self-correcting feedback loop that keeps the recommendation engine fresh and relevant.
+
+### CTR Calculation
+
+```sql
+-- 24-hour CTR calculation
+SELECT
+    COUNTIF(event_type = 'view') as views,
+    COUNTIF(event_type = 'click') as clicks,
+    SAFE_DIVIDE(COUNTIF(event_type = 'click'), COUNTIF(event_type = 'view')) as ctr
+FROM `project.books.user_interactions`
+WHERE event_timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+```
+
+### CTR Monitoring Workflow
+
+**Workflow**: `9_model_monitoring.yml`
+1. Monitor: Continuously compute CTR over the most recent 24 hours 
+2. Detect: Check if CTR is below the decay threshold 
+3. Validate: Confirm that the drop is significant and not a temporary fluctuation 
+4. Alert: Notify stakeholders that model performance is declining 
+5. Retrain: Trigger the full ML pipeline to generate a new model 
+6. Evaluate: Only promote the new model if it performs better 
+7. Deploy: Update production with the improved recommendation model 
+8. This creates an automated feedback loop that keeps your recommendation engine fresh and aligned with real-world user behavior.
+
+```yaml
+jobs:
+  model-monitoring:
+    steps:
+      - name: Run Model Monitoring
+        run: |
+          python -c "
+          from src.model_monitoring import run_full_monitoring
+          results = run_full_monitoring(model_name='boosted_tree_regressor')
+          if results['decay_results'].get('decay_detected'):
+              exit(1)  # Trigger retraining
+          "
+```
+
+### CTR Thresholds & Alerts
+
+- **Decay Threshold**: CTR < 0.20% triggers model decay alerts
+- **Alert Channels**: Email notifications to ML team
+- **Recovery Action**: Automatic retraining pipeline initiation
+- **Reporting**: Daily CTR reports in monitoring dashboard
+
+### CTR-Driven Retraining
+
+1. **Detection**: 24-hour rolling CTR calculation
+2. **Validation**: Multiple checks to avoid false positives
+3. **Trigger**: GitHub Actions workflow dispatch to retraining pipeline
+4. **Fallback**: Manual retraining approval for critical alerts
+
+## API Architecture
+
+### FastAPI Backend Overview
+
+**Base URL**: `https://recommendation-service-{PROJECT_NUMBER}-{REGION}.run.app`
+
+**Technology Stack**:
+- **Framework**: FastAPI with auto-generated API docs
+- **Language**: Python 3.11
+- **Deployment**: Google Cloud Run (serverless)
+- **Database**: Google BigQuery (OLAP analytics)
+- **Caching**: Redis (optional, for high traffic)
+- **Monitoring**: Custom middleware with real-time metrics
+
+### Core API Endpoints
+
+#### 1. Recommendation Engine
+
+```http
+GET /load-recommendation?user_id={user_id}
+```
+
+**Purpose**: Get personalized book recommendations
+- **New Users**: Returns global top-10 books
+- **Existing Users**: Queries Vertex AI endpoint for predictions
+- **Response**: JSON with `recommendations` array
+- **Monitoring**: Automatic CTR view logging
+
+**Response Format**:
+```json
+{
+  "user_id": "user_12345",
+  "recommendations": [
+    {
+      "book_id": 5988,
+      "title": "The Hobbit",
+      "author": "J.R.R. Tolkien",
+      "predicted_rating": 4.62
+    }
+  ]
+}
+```
+
+#### 2. CTR Event Logging
+
+```http
+POST /book-click
+Content-Type: application/json
+
+{
+  "user_id": "user_12345",
+  "book_id": 5988,
+  "book_title": "The Hobbit",
+  "event_type": "click"
+}
+```
+
+**Event Types**: `view`, `click`, `like`, `add_to_list`, `mark_read`
+**Use Cases**: CTR tracking, user behavior analytics, model performance
+
+#### 3. User History Management
+
+```http
+GET /books-read/{user_id}
+GET /books-unread/{user_id}
+```
+
+**Read Books**: Shows user's previously marked books with read dates
+**Unread Books**: Personalized unread book suggestions
+**Rating Integration**: Connects to interaction history
+
+#### 4. Frontend Metrics Collection
+
+```http
+POST /frontend-metrics
+```
+
+**Purpose**: Web Vitals and frontend performance data
+- **Source**: Streamlit app with JavaScript monitoring
+- **Metrics**: LCP, INP, CLS, FCP, TTFB
+- **Integration**: Real-time user experience tracking
+
+#### 5. Administrative Endpoints
+
+```http
+GET /report/                    # Admin monitoring dashboard
+GET /report/api/metrics         # Model metrics JSON
+GET /report/api/drift          # Drift detection data
+GET /metrics                    # Real-time API metrics
+GET /metrics/timeline          # Request timeline data
+```
+
+### API Performance Monitoring
+
+**Middleware Integration**:
+- **Response Times**: P50, P95, P99 percentiles
+- **Error Rates**: HTTP error classification
+- **Throughput**: Requests per second/minute
+- **Active Connections**: Current concurrent requests
+
+**Metrics Collection**:
+```python
+from .middleware import MonitoringMiddleware, get_metrics_collector
+
+app.add_middleware(MonitoringMiddleware)
+```
+
+**Dashboard Integration**: Real-time metrics displayed in admin dashboard with automatic alerting for performance degradation.
+
+### API Security & Authentication
+
+- **CORS**: Configured for Streamlit frontend access
+- **Rate Limiting**: Implemented via Cloud Run concurrency controls
+- **BigQuery IAM**: Service account with read-only access
+- **Environment Variables**: Encrypted secrets for API keys
+
+## Frontend Application (Streamlit)
+
+### Overview
+
+**URL**: Served as static files via FastAPI `/app` endpoint
+**Technology**: Streamlit with custom React components
+**Features**: Full book recommendation interface with rich user interactions
+**Performance**: Web Vitals monitoring integrated into user experience
+
+### Page Structure
+
+```python
+# Main Application Flow
+├── User Selection/Login
+│   ├── Input user ID
+│   ├── Quick-select sample users
+│   └── Admin access (credentials: admin/admin)
+│
+├── Recommendations Display
+│   ├── Top-10 personalized recommendations
+│   ├── Card-based UI with ratings and authors
+│   └── Click tracking for CTR monitoring
+│
+├── Book Details Modal
+│   ├── Google Books API integration
+│   ├── Rich metadata display
+│   ├── User interaction buttons
+│   └── Rating submission for marked-as-read
+│
+├── Search Functionality
+│   ├── Real-time book search
+│   ├── Local database with Google Books fallback
+│   ├── Read/ unread filtering
+│   └── Persistent search results
+│
+├── My Read Books
+│   └── Personal reading history with dates
+```
+
+### User Interaction Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant S as Streamlit App
+    participant F as FastAPI Backend
+    participant B as BigQuery
+    participant V as Vertex AI
+
+    U->>S: Enter user ID
+    S->>F: Request recommendations
+    F->>V: Get predictions (if existing user)
+    V-->>F: Return predictions
+    F->>S: Send recommendations
+    S-->>U: Display book cards
+
+    U->>S: Click book "View Details"
+    S->>F: Log click event (CTR)
+    S->>S: Fetch Google Books details
+    S-->>U: Show detailed book info
+
+    U->>S: Mark book as read
+    S-->>U: Show rating slider modal
+    U->>S: Submit rating 1-5 stars
+    S->>F: Store rating in BigQuery
+    F->>S: Confirm successful storage
+```
+
+#### Detailed Deployment Steps
+
+**Environment Setup**:
+1. Enable required GCP APIs (AI Platform, Cloud Run, Cloud Build, BigQuery)
+2. Configure service accounts with BigQuery access
+3. Set up Artifact Registry for Docker containers
+
+**Model Deployment**:
+1. Retrieve selected model from Vertex AI Model Registry
+2. Create/update endpoint with specified configuration
+3. Deploy model with traffic split and resource allocation
+4. Verify deployment health and accessibility
+
+**API Backend Deployment**:
+1. Build Docker container with FastAPI application
+2. Deploy to Cloud Run v2 service with autoscaling
+3. Configure domain mapping and health checks
+4. Enable public access for web client consumption
+
+#### Repository Integration & CI/CD
+
+**GitHub Actions Workflows**:
+- **8_model_deploy_endpoint.yml**: Handles Vertex AI model deployment
+- **9_model_monitoring.yml**: Continuous monitoring and drift detection
+- **deploy-api-backend.yml**: FastAPI backend updates
+- **terraform_infra.yml**: Infrastructure provisioning
+
+**Deployment Triggers**:
+- Automatic: Model pipeline completion
+- Manual: Workflow dispatch for emergency deployments
+- Environment-specific: Dev/staging/prod with different configurations
+
+#### Automated Deployment Scripts
+
+**Cloud Build Configuration** (`cloudbuild.yaml`):
+```yaml
+steps:
+  - id: 'fetch-model-info'
+    # Retrieves model from Vertex AI Registry
+  - id: 'check-endpoint'
+    # Creates or verifies endpoint existence
+  - id: 'deploy-model'
+    # Executes Python deployment script
+  - id: 'verify-deployment'
+    # Health checks and validation
+```
+
+**Python Deployment Script** (`src/model_deployment.py`):
+- **Model Retrieval**: Fetches models from Vertex AI registry
+- **Endpoint Management**: Creates or updates endpoints
+- **Traffic Management**: Handles gradual rollouts with percentage splits
+- **Logging**: Cloud Logging integration for deployment events
+- **Health Verification**: Automated post-deployment validation
+
+#### API Backend Architecture
+
+**FastAPI Application** (`api/main.py`):
+- **Endpoints**: Recommendation, health checks, monitoring dashboards
+- **CORS Support**: Web client integration
+- **Monitoring Middleware**: Real-time performance tracking
+- **BigQuery Integration**: Direct model prediction queries
+
+**Cloud Run Configuration** (via Terraform):
+- **Scaling**: Min/max replica counts with CPU utilization triggers
+- **Resource Limits**: CPU and memory allocation
+- **Security**: Service account binding for BigQuery access
+- **Networking**: Load balancing and health checks
+
+### Model Monitoring and Retraining
+
+#### Monitoring Framework
+
+**Performance Metrics**:
+- **Model Decay**: Click-Through Rate (CTR) monitoring over 24-hour windows
+- **Thresholds**: CTR < 0.20% triggers alerts and retraining
+- **Data Sources**: User interaction logs in BigQuery
+
+**Drift Detection**:
+- **Input Distribution**: Monitors feature distributions over time
+- **Statistical Tests**: Chi-square and Kolmogorov-Smirnov tests
+- **Threshold-based Alarms**: Configurable drift thresholds
+
+**Dashboard Integration**:
+- **Real-time Monitoring**: Live API performance metrics
+- **Visualization**: Error heatmaps and performance charts
+- **Alerting**: Email notifications for anomaly detection
+
+#### Retraining Automation
+
+**Triggering Mechanisms**:
+- **Performance Thresholds**: RMSE deltas > 5% from baseline
+- **Drift Detection**: Significant input distribution changes
+- **Schedule-based**: Periodic retraining windows (weekly/monthly)
+
+**Automated Pipeline**:
+- **CI/CD Integration**: Full pipeline reruns on trigger detection
+- **Model Comparison**: A/B testing with deployed vs new models
+- **Rollback Capabilities**: Automatic failback on performance degradation
+
+**Scripts and Configurations**:
+- **monitor_decay.py**: CTR monitoring with BigQuery aggregation
+- **model_monitoring.py**: Comprehensive drift and performance analysis
+- **Workflow Integration**: GitHub Actions handle full retraining cycles
+
+#### Monitoring Code Components
+
+**Decay Detection** (`src/monitor_decay.py`):
+- **CTR Calculation**: Aggregates views vs clicks over time windows
+- **Threshold Alerts**: Email notifications on performance drops
+- **BigQuery Queries**: Efficient distributed computation
+
+**Model Monitoring** (`src/model_monitoring.py`):
+- **Drift Analysis**: Statistical tests for distribution changes
+- **Performance Tracking**: RMSE/MSE monitoring over time
+- **Report Generation**: Structured JSON and visualization outputs
+
+**API Monitoring** (`api/main.py` + middleware):
+- **Request Tracking**: Latency, error rates, throughput metrics
+- **Frontend Metrics**: Web vitals collection from browser clients
+- **Health Checks**: Automated endpoint accessibility verification
+
+#### Retraining Pipeline Integration
+
+**Workflow Chain**:
+- **Monitoring Detection** → **Notification** → **Pipeline Trigger** → **Model Comparison** → **Production Deployment**
+
+**Quality Gates**:
+- **Validation Tests**: Performance must exceed thresholds
+- **Bias Checks**: Fairness preserved in retrained models
+- **Integration Tests**: End-to-end prediction validation
+
+**Automation Safety**:
+- **Manual Approval**: Critical retraining requires human review
+- **Gradual Rollout**: 10% traffic split, then full migration on success
+- **Rollback Plans**: Automatic reversion on performance degradation
+
+### Evaluation Criteria Implementation
+
+**Correctness and Completeness**:
+- Automated deployment scripts complete without manual intervention
+- Full pipeline execution from GitHub Actions triggers
+- Multiple environment support (dev/staging/prod)
+
+**Documentation and Replication**:
+- Cloud Build YAML for step-by-step GCP deployment
+- Terraform configurations for infrastructure recreation
+- Detailed environment setup and permission guides
+
+**CI/CD Integration**:
+- GitHub Actions workflows for automated deployment on model changes
+- Vertex AI Model Registry integration for version management
+- Repository webhook triggers for continuous deployment
+
+**Model Monitoring and Retraining**:
+- Performance monitoring with CTR and drift detection
+- Automated retraining pipeline with quality checks
+- Notification systems for model health and retraining status
+
+For comprehensive documentation on all pipeline components, see [`README_data.md`](README_data.md) and [`README_model.md`](README_model.md).
+
+---
+
+**Note**: This README provides implementation highlights aligned with the PDF deployment requirements. The full codebase demonstrates production-ready MLOps practices with automated deployment, monitoring, and continuous improvement capabilities.
