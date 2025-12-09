@@ -2,14 +2,24 @@ FROM python:3.11-slim
 
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
 
 RUN pip install --no-cache-dir streamlit requests pandas
 
+
 COPY pages/app ./pages/app
+
+
 COPY pages/data/books_database.json ./data/books_database.json
-COPY datapipeline/scripts/logger_setup.py ./datapipeline/scripts/logger_setup.py 
+
+
+COPY datapipeline/__init__.py ./datapipeline/__init__.py
+COPY datapipeline/scripts/__init__.py ./datapipeline/scripts/__init__.py
+COPY datapipeline/scripts/logger_setup.py ./datapipeline/scripts/logger_setup.py
 
 ENV PORT=8501
 EXPOSE 8501
 
 CMD ["streamlit", "run", "pages/app/book_recommendation_app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+
