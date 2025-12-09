@@ -558,32 +558,77 @@ uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 
 ## Step 10: Frontend (Streamlit) Deployment
 
-The project includes a Streamlit frontend application in `pages/app/`.
+The project includes a Streamlit frontend application that provides the user interface for the book recommendation system.
 
-### 10.1 Install Frontend Dependencies
+### Frontend Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        ST[Streamlit App<br/>Port 8501]
+        WV[Web Vitals<br/>Monitoring]
+    end
+
+    subgraph "API Layer"
+        FA[FastAPI Backend<br/>Port 8080]
+    end
+
+    subgraph "External"
+        GB[Google Books API]
+    end
+
+    ST --> FA
+    ST --> GB
+    WV --> FA
+```
+
+### 10.1 Frontend File Structure
+
+```
+pages/
+├── app/
+│   ├── __init__.py
+│   ├── book_recommendation_app.py    # Main Streamlit application
+│   └── monitoring_page.py            # Admin monitoring page
+├── data/
+│   └── books_database.json           # Local books catalog
+└── requirements.txt                   # Frontend dependencies
+
+Dockerfile.frontend                    # Container configuration
+.github/workflows/deploy_frontend.yml  # CI/CD workflow
+```
+
+### 10.2 Install Frontend Dependencies
 
 ```bash
 pip install -r pages/requirements.txt
 ```
 
 Dependencies:
-- `streamlit==1.51.0`
-- `requests==2.31.0`
-- `pandas>=2.0.0`
+- `streamlit` - Web application framework
+- `requests` - HTTP client for API calls
+- `pandas` - Data manipulation
 
-### 10.2 Configure API Base URL
+### 10.3 Configure API Base URL
 
-Edit `pages/app/book_recommendation_app.py` and update the API URL:
+The frontend connects to the FastAPI backend. Update the API URL in two files:
 
+**File 1: `pages/app/book_recommendation_app.py` (Line 13)**
 ```python
-# Line 12 - Change to your deployed API URL
 API_BASE_URL = "https://your-cloud-run-url.run.app"
+```
 
-# Or for local development:
+**File 2: `pages/app/monitoring_page.py` (Line 17)**
+```python
+API_BASE_URL = os.environ.get("API_BASE_URL", "https://your-cloud-run-url.run.app")
+```
+
+**For local development:**
+```python
 API_BASE_URL = "http://localhost:8080"
 ```
 
-### 10.3 Run Streamlit Locally
+### 10.4 Run Streamlit Locally
 
 ```bash
 # From project root
@@ -592,55 +637,138 @@ streamlit run pages/app/book_recommendation_app.py
 # Access at http://localhost:8501
 ```
 
-### 10.4 Deploy Streamlit to Cloud
+**Expected behavior:**
+- Login page displays with user ID input
+- Sample users available for quick testing
+- Admin button for monitoring dashboard access
 
-**Option A: Deploy to Streamlit Cloud**
+### 10.5 Deploy to Cloud Run (Manual)
+
+**Step 1: Build Docker Image**
+```bash
+# Using the existing Dockerfile.frontend
+docker build -f Dockerfile.frontend -t recommendation-frontend .
+```
+
+**Step 2: Configure Artifact Registry**
+```bash
+# Create repository (if not exists)
+gcloud artifacts repositories create recommendation-service \
+    --repository-format=docker \
+    --location=us-central1
+
+# Configure Docker authentication
+gcloud auth configure-docker us-central1-docker.pkg.dev
+```
+
+**Step 3: Tag and Push Image**
+```bash
+IMAGE="us-central1-docker.pkg.dev/YOUR_PROJECT_ID/recommendation-service/recommendation-frontend:latest"
+
+docker tag recommendation-frontend $IMAGE
+docker push $IMAGE
+```
+
+**Step 4: Deploy to Cloud Run**
+```bash
+gcloud run deploy recommendation-frontend \
+    --image $IMAGE \
+    --region us-central1 \
+    --platform managed \
+    --allow-unauthenticated \
+    --port 8501 \
+    --memory 512Mi \
+    --cpu 1 \
+    --min-instances 0 \
+    --max-instances 3
+```
+
+**Step 5: Get Deployed URL**
+```bash
+gcloud run services describe recommendation-frontend \
+    --region us-central1 \
+    --format='value(status.url)'
+```
+
+### 10.6 Deploy via GitHub Actions (Recommended)
+
+The workflow `deploy_frontend.yml` automatically deploys when changes are pushed to:
+- `pages/app/**`
+- `Dockerfile.frontend`
+
+**Workflow triggers:**
+- Push to `master` branch (specified paths)
+- Manual dispatch from GitHub Actions UI
+
+**CI/CD Flow:**
+```mermaid
+flowchart LR
+    A[Push to master] --> B{Path Changed?}
+    B -->|pages/app/** or<br/>Dockerfile.frontend| C[Checkout Code]
+    B -->|Other paths| X[Skip]
+    
+    C --> D[Authenticate GCP]
+    D --> E[Configure Docker]
+    E --> F[Build Image]
+    F --> G[Push to Artifact Registry]
+    G --> H[Deploy to Cloud Run]
+    H --> I[Live at Port 8501]
+```
+
+**Required GitHub Secrets for Frontend:**
+| Secret | Description |
+|--------|-------------|
+| `GCP_CREDENTIALS` | Service account JSON key |
+| `GCP_PROJECT_ID` | Your GCP project ID |
+| `GCP_REGION` | Deployment region (default: `us-central1`) |
+
+**Trigger manual deployment:**
+```
+GitHub → Actions → "Build & Deploy Frontend to Cloud Run" → Run workflow
+```
+
+### 10.7 Alternative: Deploy to Streamlit Cloud
+
+For simpler deployment without GCP:
 
 1. Push your repo to GitHub
 2. Go to [share.streamlit.io](https://share.streamlit.io)
 3. Connect your GitHub repo
-4. Set main file: `pages/app/book_recommendation_app.py`
-5. Deploy
+4. Configure:
+   - **Main file path**: `pages/app/book_recommendation_app.py`
+   - **Python version**: 3.11
+5. Add secrets for API_BASE_URL if needed
+6. Deploy
 
-**Option B: Deploy to Cloud Run**
+### 10.8 Environment Variables
 
-Create `Dockerfile.frontend`:
-```dockerfile
-FROM python:3.11-slim
+| Variable | Description | Default |
+|----------|-------------|--------|
+| `API_BASE_URL` | Backend API endpoint | `https://recommendation-service-....run.app` |
+| `PORT` | Streamlit server port | `8501` |
 
-WORKDIR /app
-
-COPY pages/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY pages/ ./pages/
-
-EXPOSE 8501
-
-CMD ["streamlit", "run", "pages/app/book_recommendation_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
-```
-
+**Set via Docker:**
 ```bash
-# Build and deploy
-docker build -f Dockerfile.frontend -t gcr.io/YOUR_PROJECT_ID/recommendation-frontend:latest .
-gcloud run deploy recommendation-frontend \
-    --image gcr.io/YOUR_PROJECT_ID/recommendation-frontend:latest \
-    --platform managed \
-    --region us-central1 \
-    --port 8501 \
-    --allow-unauthenticated
+docker run -p 8501:8501 \
+    -e API_BASE_URL=https://your-api.run.app \
+    recommendation-frontend
 ```
 
-### 10.5 Frontend Features
+### 10.9 Frontend Features Summary
 
-The Streamlit app provides:
-- User ID login/selection
-- Personalized book recommendations
-- Book search with Google Books API integration
-- Mark books as read with ratings
-- Reading history view
-- Web Vitals monitoring (LCP, FCP, CLS, INP, TTFB)
-- Real-time API call tracking
+| Feature | Description | API Endpoint |
+|---------|-------------|---------------|
+| **User Login** | Enter user ID or select sample user | - |
+| **Recommendations** | Personalized top-10 books | `POST /load-recommendation` |
+| **Book Search** | Search by title/author | Local DB + Google Books API |
+| **Book Details** | Cover, description, categories | Google Books API |
+| **Mark as Read** | Rate and track read books | `POST /mark-read` |
+| **Reading History** | View previously read books | `GET /books-read/{user_id}` |
+| **CTR Tracking** | Track views, clicks, likes | `POST /book-click` |
+| **Web Vitals** | Performance monitoring | `POST /frontend-metrics` |
+| **Admin Dashboard** | API/model metrics | `GET /report` (admin/admin) |
+
+For complete frontend documentation, see **[`README_frontend.md`](README_frontend.md)**.
 
 ---
 
@@ -675,6 +803,7 @@ Add these secrets in: `Settings → Secrets and variables → Actions`
 | Deploy Endpoint | `8_model_deploy_endpoint.yml` | Manual |
 | Monitoring | `9_model_monitoring.yml` | Manual, scheduled |
 | API Backend | `deploy-api-backend.yml` | Push to `api/**`, `terraform/**` |
+| Frontend | `deploy_frontend.yml` | Push to `pages/app/**`, `Dockerfile.frontend` |
 | PR Tests | `pr_tests.yml` | Pull requests |
 
 ---
@@ -746,7 +875,31 @@ gcloud ai endpoints describe goodreads-recommendation-endpoint \
     --region=us-central1
 ```
 
-### 12.6 Monitoring Dashboard
+### 12.6 Frontend Validation
+
+```bash
+# Get frontend URL
+FRONTEND_URL=$(gcloud run services describe recommendation-frontend \
+    --region=us-central1 --format='value(status.url)')
+
+# Check frontend is accessible
+curl -I "${FRONTEND_URL}"
+# Expected: HTTP 200 OK
+
+# Or open in browser
+echo "Frontend URL: ${FRONTEND_URL}"
+```
+
+**Manual Testing Checklist:**
+- [ ] Homepage loads with user selection
+- [ ] Sample user buttons work
+- [ ] Recommendations display after login
+- [ ] Book details modal opens with cover image
+- [ ] Search returns results
+- [ ] Mark as read with rating works
+- [ ] Admin login redirects to monitoring dashboard
+
+### 12.7 Monitoring Dashboard
 
 Access the admin dashboard:
 ```
@@ -780,6 +933,11 @@ pytest datapipeline/tests/ -v
 | Cloud Run 503 errors | Container crash | Check logs: `gcloud run logs read recommendation-service` |
 | Model deployment fails | Vertex AI quota | Check quotas in GCP Console |
 | MLflow connection refused | Server not running | Start MLflow: `make mlflow-ui` or via docker-compose |
+| Frontend won't start | Port 8501 in use | Check: `lsof -i :8501` and kill process |
+| Frontend API errors | Wrong API_BASE_URL | Update URL in `book_recommendation_app.py` line 13 |
+| Books database warning | Missing JSON file | Verify `pages/data/books_database.json` exists |
+| Frontend 502/503 errors | Container timeout | Increase memory: `--memory 1Gi` in deploy command |
+| Web Vitals not sending | CORS issues | Check backend CORS configuration |
 
 ### Common Debug Commands
 
@@ -863,18 +1021,25 @@ bq query "SELECT 1"
 ### Deployment
 - [ ] Deploy infrastructure: `make terraform-init && make terraform-apply`
 - [ ] Deploy API backend: via GitHub Actions or `gcloud run deploy`
-- [ ] Deploy frontend: Streamlit Cloud or Cloud Run
-- [ ] Update frontend API_BASE_URL to point to deployed API
+- [ ] Update `API_BASE_URL` in `pages/app/book_recommendation_app.py` (line 13)
+- [ ] Update `API_BASE_URL` in `pages/app/monitoring_page.py` (line 17)
+- [ ] Deploy frontend: via GitHub Actions or manual Cloud Run deploy
+- [ ] Verify frontend connects to deployed API
 
 ### Validation
 - [ ] Test API health: `curl $API_URL/health`
-- [ ] Test recommendations: `curl "$API_URL/load-recommendation?user_id=test"`
-- [ ] Test frontend: Access Streamlit app and get recommendations
-- [ ] Test monitoring: Access `/report` dashboard
+- [ ] Test recommendations: `curl -X POST "$API_URL/load-recommendation" -H "Content-Type: application/json" -d '{"user_id":"test"}'`
+- [ ] Test frontend loads: Access Streamlit URL in browser
+- [ ] Test login with sample user
+- [ ] Test book recommendations display
+- [ ] Test book search functionality
+- [ ] Test mark as read with rating
+- [ ] Test admin monitoring: Access `/report` with admin/admin
 
 ---
 
 For additional documentation, see:
+- [`README.md`](README.md) - Project overview
 - [`README_data.md`](README_data.md) - Data pipeline details
 - [`README_model.md`](README_model.md) - Model development details
-- [`README.md`](README.md) - Project overview
+- [`README_frontend.md`](README_frontend.md) - Frontend deployment guide
