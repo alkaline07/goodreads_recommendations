@@ -14,8 +14,9 @@ This document provides detailed instructions for replicating the Goodreads Book 
 - [Step 8: Infrastructure Deployment](#step-8-infrastructure-deployment)
 - [Step 9: API Backend Deployment](#step-9-api-backend-deployment)
 - [Step 10: Frontend (Streamlit) Deployment](#step-10-frontend-streamlit-deployment)
-- [Step 11: CI/CD Setup (GitHub Actions)](#step-11-cicd-setup-github-actions)
-- [Step 12: Validation](#step-12-validation)
+- [Step 11: ELK Stack Setup (Optional)](#step-11-elk-stack-setup-optional)
+- [Step 12: CI/CD Setup (GitHub Actions)](#step-12-cicd-setup-github-actions)
+- [Step 13: Validation](#step-13-validation)
 - [Troubleshooting](#troubleshooting)
 - [Platform Migration Notes](#platform-migration-notes)
 
@@ -772,9 +773,65 @@ For complete frontend documentation, see **[`README_frontend.md`](README_fronten
 
 ---
 
-## Step 11: CI/CD Setup (GitHub Actions)
+## Step 11: ELK Stack Setup (Optional)
 
-### 8.1 Required GitHub Secrets
+The project includes an ELK Stack (Elasticsearch, Logstash, Kibana) for centralized log aggregation.
+
+### 11.1 Local ELK Deployment
+
+```bash
+# Start ELK stack locally
+docker compose -f docker-compose.elk.yaml up -d
+
+# Access Kibana
+open http://localhost:5601
+
+# Access Elasticsearch
+curl http://localhost:9200/_cluster/health?pretty
+```
+
+### 11.2 GCP ELK Deployment (Terraform)
+
+**Deploy via GitHub Actions:**
+```
+GitHub → Actions → "Deploy ELK Stack" → Run workflow
+```
+
+**Or manually via Terraform:**
+```bash
+cd terraform
+terraform apply -target=google_compute_instance.elk_stack
+```
+
+### 11.3 ELK Configuration Files
+
+| File | Purpose |
+|------|---------||
+| `docker-compose.elk.yaml` | Local ELK orchestration |
+| `elk/elasticsearch/elasticsearch.yml` | Elasticsearch config |
+| `elk/logstash/pipeline/logstash.conf` | Log parsing pipeline |
+| `elk/kibana/kibana.yml` | Kibana dashboard config |
+| `elk/filebeat/filebeat.yml` | Log shipper config |
+| `terraform/elk.tf` | GCP infrastructure |
+
+### 11.4 Access URLs (After Deployment)
+
+```bash
+# Get ELK IP from Terraform
+cd terraform
+ELK_IP=$(terraform output -raw elk_instance_ip)
+
+# Access services
+echo "Kibana:        http://$ELK_IP:5601"
+echo "Elasticsearch: http://$ELK_IP:9200"
+echo "Logstash:      $ELK_IP:5044"
+```
+
+---
+
+## Step 12: CI/CD Setup (GitHub Actions)
+
+### 12.1 Required GitHub Secrets
 
 Add these secrets in: `Settings → Secrets and variables → Actions`
 
@@ -788,12 +845,12 @@ Add these secrets in: `Settings → Secrets and variables → Actions`
 | `GIT_USER_EMAIL` | Email for commits | `github-actions[bot]@users.noreply.github.com` |
 | `NGROK_AUTH_TOKEN` | ngrok token for Airflow tunnel | Get from ngrok.com |
 
-### 8.2 Workflow Summary
+### 12.2 Workflow Summary
 
 | Workflow | File | Trigger |
 |----------|------|---------|
 | Airflow Pipeline | `0_preprocess_data.yml` | Manual, push to `datapipeline/**` |
-| Load Data | `1_load_data.yml` | After workflow 0, manual |
+| Load Data | `1_load_data.yml` | **Auto: After workflow 0**, manual |
 | Train Model | `2_train_model.yml` | After workflow 1 |
 | Prediction Tables | `3_bias_prediction_table.yml` | After workflow 2 |
 | Evaluate Model | `4_evaluate_model.yml` | After workflow 3 |
@@ -801,16 +858,19 @@ Add these secrets in: `Settings → Secrets and variables → Actions`
 | Validation | `6_model_validation.yml` | After workflow 5 |
 | Model Manager | `7_model_manager.yml` | After workflow 6 |
 | Deploy Endpoint | `8_model_deploy_endpoint.yml` | Manual |
-| Monitoring | `9_model_monitoring.yml` | Manual, scheduled |
+| Monitoring | `9_model_monitoring.yml` | **Auto: After workflow 8** |
+| Decay Monitoring | `model_decay.yml` | **Scheduled daily (cron)**, auto-triggers retraining |
+| Docker Model Build | `docker-model-build-push.yml` | **Auto: Push to `src/**`**, manual |
+| ELK Stack | `deploy_elk.yml` | **Auto: Push to `terraform/elk.tf`**, manual |
 | API Backend | `deploy-api-backend.yml` | Push to `api/**`, `terraform/**` |
 | Frontend | `deploy_frontend.yml` | Push to `pages/app/**`, `Dockerfile.frontend` |
 | PR Tests | `pr_tests.yml` | Pull requests |
 
 ---
 
-## Step 12: Validation
+## Step 13: Validation
 
-### 12.1 Infrastructure Validation
+### 13.1 Infrastructure Validation
 
 ```bash
 # Check Terraform state
@@ -823,7 +883,7 @@ gcloud ai endpoints list --region=us-central1
 gcloud run services list --region=us-central1
 ```
 
-### 12.2 API Health Checks
+### 13.2 API Health Checks
 
 ```bash
 # Get service URL
@@ -838,7 +898,7 @@ curl "${API_URL}/health"
 curl "${API_URL}/"
 ```
 
-### 12.3 Recommendation API Validation
+### 13.3 Recommendation API Validation
 
 ```bash
 # Get recommendations for a user
@@ -853,7 +913,7 @@ curl "${API_URL}/load-recommendation?user_id=12345"
 # }
 ```
 
-### 12.4 BigQuery Validation
+### 13.4 BigQuery Validation
 
 ```bash
 # Check tables exist
@@ -864,7 +924,7 @@ bq query --use_legacy_sql=false \
     "SELECT COUNT(*) FROM \`YOUR_PROJECT_ID.books.train_data\`"
 ```
 
-### 12.5 Model Validation
+### 13.5 Model Validation
 
 ```bash
 # Check registered models
@@ -875,7 +935,7 @@ gcloud ai endpoints describe goodreads-recommendation-endpoint \
     --region=us-central1
 ```
 
-### 12.6 Frontend Validation
+### 13.6 Frontend Validation
 
 ```bash
 # Get frontend URL
@@ -899,7 +959,7 @@ echo "Frontend URL: ${FRONTEND_URL}"
 - [ ] Mark as read with rating works
 - [ ] Admin login redirects to monitoring dashboard
 
-### 12.7 Monitoring Dashboard
+### 13.7 Monitoring Dashboard
 
 Access the admin dashboard:
 ```
@@ -908,7 +968,20 @@ Username: admin
 Password: admin
 ```
 
-### 12.7 Run Tests
+### 13.8 ELK Stack Validation
+
+```bash
+# Check Elasticsearch is running
+curl -s "http://$ELK_IP:9200/_cluster/health?pretty"
+
+# Check Kibana is accessible
+curl -I "http://$ELK_IP:5601"
+
+# List indices
+curl -s "http://$ELK_IP:9200/_cat/indices?v"
+```
+
+### 13.9 Run Tests
 
 ```bash
 # Run data pipeline tests

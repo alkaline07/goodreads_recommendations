@@ -75,9 +75,9 @@ Our project uses GitHub Actions to automate the complete ML pipeline from data l
 The CI/CD pipeline consists of **8 sequential workflows** plus **1 supporting workflow**:
 
 ```text
-PR Test Suite
+0. Airflow Pipeline (Data Preprocessing)
    ↓
-1. Load Data
+1. Load Data (Auto-triggered after Airflow Pipeline)
    ↓
 2. Model Training & Register
    ↓
@@ -94,6 +94,8 @@ PR Test Suite
 
 **Supporting Workflows:**
 - **Send Email Notification** - Reusable workflow for sending notifications
+- **Docker Model Build** - Builds and pushes ML Docker image to GHCR on code changes
+- **Model Decay Monitoring** - Scheduled daily CTR monitoring that auto-triggers retraining
 
 ### Pipeline Flow Diagram
 
@@ -103,9 +105,14 @@ PR Test Suite
 └────────┬────────┘
          │
          ▼
-┌─────────────────┐
-│  1. Load Data   │ (Manual Trigger)
-└────────┬────────┘
+┌─────────────────────────┐
+│  0. Airflow Pipeline    │ (Manual OR Push to datapipeline/**)
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  1. Load Data           │ (Auto: After Airflow Pipeline OR Manual)
+└────────┬────────────────┘
          │
          ▼
 ┌──────────────────────┐
@@ -141,6 +148,25 @@ PR Test Suite
 ┌─────────────────┐
 │ 7. Model Manager│ (Auto: After Validation)
 └─────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  8. Deploy Model        │ (Manual)
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│  9. Model Monitoring    │ (Auto: After Deploy Model)
+└─────────────────────────┘
+
+┌─────────────────────────┐
+│ Monitor Model Decay     │ (Scheduled: Daily cron)
+│ (Triggers retraining)   │
+└─────────────────────────┘
+
+┌─────────────────────────┐
+│ Docker Model Build      │ (Auto: Push to src/**)
+└─────────────────────────┘
 
 ┌─────────────────┐
 │ Send Email      │ (Called by all workflows)
@@ -327,6 +353,80 @@ All generated artifacts (models, reports, visualizations) are committed to the `
   </p>
 </div>
 
+#### Docker Model Build Workflow (`docker-model-build-push.yml`)
+
+**Purpose:** Automatically builds and pushes the ML Docker image to GitHub Container Registry (GHCR) when model code changes.
+
+**Trigger:** 
+- Automatically on push to `master` branch when files in `src/**` are changed
+- Manual dispatch via GitHub Actions UI
+
+**Steps:**
+
+1. **Checkout code** - Retrieves repository code
+2. **Log in to GHCR** - Authenticates with GitHub Container Registry
+3. **Set up Docker Buildx** - Configures multi-platform build support
+4. **Build and push image** - Builds `Dockerfile.model` and pushes to GHCR with:
+   - `ghcr.io/<owner>/goodreads-model:latest`
+   - `ghcr.io/<owner>/goodreads-model:<commit_sha>`
+5. **Make package public** - Updates GHCR package visibility
+
+**Key Features:**
+- **Multi-Platform Support**: Builds for both `linux/amd64` and `linux/arm64`
+- **Automatic Versioning**: Tags with both `latest` and commit SHA
+- **Public Registry**: Image publicly accessible from GHCR
+
+#### Model Decay Monitoring (`model_decay.yml`)
+
+**Purpose:** Monitors Click-Through Rate (CTR) on a daily schedule and automatically triggers model retraining when decay is detected.
+
+**Trigger:** 
+- Scheduled daily via cron: `0 8 * * *` (8 AM UTC / midnight PST)
+- Manual dispatch via GitHub Actions UI
+
+**Steps:**
+
+1. **Checkout code** - Retrieves repository code
+2. **Set up Python 3.11** - Configures Python environment
+3. **Install dependencies** - Installs required packages
+4. **Run monitor script** - Executes `src/monitor_decay.py` which:
+   - Queries BigQuery for 24-hour CTR metrics
+   - Compares CTR against decay threshold (20%)
+   - Returns exit code 1 if decay detected
+5. **Trigger retraining** - If decay detected (exit code 1), dispatches workflow `0_preprocess_data.yml` to start full retraining pipeline
+
+**Key Features:**
+- **Automated Monitoring**: Runs daily without manual intervention
+- **CTR-Based Detection**: Uses real user engagement data
+- **Self-Healing Pipeline**: Automatically initiates retraining on decay
+- **Threshold Configuration**: Configurable in `src/monitor_decay.py`
+
+#### Model Monitoring Workflow (`9_model_monitoring.yml`)
+
+**Purpose:** Runs comprehensive model monitoring including drift detection and performance analysis after model deployment.
+
+**Trigger:** 
+- Automatically after "8. Deploy Model" workflow completes successfully
+- Note: This is NOT a scheduled or manual-only workflow
+
+**Steps:**
+
+1. **Checkout code** - Retrieves repository code
+2. **Set up Python 3.11** - Configures Python environment
+3. **Authenticate to GCP** - Uses service account credentials
+4. **Install dependencies** - Installs BigQuery, pandas, scipy, MLflow packages
+5. **Run Model Monitoring** - Executes `run_full_monitoring()` which:
+   - Checks for model decay
+   - Performs data drift detection (KS test, PSI)
+   - Generates monitoring reports
+6. **Upload monitoring reports** - Saves reports as GitHub artifacts
+7. **Commit reports** - Commits JSON reports to `docs/monitoring_reports/`
+8. **Send email notification** - Notifies team of monitoring results
+
+**Exit Conditions:**
+- Exit code 1 if decay detected → triggers alert
+- Exit code 1 if drift detected → triggers alert
+
 ## Code for Loading Data from Data Pipeline
 
 > **Note:** For information about the data pipeline architecture, setup, and data processing components, please refer to [README_data.md](README_data.md).
@@ -352,7 +452,7 @@ The data loading module (`src/load_data.py`) bootstraps BigQuery credentials and
 
 **Workflow:** [`1_load_data.yml`](.github/workflows/1_load_data.yml)
 
-**Trigger:** Manual workflow dispatch (can be triggered manually from GitHub Actions UI)
+**Trigger:** Automatically runs after "0. Run Airflow Pipeline" workflow completes successfully, OR can be triggered manually via GitHub Actions UI
 
 **Steps:**
 
