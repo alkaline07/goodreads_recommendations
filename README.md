@@ -234,8 +234,11 @@ The system analyzes bias across multiple dimensions:
 For complete model development documentation, see [`README_model.md`](README_model.md).
 
 ## Phase 3. Model Deployment
-![img.png](assets/img.png)![img.png](../img.png)
-![img_2.png](assets/img_2.png)![img_2.png](../img_2.png)
+
+![img.png](assets/img.png)
+
+![img_2.png](assets/img_2.png)
+
 ### Cloud Deployment Strategy
 
 The project implements **cloud-based deployment** on **Google Cloud Platform (GCP)**, selected for its managed ML services, scalability, and integration with the existing BigQuery data pipeline. The deployment strategy leverages Vertex AI for model serving, Cloud Build for automation, and Cloud Run for the API backend.
@@ -275,17 +278,18 @@ CTR is one of the most direct indicators of how well your recommendation model i
 
 ```mermaid
 graph TD
-    A[Streamlit Frontend] --> B[track_api_call()]
-    A --> C[send_click_event()]
-    B --> D[FastAPI /frontend-metrics]
-    C --> E[FastAPI /book-click]
-    D --> F[(BigQuery: user_interactions)]
+    A[Streamlit Frontend] --> B["track_api_call()"]
+    A --> C["send_click_event()"]
+    B --> D["FastAPI /frontend-metrics"]
+    C --> E["FastAPI /book-click"]
+    D --> F[("BigQuery: user_interactions")]
     E --> F
     F --> G[CTR Calculation Job]
     G --> H[Monitoring Dashboard]
-    H --> I{CTR < 0.20%}
-    I --> J[Alert: Model Decay]
-    I --> K[Trigger Retraining]
+    H --> I{"CTR < 20%"}
+    I -->|Yes| J[Alert: Model Decay]
+    I -->|Yes| K[Trigger Retraining]
+    I -->|No| L[Continue Monitoring]
 ```
 
 ### CTR Data Schema
@@ -298,32 +302,32 @@ graph TD
 | `user_id` | STRING | User identifier |
 | `book_id` | INT64 | Book identifier |
 | `book_title` | STRING | Book title for analytics |
-| `event_type` | STRING | `view`, `click`, `like`, `add_to_list`, `mark_read` |
+| `event_type` | STRING | `view`, `click`, `like`, `add_to_list` |
 | `event_timestamp` | TIMESTAMP | Partitioned timestamp |
 
 ### How it works
 **1. User Interactions Are Logged**
 - Whenever a user sees or interacts with a recommendation on the frontend, an event is generated automatically.
 - These include:
-- - View events when a book recommendation is displayed
-- - Click or engagement events when the user interacts with a recommended book
+  - View events when a book recommendation is displayed
+  - Click or engagement events when the user interacts with a recommended book
 - These events are silently captured without affecting the user experience.
 
 **2. Events Are Sent to the Backend**
 - Each event is forwarded from the frontend to the backend API.
 - Two types of endpoints receive:
-- - View events
-- - Click / engagement events
+  - View events
+  - Click / engagement events
 - The backend validates and forwards these events to storage.
 
 **3. Events Are Stored in BigQuery**
 - Every interaction is saved as a row in the user_interactions table in BigQuery. 
 - Stored fields typically include:
-- - User ID
-- - Book ID
-- - Event type (view, click, etc.)
-- - Timestamp
-- - This creates a detailed history of user engagement with recommendations.
+  - User ID
+  - Book ID
+  - Event type (view, click, etc.)
+  - Timestamp
+- This creates a detailed history of user engagement with recommendations.
 
 **4. CTR Is Calculated on a Rolling Basis**
 - A scheduled monitoring job regularly reads the last 24 hours of event data and computes CTR using the formula:
@@ -332,23 +336,23 @@ graph TD
 
 **5. CTR Is Compared Against a Decay Threshold**
 - The system checks whether the current CTR meets an expected performance threshold.
-- Example: CTR < 0.20% → Model is considered to be decaying
+- Threshold: CTR < 20% → Model is considered to be decaying
 - A drop in CTR indicates that the model may no longer be producing high-quality recommendations.
 
 **6. Alerts Are Sent When CTR Drops**
 - If the CTR falls below the threshold:
-- - An alert is generated
-- - Email notifications are sent to the ML team
-- - Monitoring logs are updated
+  - An alert is generated
+  - Email notifications are sent to the ML team
+  - Monitoring logs are updated
 - This ensures immediate visibility into potential declines in model performance.
 
 **7. CTR Decay Triggers Model Retraining**
 - When sustained CTR decay is detected:
-- - The monitoring workflow flags the issue
-- - The ML pipeline is automatically triggered
-- - The model is retrained using the latest data
-- - Evaluation, bias detection, and validation are rerun
-- - Model Manager decides whether to promote the new version
+  - The monitoring workflow flags the issue
+  - The ML pipeline is automatically triggered
+  - The model is retrained using the latest data
+  - Evaluation, bias detection, and validation are rerun
+  - Model Manager decides whether to promote the new version
 - This creates a self-correcting feedback loop that keeps the recommendation engine fresh and relevant.
 
 ### CTR Calculation
@@ -391,7 +395,7 @@ jobs:
 
 ### CTR Thresholds & Alerts
 
-- **Decay Threshold**: CTR < 0.20% triggers model decay alerts
+- **Decay Threshold**: CTR < 20% triggers model decay alerts (defined in `src/monitor_decay.py`)
 - **Alert Channels**: Email notifications to ML team
 - **Recovery Action**: Automatic retraining pipeline initiation
 - **Reporting**: Daily CTR reports in monitoring dashboard
@@ -460,7 +464,7 @@ Content-Type: application/json
 }
 ```
 
-**Event Types**: `view`, `click`, `like`, `add_to_list`, `mark_read`
+**Event Types**: `view`, `click`, `like`, `add_to_list`
 **Use Cases**: CTR tracking, user behavior analytics, model performance
 
 #### 3. User History Management
@@ -485,39 +489,118 @@ POST /frontend-metrics
 - **Metrics**: LCP, INP, CLS, FCP, TTFB
 - **Integration**: Real-time user experience tracking
 
-#### 5. Administrative Endpoints
+#### 5. Mark Book as Read
 
 ```http
-GET /report/                    # Admin monitoring dashboard
-GET /report/api/metrics         # Model metrics JSON
+POST /mark-read
+Content-Type: application/json
+
+{
+  "user_id": "user_12345",
+  "book_id": 5988,
+  "rating": 4
+}
+```
+
+**Purpose**: Records user reading history and ratings in BigQuery
+- **Rating Range**: 1-5 stars
+- **Storage**: BigQuery `interactions` table for model retraining
+
+#### 6. Health & Root Endpoints
+
+```http
+GET /              # Root endpoint with API info
+GET /health        # Health check for load balancer probes
+```
+
+#### 7. Administrative Endpoints
+
+```http
+GET /report                    # Admin monitoring dashboard (Basic Auth: admin/admin)
+GET /report/api/metrics        # Model metrics JSON
 GET /report/api/drift          # Drift detection data
-GET /metrics                    # Real-time API metrics
+GET /metrics                   # Real-time API metrics
 GET /metrics/timeline          # Request timeline data
 ```
 
 ### API Performance Monitoring
 
-**Middleware Integration**:
-- **Response Times**: P50, P95, P99 percentiles
-- **Error Rates**: HTTP error classification
-- **Throughput**: Requests per second/minute
-- **Active Connections**: Current concurrent requests
+**Middleware Integration** (`api/middleware.py`):
+- **Response Times**: P50, P95, P99 percentiles tracked per endpoint
+- **Error Rates**: HTTP error classification (4xx client, 5xx server)
+- **Throughput**: Requests per second/minute with time-series storage
+- **Active Connections**: Current concurrent requests counter
+- **Timeline History**: Last 1000 requests stored for analysis
 
-**Metrics Collection**:
+**Metrics Collector Features**:
 ```python
 from .middleware import MonitoringMiddleware, get_metrics_collector
 
 app.add_middleware(MonitoringMiddleware)
+collector = get_metrics_collector()
+
+# Available metrics:
+# - collector.request_count: Total requests processed
+# - collector.error_count: Total errors by status code
+# - collector.response_times: Per-endpoint latency distribution
+# - collector.active_requests: Current concurrent requests
+# - collector.get_percentile_stats(): P50/P95/P99 statistics
 ```
 
-**Dashboard Integration**: Real-time metrics displayed in admin dashboard with automatic alerting for performance degradation.
+**Metrics Endpoints**:
+- `GET /metrics`: Real-time metrics summary (JSON)
+- `GET /metrics/timeline`: Historical request data for charts
+- `POST /metrics/frontend`: Web Vitals collection from browser
+
+**Dashboard Integration**: Real-time metrics displayed in admin dashboard at `/report` with automatic alerting for performance degradation.
+
+### API Data Models (`api/data_models.py`)
+
+**Request Models**:
+```python
+class RecommendationRequest:
+    user_id: str              # Required user identifier
+
+class ClickEventRequest:
+    user_id: str              # User who performed action
+    book_id: int              # Target book
+    book_title: str           # Book title for logging
+    event_type: str           # view, click, like, add_to_list
+
+class MarkReadRequest:
+    user_id: str              # User marking book
+    book_id: int              # Book being marked
+    rating: int               # 1-5 star rating
+
+class FrontendMetrics:
+    lcp: float                # Largest Contentful Paint
+    inp: float                # Interaction to Next Paint
+    cls: float                # Cumulative Layout Shift
+    fcp: float                # First Contentful Paint
+    ttfb: float               # Time to First Byte
+    user_id: Optional[str]    # Associated user
+```
+
+**Response Models**:
+```python
+class BookRecommendation:
+    book_id: int
+    title: str
+    author: str
+    predicted_rating: float   # Model's predicted rating
+
+class RecommendationResponse:
+    user_id: str
+    recommendations: List[BookRecommendation]
+```
 
 ### API Security & Authentication
 
-- **CORS**: Configured for Streamlit frontend access
-- **Rate Limiting**: Implemented via Cloud Run concurrency controls
-- **BigQuery IAM**: Service account with read-only access
-- **Environment Variables**: Encrypted secrets for API keys
+- **CORS**: Configured for Streamlit frontend access (`allow_origins=["*"]`)
+- **Rate Limiting**: Implemented via Cloud Run concurrency controls (80 req/instance)
+- **Admin Auth**: HTTP Basic Authentication for `/report` dashboard (admin/admin)
+- **BigQuery IAM**: Service account with read-only access to model tables
+- **Environment Variables**: GCP project, dataset, and model names via env vars
 
 ## Frontend Application (Streamlit)
 
@@ -609,15 +692,33 @@ sequenceDiagram
 #### Repository Integration & CI/CD
 
 **GitHub Actions Workflows**:
-- **8_model_deploy_endpoint.yml**: Handles Vertex AI model deployment
-- **9_model_monitoring.yml**: Continuous monitoring and drift detection
-- **deploy-api-backend.yml**: FastAPI backend updates
-- **terraform_infra.yml**: Infrastructure provisioning
 
-**Deployment Triggers**:
-- Automatic: Model pipeline completion
-- Manual: Workflow dispatch for emergency deployments
-- Environment-specific: Dev/staging/prod with different configurations
+| Workflow | File | Purpose | Trigger |
+|----------|------|---------|---------|
+| Model Deployment | `8_model_deploy_endpoint.yml` | Deploy model to Vertex AI endpoint | Manual dispatch, after training |
+| Model Monitoring | `9_model_monitoring.yml` | Run drift detection and performance checks | Scheduled (cron), manual |
+| Decay Monitoring | `model_decay.yml` | CTR monitoring and retraining triggers | Scheduled daily |
+| API Backend | `deploy-api-backend.yml` | Deploy FastAPI to Cloud Run | Push to main, manual |
+| Infrastructure | `terraform_infra.yml` | Provision GCP resources | Manual dispatch |
+
+**Workflow Details**:
+- **8_model_deploy_endpoint.yml**: 
+  - Authenticates to GCP via Workload Identity
+  - Runs `src/model_deployment.py` to deploy selected model version
+  - Configures traffic split and machine type
+  - Verifies deployment health
+
+- **9_model_monitoring.yml**:
+  - Executes `src/model_monitoring.py` for comprehensive analysis
+  - Generates drift reports and performance metrics
+  - Creates GitHub artifacts with monitoring results
+  - Sends alerts on threshold breaches
+
+- **model_decay.yml**:
+  - Runs `src/monitor_decay.py` for CTR analysis
+  - Queries BigQuery for 24-hour event aggregation
+  - Triggers retraining pipeline if CTR < 20%
+  - Sends email notifications on decay detection
 
 #### Automated Deployment Scripts
 
@@ -649,11 +750,19 @@ steps:
 - **Monitoring Middleware**: Real-time performance tracking
 - **BigQuery Integration**: Direct model prediction queries
 
-**Cloud Run Configuration** (via Terraform):
-- **Scaling**: Min/max replica counts with CPU utilization triggers
-- **Resource Limits**: CPU and memory allocation
-- **Security**: Service account binding for BigQuery access
-- **Networking**: Load balancing and health checks
+**Cloud Run Configuration** (`terraform/main.tf`):
+- **Scaling**: Min 0 / Max 10 replicas with 80% CPU utilization trigger
+- **Resource Limits**: 1 CPU, 512Mi memory per instance
+- **Concurrency**: 80 requests per container instance
+- **Timeout**: 300 seconds request timeout
+- **Security**: Service account with BigQuery read access
+- **Networking**: Internal and external load balancing with health checks
+
+**Vertex AI Infrastructure** (`terraform/vertex_ai.tf`):
+- **Metrics Scope**: Centralized monitoring across all ML endpoints
+- **Alert Policies**: Automated alerting for prediction latency and error rates
+- **Dashboard**: Custom monitoring dashboard for model performance visualization
+- **Notification Channels**: Email alerts to ML team for critical events
 
 ### Model Monitoring and Retraining
 
@@ -661,23 +770,38 @@ steps:
 
 **Performance Metrics**:
 - **Model Decay**: Click-Through Rate (CTR) monitoring over 24-hour windows
-- **Thresholds**: CTR < 0.20% triggers alerts and retraining
+- **Thresholds**: CTR < 20% triggers alerts and retraining (defined in `src/monitor_decay.py`)
 - **Data Sources**: User interaction logs in BigQuery
 
-**Drift Detection**:
+**Drift Detection** (`src/model_monitoring.py`):
 - **Input Distribution**: Monitors feature distributions over time
-- **Statistical Tests**: Chi-square and Kolmogorov-Smirnov tests
-- **Threshold-based Alarms**: Configurable drift thresholds
+- **Statistical Tests**:
+  - Kolmogorov-Smirnov (KS) test with p-value threshold < 0.05
+  - Population Stability Index (PSI) threshold > 0.2
+  - Mean shift detection > 2.0 standard deviations
+- **Feature Monitoring**: Tracks `user_avg_rating`, `book_avg_rating`, `user_book_count`, `book_rating_count`
+- **Comparison Window**: Reference vs current data distributions
 
-**Dashboard Integration**:
-- **Real-time Monitoring**: Live API performance metrics
-- **Visualization**: Error heatmaps and performance charts
-- **Alerting**: Email notifications for anomaly detection
+**Monitoring Dashboard** (`api/monitoring_dashboard.py`):
+- **Access**: `/report` endpoint with HTTP Basic Auth (admin/admin)
+- **Model Metrics Panel**: 
+  - Active model version and deployment timestamp
+  - RMSE, MAE, R², Explained Variance scores
+  - Performance trend charts over time
+- **Drift Detection Panel**:
+  - Feature drift status with color-coded indicators
+  - PSI scores, KS test p-values, mean shifts
+  - Automated drift alerts when thresholds exceeded
+- **API Performance Panel**:
+  - Request latency percentiles (P50, P95, P99)
+  - Error rate heatmaps by hour
+  - Throughput and active connections
+- **Auto-refresh**: Dashboard updates every 30 seconds
 
 #### Retraining Automation
 
 **Triggering Mechanisms**:
-- **Performance Thresholds**: RMSE deltas > 5% from baseline
+- **Performance Thresholds**: RMSE/MAE increase > 10%, R² decrease > 0.05, accuracy drop > 5%
 - **Drift Detection**: Significant input distribution changes
 - **Schedule-based**: Periodic retraining windows (weekly/monthly)
 
