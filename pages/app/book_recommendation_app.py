@@ -908,9 +908,9 @@ if st.session_state.view_mode == 'user_selection':
     st.markdown("### Try Sample Users")
     
     quick_users = {
-        "User-4b1af": {"id": "4b1af908229844ec02bc4b40aa6ea4dd"},
-        "User-2faa2": {"id": "2faa2ef7e9062a7339ed1e4299c7ecaf"},
-        "User-4597b": {"id": "4597ba0bb52054eae1e87534c78b13b8"}
+        "Prad Bitt": {"id": "4b1af908229844ec02bc4b40aa6ea4dd"},
+        "Dark Mamon": {"id": "2faa2ef7e9062a7339ed1e4299c7ecaf"},
+        "Com Truise": {"id": "4597ba0bb52054eae1e87534c78b13b8"}
     }
     
     cols = st.columns(3)
