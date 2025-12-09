@@ -7,6 +7,8 @@ on:
     paths:
       - 'api/**'
       - 'terraform/**'
+      - 'Dockerfile.backend'
+      
   workflow_dispatch:
 
 concurrency:
