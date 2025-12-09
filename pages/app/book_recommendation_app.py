@@ -6,6 +6,7 @@ import json
 import os
 import time
 from datetime import datetime
+from urllib.parse import quote
 # Restore session state BEFORE Streamlit renders widgets
 current_user = st.session_state.get("current_user", None)
 
@@ -306,8 +307,6 @@ def load_books_database():
                         "isbn": item.get("isbn") or item.get("isbn_clean") or ""
                     })
 
-                # Add fallback books for popular searchable titles
-                books.extend(load_fallback_database())
                 return books
         else:
             st.warning("books_database.json not found, using fallback data")
@@ -320,30 +319,9 @@ def load_books_database():
 def load_fallback_database():
     """Fallback database if JSON file is not available"""
     return [
-        {"book_id": "db_1", "title": "The Silent Patient", "author": "Alex Michaelides", "rating": 4.5,
-         "isbn": "9781250301697"},
-        {"book_id": "db_2", "title": "Where the Crawdads Sing", "author": "Delia Owens", "rating": 4.6,
-         "isbn": "9780735219090"},
-        {"book_id": "db_3", "title": "Atomic Habits", "author": "James Clear", "rating": 4.8, "isbn": "9780735211292"},
-        {"book_id": "db_4", "title": "The Midnight Library", "author": "Matt Haig", "rating": 4.3,
-         "isbn": "9780525559474"},
-        {"book_id": "db_5", "title": "Project Hail Mary", "author": "Andy Weir", "rating": 4.7,
-         "isbn": "9780593135204"},
-        {"book_id": "db_6", "title": "Dune", "author": "Frank Herbert", "rating": 4.6, "isbn": "9780441172719"},
-        {"book_id": "db_7", "title": "The Seven Husbands of Evelyn Hugo", "author": "Taylor Jenkins Reid",
-         "rating": 4.7, "isbn": "9781501161933"},
-        {"book_id": "db_8", "title": "Normal People", "author": "Sally Rooney", "rating": 4.2, "isbn": "9781984822178"},
-        {"book_id": "db_9", "title": "The Nightingale", "author": "Kristin Hannah", "rating": 4.8,
-         "isbn": "9780312577223"},
-        {"book_id": "db_10", "title": "Circe", "author": "Madeline Miller", "rating": 4.6, "isbn": "9780316556347"},
-        {"book_id": "db_11", "title": "The Book Thief", "author": "Markus Zusak", "rating": 4.7,
-         "isbn": "9780375842207"},
-        {"book_id": "db_12", "title": "The Kite Runner", "author": "Khaled Hosseini", "rating": 4.6,
-         "isbn": "9781594631931"},
-        {"book_id": "db_13", "title": "Life of Pi", "author": "Yann Martel", "rating": 4.3, "isbn": "9780156027328"},
-        {"book_id": "db_14", "title": "The Hunger Games", "author": "Suzanne Collins", "rating": 4.5,
-         "isbn": "9780439023481"},
-        {"book_id": "db_15", "title": "Gone Girl", "author": "Gillian Flynn", "rating": 4.4, "isbn": "9780307588371"},
+        {"book_id": "13079104", "title": "Circe", "author": "Madeline Miller", "rating": 4.6, "isbn": "9780316556347"},
+        {"book_id": "11295686", "title": "Gone Girl", "author": "Gillian Flynn", "rating": 4.4, "isbn": "9780307588371"},
+
     ]
 
 
@@ -360,52 +338,95 @@ def search_books(query: str, books_db: List[Dict]) -> List[Dict]:
     return results[:20]
 
 
-def get_book_details_from_google(title: str, author: str, isbn: str = None) -> Dict:
-    """Fetch book details from Google Books API"""
+def get_book_details_from_google(title: str, author: str, isbn: str = None, api_rating=None) -> Dict:
+    """Fetch book details from Google Books API with improved search accuracy"""
     try:
-        # Try searching by ISBN first if available
+        book_data = None
+
+        # Strategy 1: Try ISBN first if available
         if isbn:
             url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-        else:
-            # Search by title and author
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if 'items' in data and len(data['items']) > 0:
+                    book_data = data['items'][0]['volumeInfo']
+
+        # Strategy 2: If ISBN failed or not available, use title + author with field-specific search
+        if not book_data:
+            # Use intitle: and inauthor: for precise matching
+            encoded_title = quote(title)
+            encoded_author = quote(author)
+            url = f"https://www.googleapis.com/books/v1/volumes?q=intitle:{encoded_title}+inauthor:{encoded_author}"
+
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if 'items' in data and len(data['items']) > 0:
+                    # Find best match - prioritize exact title match
+                    best_match = None
+                    for item in data['items']:
+                        item_info = item.get('volumeInfo', {})
+                        item_title = item_info.get('title', '').lower()
+                        item_authors = [a.lower() for a in item_info.get('authors', [])]
+
+                        # Check for exact title match
+                        if title.lower() == item_title:
+                            # Check if author matches
+                            if any(author.lower() in a or a in author.lower() for a in item_authors):
+                                best_match = item_info
+                                break
+
+                        # Store first result as fallback
+                        if best_match is None:
+                            best_match = item_info
+
+                    book_data = best_match
+
+        # Strategy 3: Fallback to simple combined search
+        if not book_data:
             query = f"{title} {author}".replace(" ", "+")
-            url = f"https://www.googleapis.com/books/v1/volumes?q={query}"
+            url = f"https://www.googleapis.com/books/v1/volumes?q={quote(query, safe='+')}"
 
-        response = requests.get(url, timeout=10)
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if 'items' in data and len(data['items']) > 0:
+                    book_data = data['items'][0]['volumeInfo']
 
-        if response.status_code == 200:
-            data = response.json()
+        # Process the found book data
+        if book_data:
+            # Prioritize API rating, fall back to Google's rating
+            if api_rating is not None and api_rating != "N/A":
+                final_rating = api_rating
+            else:
+                final_rating = book_data.get('averageRating', 'N/A')
 
-            if 'items' in data and len(data['items']) > 0:
-                book_info = data['items'][0]['volumeInfo']
+            return {
+                "title": book_data.get('title', title),
+                "author": ', '.join(book_data.get('authors', [author])),
+                "description": book_data.get('description', 'No description available.'),
+                "cover_url": book_data.get('imageLinks', {}).get('thumbnail',
+                                                                 book_data.get('imageLinks', {}).get(
+                                                                     'smallThumbnail',
+                                                                     'https://via.placeholder.com/300x450?text=No+Cover')),
+                "published_date": book_data.get('publishedDate', 'Unknown'),
+                "page_count": book_data.get('pageCount', 'N/A'),
+                "categories": book_data.get('categories', ['General']),
+                "rating": final_rating,
+                "ratings_count": book_data.get('ratingsCount', 'N/A'),
+                "language": book_data.get('language', 'en'),
+                "preview_link": book_data.get('previewLink', '#')
+            }
 
-                # Extract relevant information
-                return {
-                    "title": book_info.get('title', title),
-                    "author": ', '.join(book_info.get('authors', [author])),
-                    "description": book_info.get('description', 'No description available.'),
-                    "cover_url": book_info.get('imageLinks', {}).get('thumbnail',
-                                                                     book_info.get('imageLinks', {}).get(
-                                                                         'smallThumbnail',
-                                                                         'https://via.placeholder.com/300x450?text=No+Cover')),
-                    "published_date": book_info.get('publishedDate', 'Unknown'),
-                    "page_count": book_info.get('pageCount', 'N/A'),
-                    "categories": book_info.get('categories', ['General']),
-                    "rating": book_info.get('averageRating', 'N/A'),
-                    "ratings_count": book_info.get('ratingsCount', 'N/A'),
-                    "language": book_info.get('language', 'en'),
-                    "preview_link": book_info.get('previewLink', '#')
-                }
-
-        # Fallback if API call fails
-        return create_fallback_book_details(title, author)
+        return create_fallback_book_details(title, author, api_rating)
 
     except Exception as e:
         st.error(f"Error fetching book details: {str(e)}")
-        return create_fallback_book_details(title, author)
+        return create_fallback_book_details(title, author, api_rating)
 
 
-def create_fallback_book_details(title: str, author: str) -> Dict:
+def create_fallback_book_details(title: str, author: str, api_rating=None) -> Dict:
     """Create fallback book details if Google Books API fails"""
     return {
         "title": title,
@@ -415,7 +436,7 @@ def create_fallback_book_details(title: str, author: str) -> Dict:
         "published_date": "Unknown",
         "page_count": "N/A",
         "categories": ["General"],
-        "rating": "N/A",
+        "rating": api_rating if api_rating is not None else "N/A",
         "ratings_count": "N/A",
         "language": "en",
         "preview_link": "#"
@@ -605,7 +626,6 @@ def display_book_card(book: Dict, col, button_prefix: str = "btn"):
         """, unsafe_allow_html=True)
 
         if st.button(f"View Details", key=f"{button_prefix}_{book['book_id']}", use_container_width=True):
-            # Track click event
             send_click_event(
                 st.session_state.current_user,
                 book['book_id'],
@@ -613,13 +633,15 @@ def display_book_card(book: Dict, col, button_prefix: str = "btn"):
                 book['title']
             )
 
-            # Show loading spinner while fetching from Google Books API
             with st.spinner(f'Fetching details for "{book["title"]}"...'):
-                # Get book details from Google Books API
+                # Get API rating
+                api_rating = book.get('predicted_rating') or book.get('average_rating') or book.get('rating')
+
                 book_details = get_book_details_from_google(
                     book['title'],
                     book['author'],
-                    book.get('isbn')
+                    book.get('isbn'),
+                    api_rating=api_rating  # Pass API rating as priority
                 )
                 book_details['book_id'] = book['book_id']
 
@@ -752,10 +774,13 @@ elif st.session_state.view_mode == 'read_books':
 
                         if st.button(f"View Details", key=f"read_{book['book_id']}", use_container_width=True):
                             with st.spinner(f'Fetching details for "{book["title"]}"...'):
+                                api_rating = book.get('average_rating') or book.get('rating')
+
                                 book_details = get_book_details_from_google(
                                     book['title'],
                                     book['author'],
-                                    book.get('isbn')
+                                    book.get('isbn'),
+                                    api_rating=api_rating
                                 )
                                 book_details['book_id'] = book['book_id']
                                 book_details['already_read'] = True
@@ -817,12 +842,14 @@ elif st.session_state.view_mode == 'search':
                     st.markdown(f"**{book.get('title', 'Unknown')}** by *{book.get('author', 'Unknown')}* - ⭐ {format_rating(book.get('rating'))}")
             with col2:
                 if st.button("View", key=f"search_view_{idx}_{book.get('book_id', idx)}", use_container_width=True):
-
                     with st.spinner(f'Fetching details...'):
+                        api_rating = book.get('rating') or book.get('average_rating')
+
                         book_details = get_book_details_from_google(
                             book.get('title', ''),
                             book.get('author', ''),
-                            book.get('isbn')
+                            book.get('isbn'),
+                            api_rating=api_rating
                         )
                         book_details['book_id'] = book.get('book_id', '')
                         book_details['already_read'] = is_read
@@ -907,25 +934,56 @@ elif st.session_state.view_mode == 'book_details':
             # Display star rating visually
             stars_display = "⭐" * rating + "☆" * (5 - rating)
             st.markdown(f"**Your rating:** {stars_display} ({rating}/5)")
+
             col_submit, col_cancel = st.columns(2)
             with col_submit:
                 if st.button("✅ Submit Rating & Mark as Read", type="primary", use_container_width=True):
                     try:
-                        requests.post(
+                        # Prepare the payload
+                        payload = {
+                            "user_id": st.session_state.current_user,
+                            "book_id": st.session_state.rating_book_info['book_id'],
+                            "book_title": st.session_state.rating_book_info.get('title', ''),
+                            "rating": rating
+                        }
+
+                        # Debug: Show what's being sent (remove in production)
+                        # st.write("Sending payload:", payload)
+
+                        response = requests.post(
                             f"{API_BASE_URL}/mark-read",
-                            json={
-                                "user_id": st.session_state.current_user,
-                                "book_id": st.session_state.rating_book_info['book_id'],
-                                "rating": rating
-                            },
+                            json=payload,
                             timeout=10
                         )
-                        st.success(f"Marked as read with {rating}⭐ rating!")
-                        st.balloons()
+
+                        # Check response status
+                        if response.status_code == 200:
+                            st.success(
+                                f"'{st.session_state.rating_book_info['title']}' marked as read with {rating}⭐ rating!")
+                            st.balloons()
+
+                            # Update the book's already_read status
+                            st.session_state.selected_book['already_read'] = True
+
+                            # Refresh read books list
+                            st.session_state.read_books = get_read_books(st.session_state.current_user)
+
+                            # Clear modal state
+                            st.session_state.show_rating_modal = False
+                            st.session_state.rating_book_info = None
+
+                            # Rerun to update UI
+                            time.sleep(1)  # Brief pause to show success message
+                            st.rerun()
+                        else:
+                            st.error(f"API Error: {response.status_code} - {response.text}")
+
+                    except requests.exceptions.Timeout:
+                        st.error("Request timed out. Please try again.")
+                    except requests.exceptions.ConnectionError:
+                        st.error("Could not connect to the server. Please check your connection.")
                     except Exception as e:
-                        st.error(f"Error marking book as read: {e}")
-                    st.session_state.show_rating_modal = False
-                    st.session_state.rating_book_info = None
+                        st.error(f"Error marking book as read: {str(e)}")
 
             with col_cancel:
                 if st.button("❌ Cancel", use_container_width=True):
