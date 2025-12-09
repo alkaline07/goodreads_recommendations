@@ -7,7 +7,7 @@ This project builds a machine learning-based book recommendation system using Go
 - [Phase 1. Data Pipeline](#data-pipeline)
 - [Phase 2. Model Development](#model-development)
 - [Phase 3. Model Deployment](#model-deployment)
-- Project Recreation 
+- [Project Recreation](#project-recreation)
 
 ## Team Members
 
@@ -870,6 +870,10 @@ steps:
 - Notification systems for model health and retraining status
 
 For comprehensive documentation on all pipeline components, see [`README_data.md`](README_data.md) and [`README_model.md`](README_model.md).
+
+## Project Recreation
+
+For detailed instructions on replicating this project on other machines or platforms, including setup, deployment, and validation steps, see **[`README_project_replication.md`](README_project_replication.md)**.
 
 ---
 
