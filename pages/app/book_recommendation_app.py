@@ -13,10 +13,6 @@ current_user = st.session_state.get("current_user", None)
 
 API_BASE_URL = "https://recommendation-service-491512947755.us-central1.run.app"
 
-# [Keep all your existing helper functions exactly as they are - inject_web_vitals_monitoring, format_rating, 
-# track_api_call, get_recommendations, get_read_books, get_unread_books, load_books_database, 
-# load_fallback_database, search_books, get_book_details_from_google, create_fallback_book_details, 
-# send_click_event - NO CHANGES TO THESE]
 
 def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
     """Inject Web Vitals monitoring script into the Streamlit app's parent window."""
@@ -747,7 +743,7 @@ st.markdown("""
         /* Green gradient for Mark as Read */
     }
     .stButton > button[kind="primary"] {
-        background: rgba(138, 43, 226);
+        background: rgba(138, 43, 226✓);
         box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 
     }   
