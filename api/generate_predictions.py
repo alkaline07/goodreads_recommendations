@@ -4,6 +4,9 @@ from typing import Optional, Dict
 import datetime
 import argparse
 import json
+from datapipeline.scripts.logger_setup import get_logger
+
+logger = get_logger("generate-predictions")
 
 class GeneratePredictions:
     def __init__(self):
@@ -93,10 +96,10 @@ class GeneratePredictions:
                 "display_name": f"goodreads_{model_name}"
             }
         except FileNotFoundError:
-            print("Model selection report not found, using default")
+            logger.warning("Model selection report not found, using default")
             return default_info
         except Exception as e:
-            print(f"Error reading model selection report: {e}")
+            logger.error("Error reading model selection report", error=str(e))
             return default_info
     
     def get_version(self, display_name):
@@ -107,11 +110,11 @@ class GeneratePredictions:
             )
             
             if not models:
-                print(f"No model found with display name: {display_name}")
+                logger.warning("No model found with display name", display_name=display_name)
                 return None
             
             parent_model = models[0]
-            print(f"Found parent model: {parent_model.resource_name}")
+            logger.info("Found parent model", resource_name=parent_model.resource_name)
             
             versions = parent_model.versioning_registry.list_versions()
             default_version = None
@@ -122,7 +125,7 @@ class GeneratePredictions:
                     break
             return default_version.version_id if default_version else None
         except Exception as e:
-            print(f"Error retrieving model version: {e}")
+            logger.error("Error retrieving model version", error=str(e))
             return None
     
     def get_bq_model_id_by_version(self, display_name, version_id):
@@ -151,7 +154,7 @@ class GeneratePredictions:
         elif "matrix_factorization" in display_name:
             return f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
         else:
-            print(f"Model type for {display_name} not recognized.")
+            logger.warning("Model type not recognized", display_name=display_name)
             return None
     
     def get_predictions(self, user_id):
@@ -185,6 +188,7 @@ if __name__ == "__main__":
     
     generator = GeneratePredictions()
     predictions = generator.get_predictions(args.user_id)
+    logger.info("Predictions generated", count=len(predictions))
     print(predictions)
 
 # Sample runner command:

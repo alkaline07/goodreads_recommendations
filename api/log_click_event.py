@@ -5,6 +5,8 @@ from google.api_core.exceptions import GoogleAPIError, NotFound
 import os
 import argparse
 import time
+from datapipeline.scripts.logger_setup import get_logger
+logger = get_logger("log-click-event")
 
 class LogClickEvent:
     def __init__(self):
@@ -23,7 +25,7 @@ class LogClickEvent:
         try:
             self.client.get_table(self.full_table_id)
         except NotFound:
-            print(f"Table {self.full_table_id} not found. Creating it...")
+            logger.info(f"Table {self.full_table_id} not found. Creating it...")
             schema = [
                 bigquery.SchemaField("event_id", "STRING", mode="REQUIRED"),
                 bigquery.SchemaField("user_id", "STRING", mode="REQUIRED"),
@@ -38,7 +40,7 @@ class LogClickEvent:
                 field="event_timestamp"
             )
             self.client.create_table(table)
-            print("Table created successfully.")
+            logger.info("Table created successfully.")
     
     def _wait_for_table(self):
         for i in range(10):
@@ -75,13 +77,13 @@ class LogClickEvent:
         try:
             errors = self.client.insert_rows_json(self.full_table_id, rows_to_insert)
             if errors == []:
-                print(f"Logged {event_type} for user {user_id}")
+                logger.info(f"Logged {event_type} for user {user_id}")
                 return True
             else:
-                print(f"Errors inserting rows: {errors}")
+                logger.error(f"Errors inserting rows: {errors}")
                 return False
         except GoogleAPIError as e:
-            print(f"API Error: {e}")
+            logger.error(f"API Error: {e}")
             return False
         
 if __name__ == "__main__":
@@ -90,11 +92,11 @@ if __name__ == "__main__":
     parser.add_argument("--book_id", type=int, required=True, help="Book ID")
     parser.add_argument("--event_type", type=str, required=True, help="Event type")
     parser.add_argument("--book_title", type=str, default=None, help="Book title (optional)")
-    
+
     args = parser.parse_args()
-    
-    logger = LogClickEvent()
-    logger.log_user_event(
+
+    event_logger = LogClickEvent()  # Renamed to avoid conflict!
+    event_logger.log_user_event(
         user_id=args.user_id,
         book_id=args.book_id,
         event_type=args.event_type,
