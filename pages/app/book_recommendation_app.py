@@ -7,11 +7,16 @@ import os
 import time
 from datetime import datetime
 from urllib.parse import quote
+
 # Restore session state BEFORE Streamlit renders widgets
 current_user = st.session_state.get("current_user", None)
 
 API_BASE_URL = "https://recommendation-service-491512947755.us-central1.run.app"
 
+# [Keep all your existing helper functions exactly as they are - inject_web_vitals_monitoring, format_rating, 
+# track_api_call, get_recommendations, get_read_books, get_unread_books, load_books_database, 
+# load_fallback_database, search_books, get_book_details_from_google, create_fallback_book_details, 
+# send_click_event - NO CHANGES TO THESE]
 
 def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
     """Inject Web Vitals monitoring script into the Streamlit app's parent window."""
@@ -31,7 +36,6 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
             parentWin._clsValue = 0;
             parentWin._inpEntries = [];
             
-            // Function to send vitals to backend
             function sendVitals(force = false) {{
                 const now = Date.now();
                 if (!force && now - parentWin._lastVitalsSend < 5000) return;
@@ -62,22 +66,15 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                   .catch(e => console.warn('[Web Vitals] Failed to send:', e));
             }}
             
-            // Calculate INP from interaction entries (P98 of all interactions)
             function calculateINP() {{
                 const entries = parentWin._inpEntries;
                 if (entries.length === 0) return;
-                
-                // Sort by duration descending
                 entries.sort((a, b) => b - a);
-                
-                // INP is the P98 (or worst if fewer than 50 interactions)
                 const p98Index = Math.min(Math.floor(entries.length * 0.02), entries.length - 1);
                 parentWin._webVitals.inp = Math.round(entries[p98Index]);
             }}
             
-            // Use PerformanceObserver for more reliable metrics in Streamlit
             try {{
-                // LCP Observer
                 new PerformanceObserver((list) => {{
                     const entries = list.getEntries();
                     const lastEntry = entries[entries.length - 1];
@@ -85,7 +82,6 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                     sendVitals();
                 }}).observe({{type: 'largest-contentful-paint', buffered: true}});
                 
-                // CLS Observer - accumulate in parent window to persist across Streamlit rerenders
                 new PerformanceObserver((list) => {{
                     for (const entry of list.getEntries()) {{
                         if (!entry.hadRecentInput) {{
@@ -96,7 +92,6 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                     sendVitals();
                 }}).observe({{type: 'layout-shift', buffered: true}});
                 
-                // FCP Observer
                 new PerformanceObserver((list) => {{
                     const entries = list.getEntries();
                     if (entries.length > 0) {{
@@ -105,7 +100,6 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                     }}
                 }}).observe({{type: 'paint', buffered: true}});
                 
-                // INP Observer (Interaction to Next Paint) - lowered threshold to 0 to capture all interactions
                 new PerformanceObserver((list) => {{
                     for (const entry of list.getEntries()) {{
                         if (entry.duration > 0) {{
@@ -116,7 +110,6 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                     sendVitals();
                 }}).observe({{type: 'event', buffered: true, durationThreshold: 0}});
                 
-                // TTFB from Navigation Timing
                 const navEntry = performance.getEntriesByType('navigation')[0];
                 if (navEntry) {{
                     parentWin._webVitals.ttfb = Math.round(navEntry.responseStart);
@@ -128,7 +121,6 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                 console.warn('[Web Vitals] PerformanceObserver not fully supported:', e);
             }}
             
-            // Explicit interaction tracking for common user actions
             function trackInteraction(event) {{
                 const start = performance.now();
                 requestAnimationFrame(() => {{
@@ -143,20 +135,16 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                 }});
             }}
             
-            // Attach interaction listeners to parent window for comprehensive tracking
             ['click', 'keydown', 'pointerdown'].forEach(eventType => {{
                 parentWin.document.addEventListener(eventType, trackInteraction, {{passive: true, capture: true}});
             }});
             
-            // Also track in iframes (Streamlit components)
             try {{
                 document.addEventListener('click', trackInteraction, {{passive: true, capture: true}});
                 document.addEventListener('keydown', trackInteraction, {{passive: true, capture: true}});
             }} catch (e) {{}}
             
-            // Force CLS measurement on dynamic content by observing mutations
             const mutationObserver = new MutationObserver(() => {{
-                // Trigger a layout shift check after DOM changes
                 if (parentWin._webVitals.cls === undefined) {{
                     parentWin._webVitals.cls = 0;
                 }}
@@ -167,7 +155,6 @@ def inject_web_vitals_monitoring(session_id: str, api_base_url: str):
                 attributes: true
             }});
             
-            // Send on various triggers
             setTimeout(sendVitals, 3000);
             setInterval(sendVitals, 30000);
             
@@ -321,7 +308,6 @@ def load_fallback_database():
     return [
         {"book_id": "13079104", "title": "Circe", "author": "Madeline Miller", "rating": 4.6, "isbn": "9780316556347"},
         {"book_id": "11295686", "title": "Gone Girl", "author": "Gillian Flynn", "rating": 4.4, "isbn": "9780307588371"},
-
     ]
 
 
@@ -343,7 +329,6 @@ def get_book_details_from_google(title: str, author: str, isbn: str = None, api_
     try:
         book_data = None
 
-        # Strategy 1: Try ISBN first if available
         if isbn:
             url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
             response = requests.get(url, timeout=10)
@@ -352,9 +337,7 @@ def get_book_details_from_google(title: str, author: str, isbn: str = None, api_
                 if 'items' in data and len(data['items']) > 0:
                     book_data = data['items'][0]['volumeInfo']
 
-        # Strategy 2: If ISBN failed or not available, use title + author with field-specific search
         if not book_data:
-            # Use intitle: and inauthor: for precise matching
             encoded_title = quote(title)
             encoded_author = quote(author)
             url = f"https://www.googleapis.com/books/v1/volumes?q=intitle:{encoded_title}+inauthor:{encoded_author}"
@@ -363,27 +346,22 @@ def get_book_details_from_google(title: str, author: str, isbn: str = None, api_
             if response.status_code == 200:
                 data = response.json()
                 if 'items' in data and len(data['items']) > 0:
-                    # Find best match - prioritize exact title match
                     best_match = None
                     for item in data['items']:
                         item_info = item.get('volumeInfo', {})
                         item_title = item_info.get('title', '').lower()
                         item_authors = [a.lower() for a in item_info.get('authors', [])]
 
-                        # Check for exact title match
                         if title.lower() == item_title:
-                            # Check if author matches
                             if any(author.lower() in a or a in author.lower() for a in item_authors):
                                 best_match = item_info
                                 break
 
-                        # Store first result as fallback
                         if best_match is None:
                             best_match = item_info
 
                     book_data = best_match
 
-        # Strategy 3: Fallback to simple combined search
         if not book_data:
             query = f"{title} {author}".replace(" ", "+")
             url = f"https://www.googleapis.com/books/v1/volumes?q={quote(query, safe='+')}"
@@ -394,9 +372,7 @@ def get_book_details_from_google(title: str, author: str, isbn: str = None, api_
                 if 'items' in data and len(data['items']) > 0:
                     book_data = data['items'][0]['volumeInfo']
 
-        # Process the found book data
         if book_data:
-            # Prioritize API rating, fall back to Google's rating
             if api_rating is not None and api_rating != "N/A":
                 final_rating = api_rating
             else:
@@ -450,7 +426,7 @@ def send_click_event(user_id: str, book_id: int, event_type: str, book_title: st
         "user_id": user_id,
         "book_id": book_id,
         "book_title": book_title,
-        "event_type": event_type,  # "view", "click", "like", "add_to_list"
+        "event_type": event_type,
         "timestamp": datetime.utcnow().isoformat()
     }
     try:
@@ -460,7 +436,6 @@ def send_click_event(user_id: str, book_id: int, event_type: str, book_title: st
     except requests.exceptions.RequestException as e:
         print(f"Error tracking event: {e}")
         return {"status": "error", "message": str(e)}
-
 
 
 # Initialize session state
@@ -473,7 +448,7 @@ if 'read_books' not in st.session_state:
 if 'selected_book' not in st.session_state:
     st.session_state.selected_book = None
 if 'view_mode' not in st.session_state:
-    st.session_state.view_mode = 'user_selection'  # 'user_selection', 'recommendations', 'book_details', 'read_books', 'search'
+    st.session_state.view_mode = 'user_selection'
 if 'books_database' not in st.session_state:
     st.session_state.books_database = load_books_database()
 if 'search_results' not in st.session_state:
@@ -500,81 +475,292 @@ if 'rating_book_info' not in st.session_state:
 
 # Page configuration
 st.set_page_config(
-    page_title="Book Recommendation System",
+    page_title="Read Mate",
     page_icon="📚",
     layout="wide"
 )
 
-# Custom CSS
+# ===== UPDATED MODERN CSS =====
 st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .main {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    }
+    
     .book-card {
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-        margin: 10px 0;
-        transition: transform 0.2s;
-        background-color: #f9f9f9;
+        padding: 24px;
+        border-radius: 16px;
+        border: none;
+        margin: 16px 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        position: relative;
+        overflow: hidden;
+        min-height: 180px;
+        display: flex; flex-direction: column; justify-content: space-between;
     }
+    
+    .book-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        
+    }
+    
     .book-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08);
     }
+    
+    .book-card:hover::before {
+        opacity: 1;
+    }
+    
     .book-title {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #2c3e50;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1a202c;
+        line-height: 1.4;
+        letter-spacing: -0.01em;
+        min-height: 56px;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
     }
+    
     .book-author {
-        color: #666;
-        margin-bottom: 5px;
-        font-style: italic;
+        color: #718096;
+        margin-bottom: 12px;
+        font-size: 15px;
+        font-weight: 400;
     }
+    
     .rating {
-        color: #f39c12;
-        font-size: 16px;
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
     }
+    
     .detail-section {
-        margin: 20px 0;
+        margin: 32px 0;
+        padding: 24px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
+    
     .genre-tag {
         display: inline-block;
-        padding: 5px 10px;
-        margin: 5px;
-        background-color: #3498db;
+        padding: 8px 16px;
+        margin: 6px 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        border-radius: 15px;
-        font-size: 14px;
+        border-radius: 24px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        transition: all 0.2s ease;
     }
+    
+    .genre-tag:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
     .description-text {
-        line-height: 1.6;
+        line-height: 1.8;
         text-align: justify;
+        color: #2d3748;
+        font-size: 16px;
+        padding: 20px;
+        background: #f7fafc;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
     }
-    .sidebar-button {
-        margin: 5px 0;
+    .stButton > button[kind="secondary"] {
+    background: white;
+    color: #1a202c;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
+
+    .stButton > button[kind="secondary"]:hover {
+        background: #f7fafc;
+        border-color: #cbd5e0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        letter-spacing: 0.02em;
+        height: 40px;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1a202c 0%, #2d3748 100%);
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: #e2e8f0 !important;
+    }
+    
+    [data-testid="stSidebar"] .stButton > button {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+    }
+    
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Sidebar horizontal rules */
+    [data-testid="stSidebar"] hr {
+        border: none;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 16px 0;
+    }
+    
+    .metric-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        text-align: center;
+        transition: transform 0.2s ease;
+    }
+    
+    .metric-card:hover {
+        transform: scale(1.05);
+    }
+    
+    .stSuccess, .stInfo {
+        border-radius: 12px;
+        border-left: 4px solid;
+        padding: 16px;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .stTextInput > div > div > input {
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        padding: 12px 16px;
+        font-size: 15px;
+        transition: all 0.2s ease;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .stSpinner > div {
+        border-color: #667eea;
+    }
+    
+    h1, h2, h3 {
+        color: #1a202c;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    
+    hr {
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        margin: 32px 0;
+    }
+/* Action buttons styling */
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        border: none;
+        width: 100%;
+    }
+
+    .like-button {
+        background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+        /* Pink gradient for Like button */
+    }
+
+    .reading-list-button {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        /* Blue gradient for Reading List */
+    }
+
+    .mark-read-button {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        /* Green gradient for Mark as Read */
+    }
+    .stButton > button[kind="primary"] {
+        background: rgba(138, 43, 226);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+
+    }   
+     
     </style>
 """, unsafe_allow_html=True)
 
-# Inject Web Vitals monitoring (runs once per page load)
+# Inject Web Vitals monitoring
 inject_web_vitals_monitoring(st.session_state.session_id, API_BASE_URL)
 
-# Sidebar with navigation
+# Sidebar
 with st.sidebar:
     st.title("Navigation")
-
-    if st.session_state.api_call_count > 0:
-        avg_latency = st.session_state.total_api_latency / st.session_state.api_call_count
-
-        latency_color = "green" if avg_latency < 500 else "orange" if avg_latency < 1000 else "red"
-        st.markdown(f"""
-            <div style='background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px;'>
-                <div style='font-size: 12px; color: #666;'>API Performance</div>
-                <div style='font-size: 18px; font-weight: bold; color: {latency_color};'>{avg_latency:.0f} ms</div>
-                <div style='font-size: 11px; color: #888;'>{st.session_state.api_call_count} calls</div>
-            </div>
-        """, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -582,30 +768,29 @@ with st.sidebar:
         st.markdown(f"**User:** User-{st.session_state.current_user[:4]}")
         st.markdown("---")
 
-        if st.button("🏠 Home", use_container_width=True, key="nav_home"):
+        if st.button("Home", use_container_width=True, key="nav_home"):
             if current_user:
                 st.session_state.recommendations = get_recommendations(current_user)
                 for book in st.session_state.recommendations:
                     send_click_event(current_user, book["book_id"], "view", book["title"])
-
             st.session_state.view_mode = "recommendations"
             st.session_state.show_rating_modal = False
             st.rerun()
 
-        if st.button("📖 My Read Books", use_container_width=True, key="nav_read"):
+        if st.button("My Read Books", use_container_width=True, key="nav_read"):
             st.session_state.read_books = get_read_books(st.session_state.current_user)
             st.session_state.view_mode = 'read_books'
             st.session_state.show_rating_modal = False
             st.rerun()
 
-        if st.button("🔍 Search Books", use_container_width=True, key="nav_search"):
+        if st.button("Search Books", use_container_width=True, key="nav_search"):
             st.session_state.view_mode = 'search'
             st.session_state.show_rating_modal = False
             st.rerun()
 
         st.markdown("---")
 
-        if st.button("🚪 Logout", use_container_width=True, key="nav_logout"):
+        if st.button("Logout", use_container_width=True, key="nav_logout"):
             st.session_state.current_user = None
             st.session_state.view_mode = 'user_selection'
             st.session_state.show_rating_modal = False
@@ -614,131 +799,168 @@ with st.sidebar:
         st.info("Please login to access all features")
 
 
-# Helper function to display book card
+# ===== UPDATED DISPLAY BOOK CARD FUNCTION =====
 def display_book_card(book: Dict, col, button_prefix: str = "btn"):
     with col:
+        rating_value = format_rating(book.get('predicted_rating'))
+        rating_color = "#ffd700" if rating_value != "N/A" else "#cbd5e0"
+        
         st.markdown(f"""
             <div class="book-card">
-                <div class="book-title">{book['title']}</div>
-                <div class="book-author">by {book['author']}</div>
-                <div class="rating">⭐ {format_rating(book.get('predicted_rating'))}</div>
+                <div style='display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;'>
+                    <div style='flex: 1;'>
+                        <div class="book-title">{book['title']}</div>
+                        <div class="book-author"><i>by {book['author']}</i></div>
+                    </div>
+                    <div style='background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); 
+                                padding: 8px 12px; border-radius: 20px; 
+                                box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+                                white-space: nowrap; margin-left: 12px;'>
+                        <span style='color: white; font-weight: 600; font-size: 14px;'>⭐ {rating_value}</span>
+                    </div>
+                </div>
+                
             </div>
         """, unsafe_allow_html=True)
 
         if st.button(f"View Details", key=f"{button_prefix}_{book['book_id']}", use_container_width=True):
-            send_click_event(
-                st.session_state.current_user,
-                book['book_id'],
-                "click",
-                book['title']
-            )
+            send_click_event(st.session_state.current_user, book['book_id'], "click", book['title'])
 
-            with st.spinner(f'Fetching details for "{book["title"]}"...'):
-                # Get API rating
+            with st.spinner(f'✨ Loading details for "{book["title"]}"...'):
                 api_rating = book.get('predicted_rating') or book.get('average_rating') or book.get('rating')
-
                 book_details = get_book_details_from_google(
                     book['title'],
                     book['author'],
                     book.get('isbn'),
-                    api_rating=api_rating  # Pass API rating as priority
+                    api_rating=api_rating
                 )
                 book_details['book_id'] = book['book_id']
-
                 st.session_state.selected_book = book_details
                 st.session_state.previous_view = 'recommendations'
                 st.session_state.view_mode = 'book_details'
-
             st.rerun()
 
 
-# Main application logic
-if st.session_state.view_mode == 'user_selection':
-    st.title("📚 Book Recommendation System")
-    st.markdown("### Select or Enter User ID")
+# ===== MAIN APPLICATION VIEWS =====
 
-    # Admin button at the top right
-    col_title, col_admin = st.columns([5, 1])
+# USER SELECTION VIEW (Updated with Hero Section)
+if st.session_state.view_mode == 'user_selection':
+    col_empty, col_admin = st.columns([11, 1])
     with col_admin:
-        if st.button("🔐 Admin", use_container_width=True):
+        if st.button("🔐", use_container_width=True, help="Admin Login"):
             st.session_state.show_admin_modal = True
             st.rerun()
-
-    # Admin login modal
     if st.session_state.show_admin_modal:
         with st.container():
-            st.markdown("---")
-            st.markdown("### 🔐 Admin Login")
-
+            
+            st.markdown("### Admin Login")
             admin_username = st.text_input("Username:", key="admin_user")
             admin_password = st.text_input("Password:", type="password", key="admin_pass")
 
-            col1, col2, col3 = st.columns([1, 1, 2])
+            col1, col2 = st.columns(2)
             with col1:
                 if st.button("Login", type="primary", use_container_width=True):
                     if admin_username == "admin" and admin_password == "admin":
                         st.success("Login successful! Redirecting to monitoring dashboard...")
                         admin_url = f"{API_BASE_URL}/report"
-                        st.markdown(f'<meta http-equiv="refresh" content="1;url={admin_url}" />',
-                                    unsafe_allow_html=True)
+                        st.markdown(f'<meta http-equiv="refresh" content="1;url={admin_url}" />', unsafe_allow_html=True)
                         st.markdown(f"[Click here if not redirected]({admin_url})")
                     else:
                         st.error("Invalid credentials!")
-
             with col2:
                 if st.button("Cancel", use_container_width=True):
                     st.session_state.show_admin_modal = False
                     st.rerun()
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+    st.markdown("""
+        <div style='text-align: center; padding: 60px 20px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; margin-bottom: 40px; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);'>
+            <h1 style='color: white; font-size: 48px; font-weight: 700; margin-bottom: 16px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                 Discover Your Next Favorite Book
+            </h1>
+            <p style='color: rgba(255,255,255,0.95); font-size: 20px; max-width: 600px; margin: 0 auto; line-height: 1.6;'>
+                Powered by advanced machine learning to recommend books tailored just for you
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 
-            st.markdown("---")
-
-    # User selection/input
-    col1, col2 = st.columns([2, 1])
+    
+    st.markdown("### Get Started")
+    col1, col2 = st.columns([3, 1])
 
     with col1:
-        user_input = st.text_input("Enter User ID:", placeholder="user_12345")
-
+        user_input = st.text_input("", placeholder="Enter your User ID (e.g., user_12345)", label_visibility="collapsed")
     with col2:
-        st.markdown("<br>", unsafe_allow_html=True)
         if st.button("Get Recommendations", type="primary", use_container_width=True):
             if user_input:
                 st.session_state.current_user = user_input
                 st.session_state.recommendations = get_recommendations(user_input)
                 st.session_state.view_mode = 'recommendations'
-
-                # Track that user viewed recommendations
                 for book in st.session_state.recommendations:
                     send_click_event(user_input, book['book_id'], "view", book['title'])
-
                 st.rerun()
             else:
                 st.error("Please enter a user ID")
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    # Quick select users
-    st.markdown("### Or select a sample user:")
+    st.markdown("### Try Sample Users")
+    
     quick_users = {
-        "User-4b1af": "4b1af908229844ec02bc4b40aa6ea4dd",
-        "User-2faa2": "2faa2ef7e9062a7339ed1e4299c7ecaf",
-        "User-4597b": "4597ba0bb52054eae1e87534c78b13b8"
+        "User-4b1af": {"id": "4b1af908229844ec02bc4b40aa6ea4dd"},
+        "User-2faa2": {"id": "2faa2ef7e9062a7339ed1e4299c7ecaf"},
+        "User-4597b": {"id": "4597ba0bb52054eae1e87534c78b13b8"}
     }
+    
     cols = st.columns(3)
-    for idx, (display_name, user_id) in enumerate(quick_users.items()):
+    for idx, (display_name, user_data) in enumerate(quick_users.items()):
         with cols[idx]:
-            if st.button(display_name, use_container_width=True):
-                st.session_state.current_user = user_id
-                st.session_state.recommendations = get_recommendations(user_id)
-                st.session_state.view_mode = 'recommendations'
-
-                for book in st.session_state.recommendations:
-                    send_click_event(user_id, book['book_id'], "view", book['title'])
-
+            
+            if st.button(display_name, key=f"user_{idx}",use_container_width=True,type="secondary"):
+                with st.spinner('Loading recommendations...'): 
+                    st.session_state.current_user = user_data['id']
+                    st.session_state.recommendations = get_recommendations(user_data['id'])
+                    for book in st.session_state.recommendations:
+                        send_click_event(user_data['id'], book['book_id'], "view", book['title'])
+                    st.session_state.view_mode = 'recommendations'  
                 st.rerun()
 
-elif st.session_state.view_mode == 'recommendations':
-    st.title(f"Recommendations for User-{st.session_state.current_user[:4]}")
-    st.markdown("### Top 10 Books Just for You")
+    st.markdown("---")
+    st.markdown("### Features")
+    
+    feature_cols = st.columns(4)
+    features = [
+        {"icon": "🎯", "title": "Personalized", "desc": "ML-powered recommendations"},
+        {"icon": "📊", "title": "Smart Analytics", "desc": "Track your reading habits"},
+        {"icon": "🔍", "title": "Advanced Search", "desc": "Find any book instantly"},
+        {"icon": "⚡", "title": "Real-time", "desc": "Live performance metrics"}
+    ]
+    
+    for col, feature in zip(feature_cols, features):
+        with col:
+            st.markdown(f"""
+                <div style='text-align: center; padding: 20px;'>
+                    <div style='font-size: 32px; margin-bottom: 8px;'>{feature['icon']}</div>
+                    <div style='font-weight: 600; font-size: 14px; color: #1a202c; margin-bottom: 4px;'>{feature['title']}</div>
+                    <div style='font-size: 12px; color: #718096;'>{feature['desc']}</div>
+                </div>
+            """, unsafe_allow_html=True)
 
-    # Display books in a grid (2 columns)
+# RECOMMENDATIONS VIEW (Updated)
+elif st.session_state.view_mode == 'recommendations':
+    col1, col2, col3 = st.columns([2, 1, 1])
+    
+    with col1:
+        st.markdown(f"""
+            <div style='margin-bottom: 8px;'>
+                <h1 style='margin: 0; font-size: 36px; color: #1a202c;'>Your Recommendations</h1>
+                <p style='color: #718096; font-size: 16px; margin-top: 8px;'>
+                    User-{st.session_state.current_user[:4]} • {len(st.session_state.recommendations)} personalized picks
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+
     if st.session_state.recommendations:
         for i in range(0, len(st.session_state.recommendations), 2):
             cols = st.columns(2)
@@ -747,13 +969,19 @@ elif st.session_state.view_mode == 'recommendations':
                     book = st.session_state.recommendations[i + j]
                     display_book_card(book, cols[j], "rec")
     else:
-        st.info("No recommendations available for this user.")
+        st.markdown("""
+            <div style='text-align: center; padding: 60px 20px; background: white; border-radius: 16px;'>
+                <div style='font-size: 64px; margin-bottom: 16px;'>📚</div>
+                <h3 style='color: #1a202c; margin-bottom: 8px;'>No recommendations yet</h3>
+                <p style='color: #718096;'>Start by rating some books to get personalized recommendations!</p>
+            </div>
+        """, unsafe_allow_html=True)
 
+# READ BOOKS VIEW (Keep your existing code)
 elif st.session_state.view_mode == 'read_books':
-    st.title(f"📖 My Read Books")
+    st.title(f"My Read Books")
     st.markdown(f"### Books you've already read")
 
-    # Display read books
     if st.session_state.read_books:
         for i in range(0, len(st.session_state.read_books), 2):
             cols = st.columns(2)
@@ -775,7 +1003,6 @@ elif st.session_state.view_mode == 'read_books':
                         if st.button(f"View Details", key=f"read_{book['book_id']}", use_container_width=True):
                             with st.spinner(f'Fetching details for "{book["title"]}"...'):
                                 api_rating = book.get('average_rating') or book.get('rating')
-
                                 book_details = get_book_details_from_google(
                                     book['title'],
                                     book['author'],
@@ -784,38 +1011,33 @@ elif st.session_state.view_mode == 'read_books':
                                 )
                                 book_details['book_id'] = book['book_id']
                                 book_details['already_read'] = True
-
                                 st.session_state.selected_book = book_details
                                 st.session_state.view_mode = 'book_details'
-
                             st.rerun()
     else:
         st.info("You haven't marked any books as read yet.")
 
+# SEARCH VIEW 
 elif st.session_state.view_mode == 'search':
-    st.title("🔍 Search Books")
+    st.title("Search Books")
     st.markdown("### Find books to add to your reading list")
 
-    # Load user's read books if not already loaded
     if st.session_state.current_user:
         st.session_state.read_books = get_read_books(st.session_state.current_user)
 
-    # Create set of read books using title + author (lowercase for matching)
     read_books_set = {
         (book.get('title', '').lower().strip(), book.get('author', '').lower().strip())
         for book in st.session_state.read_books
     }
 
-    # Use a form to properly handle search
     with st.form(key="search_form"):
         search_query = st.text_input(
             "Search by title:",
             placeholder="Enter book title ...",
             key="search_input"
         )
-        search_button = st.form_submit_button("🔍 Search", type="primary", use_container_width=True)
+        search_button = st.form_submit_button("Search", type="primary", use_container_width=True)
 
-    # Process search when form is submitted
     if search_button and search_query.strip():
         results = search_books(search_query.strip(), st.session_state.books_database)
         st.session_state.search_results = results
@@ -824,12 +1046,10 @@ elif st.session_state.view_mode == 'search':
         st.warning("Please enter a search query.")
         st.session_state.search_results = []
 
-    # Display results
     if st.session_state.search_results:
         st.success(f"**{len(st.session_state.search_results)} books found** for '{st.session_state.get('last_search_query', '')}'")
 
         for idx, book in enumerate(st.session_state.search_results[:10]):
-            # Check if this book has been read using title + author
             book_title = book.get('title', '').lower().strip()
             book_author = book.get('author', '').lower().strip()
             is_read = (book_title, book_author) in read_books_set
@@ -837,14 +1057,13 @@ elif st.session_state.view_mode == 'search':
             col1, col2 = st.columns([4, 1])
             with col1:
                 if is_read:
-                    st.markdown(f"✅ **{book.get('title', 'Unknown')}** by *{book.get('author', 'Unknown')}* - ⭐ {format_rating(book.get('rating'))} *(Already Read)*")
+                    st.markdown(f"**{book.get('title', 'Unknown')}** by *{book.get('author', 'Unknown')}* - ⭐ {format_rating(book.get('rating'))} *(Already Read)*")
                 else:
                     st.markdown(f"**{book.get('title', 'Unknown')}** by *{book.get('author', 'Unknown')}* - ⭐ {format_rating(book.get('rating'))}")
             with col2:
                 if st.button("View", key=f"search_view_{idx}_{book.get('book_id', idx)}", use_container_width=True):
                     with st.spinner(f'Fetching details...'):
                         api_rating = book.get('rating') or book.get('average_rating')
-
                         book_details = get_book_details_from_google(
                             book.get('title', ''),
                             book.get('author', ''),
@@ -853,19 +1072,16 @@ elif st.session_state.view_mode == 'search':
                         )
                         book_details['book_id'] = book.get('book_id', '')
                         book_details['already_read'] = is_read
-
                         st.session_state.selected_book = book_details
                         st.session_state.previous_view = 'search'
                         st.session_state.view_mode = 'book_details'
-
                     st.rerun()
-
             st.divider()
     else:
-        st.info("💡 Enter a search query and click 'Search' to find books.")
+        st.info("Enter a search query and click 'Search' to find books.")
 
+# BOOK DETAILS VIEW (Keep your existing code - it's already good!)
 elif st.session_state.view_mode == 'book_details':
-    # Back button
     if st.button("← Back"):
         st.session_state.view_mode = st.session_state.get('previous_view', 'recommendations')
         st.session_state.show_rating_modal = False
@@ -874,48 +1090,38 @@ elif st.session_state.view_mode == 'book_details':
     book = st.session_state.selected_book
     already_read = book.get('already_read', False)
 
-    # Book details view
     col1, col2 = st.columns([1, 3])
 
     with col1:
-        # Display cover image from Google Books with fixed smaller size
         st.image(book['cover_url'], width=250)
-
-        # Additional info box
         st.markdown("**Book Information**")
         st.markdown(f"📅 **Published:** {book['published_date']}")
         st.markdown(f"📄 **Pages:** {book['page_count']}")
         st.markdown(f"🌐 **Language:** {book['language'].upper()}")
-
         if book['preview_link'] != '#':
             st.markdown(f"[📖 Preview on Google Books]({book['preview_link']})")
 
     with col2:
         st.title(book['title'])
         st.markdown(f"**by {book['author']}**")
-
-        # Rating information
         if book['rating'] != 'N/A':
             st.markdown(f"⭐ **{book['rating']}/5** ({book['ratings_count']} ratings)")
         else:
             st.markdown("⭐ Rating not available")
 
-        # Categories/Genres
         if book['categories']:
             st.markdown("**Categories:**")
             genre_html = "".join([f'<span class="genre-tag">{genre}</span>' for genre in book['categories']])
             st.markdown(genre_html, unsafe_allow_html=True)
 
-    # Description section
     st.markdown("---")
-    st.markdown("### 📖 Description")
+    st.markdown("### Description")
     st.markdown(f'<div class="description-text">{book["description"]}</div>', unsafe_allow_html=True)
 
-    # Action buttons
     st.markdown("---")
 
     if already_read:
-        st.success("✅ You've already read this book!")
+        st.success("✓ You've already read this book!")
     else:
         if st.session_state.show_rating_modal and st.session_state.rating_book_info:
             st.markdown("---")
@@ -931,15 +1137,13 @@ elif st.session_state.view_mode == 'book_details':
                 key="rating_slider"
             )
 
-            # Display star rating visually
             stars_display = "⭐" * rating + "☆" * (5 - rating)
             st.markdown(f"**Your rating:** {stars_display} ({rating}/5)")
 
             col_submit, col_cancel = st.columns(2)
             with col_submit:
-                if st.button("✅ Submit Rating & Mark as Read", type="primary", use_container_width=True):
+                if st.button("Submit Rating & Mark as Read", type="primary", use_container_width=True):
                     try:
-                        # Prepare the payload
                         payload = {
                             "user_id": st.session_state.current_user,
                             "book_id": st.session_state.rating_book_info['book_id'],
@@ -947,33 +1151,20 @@ elif st.session_state.view_mode == 'book_details':
                             "rating": rating
                         }
 
-                        # Debug: Show what's being sent (remove in production)
-                        # st.write("Sending payload:", payload)
-
                         response = requests.post(
                             f"{API_BASE_URL}/mark-read",
                             json=payload,
                             timeout=10
                         )
 
-                        # Check response status
                         if response.status_code == 200:
-                            st.success(
-                                f"'{st.session_state.rating_book_info['title']}' marked as read with {rating}⭐ rating!")
+                            st.success(f"'{st.session_state.rating_book_info['title']}' marked as read with {rating}⭐ rating!")
                             st.balloons()
-
-                            # Update the book's already_read status
                             st.session_state.selected_book['already_read'] = True
-
-                            # Refresh read books list
                             st.session_state.read_books = get_read_books(st.session_state.current_user)
-
-                            # Clear modal state
                             st.session_state.show_rating_modal = False
                             st.session_state.rating_book_info = None
-
-                            # Rerun to update UI
-                            time.sleep(1)  # Brief pause to show success message
+                            time.sleep(1)
                             st.rerun()
                         else:
                             st.error(f"API Error: {response.status_code} - {response.text}")
@@ -991,32 +1182,20 @@ elif st.session_state.view_mode == 'book_details':
                     st.session_state.rating_book_info = None
                     st.rerun()
         else:
-            # Normal action buttons
             col1, col2, col3 = st.columns(3)
 
             with col1:
-                if st.button("❤️ Like this book", use_container_width=True):
-                    send_click_event(
-                        st.session_state.current_user,
-                        book['book_id'],
-                        "like",
-                        book['title']
-                    )
-                    st.success("Preference recorded!")
+                if st.button("❤️", key="like_btn",use_container_width=True,help='Add to Favourites'):
+                    send_click_event(st.session_state.current_user, book['book_id'], "like", book['title'])
+                    st.success("Favorite Recorded")
 
             with col2:
-                if st.button("📚 Add to Reading List", use_container_width=True):
-                    send_click_event(
-                        st.session_state.current_user,
-                        book['book_id'],
-                        "add_to_list",
-                        book['title']
-                    )
+                if st.button("Add to List", key="reading_list_btn",use_container_width=True):
+                    send_click_event(st.session_state.current_user, book['book_id'], "add_to_list", book['title'])
                     st.success("Added to your reading list!")
 
             with col3:
-                if st.button("✅ Mark as Read", use_container_width=True):
-                    # Show rating modal instead of directly marking as read
+                if st.button("✓ Mark as Read", key="mark_read_btn",use_container_width=True):
                     st.session_state.show_rating_modal = True
                     st.session_state.rating_book_info = {
                         'book_id': book['book_id'],
