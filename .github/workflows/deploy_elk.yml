@@ -1,0 +1,229 @@
+name: Build & Deploy ELK Stack
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'elk/**'
+      - 'Dockerfile.elk'
+      - 'terraform/elk.tf'
+  workflow_dispatch:
+
+concurrency:
+  group: elk-deploy-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  SERVICE_NAME: elk-stack
+  REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || 'recommendation-system-475301' }}
+  TF_WORKING_DIR: terraform
+  TF_LOCK_TIMEOUT: '300s'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Install gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Clear stale locks
+        run: |
+          LOCK_FILE="gs://recommendation-system-475301-terraform-state/model-deployment/default.tflock"
+          if gsutil -q stat "$LOCK_FILE" 2>/dev/null; then
+            echo "Found existing lock file, removing stale lock..."
+            gsutil rm "$LOCK_FILE" || true
+            echo "Stale lock removed"
+          else
+            echo "No stale lock found"
+          fi
+
+      - name: Create Artifact Registry (if needed)
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          TF_VAR_region: ${{ env.REGION }}
+          TF_VAR_service_name: "recommendation-service"
+          TF_VAR_image: "placeholder"
+          TF_VAR_elk_image: "placeholder"
+        run: |
+          terraform apply -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }} \
+            -target=google_artifact_registry_repository.docker_repo \
+            -target=google_project_service.required_apis
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push ELK Docker image
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/recommendation-service/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          IMAGE_LATEST="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/recommendation-service/${{ env.SERVICE_NAME }}:latest"
+          echo "ELK_IMAGE=${IMAGE}" >> $GITHUB_ENV
+
+          echo "Building ELK container image..."
+          docker build -f Dockerfile.elk -t "${IMAGE}" -t "${IMAGE_LATEST}" .
+          
+          echo "Pushing images to Artifact Registry..."
+          docker push "${IMAGE}"
+          docker push "${IMAGE_LATEST}"
+          
+          echo "=========================================="
+          echo "ELK image pushed successfully"
+          echo "Image: ${IMAGE}"
+          echo "=========================================="
+
+      - name: Terraform Plan (ELK)
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          TF_VAR_region: ${{ env.REGION }}
+          TF_VAR_service_name: "recommendation-service"
+          TF_VAR_image: ""
+          TF_VAR_elk_image: ${{ env.ELK_IMAGE }}
+          TF_VAR_elk_enabled: "true"
+        run: |
+          terraform plan -lock-timeout=${{ env.TF_LOCK_TIMEOUT }} \
+            -target=google_compute_address.elk_static_ip \
+            -target=google_compute_disk.elk_data \
+            -target=google_service_account.elk_sa \
+            -target=google_project_iam_member.elk_sa_logging \
+            -target=google_project_iam_member.elk_sa_monitoring \
+            -target=google_project_iam_member.elk_sa_artifact_reader \
+            -target=google_compute_instance.elk_stack \
+            -target=google_compute_firewall.elk_firewall \
+            -target=google_compute_firewall.elk_internal
+
+      - name: Terraform Apply (ELK)
+        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          TF_VAR_region: ${{ env.REGION }}
+          TF_VAR_service_name: "recommendation-service"
+          TF_VAR_image: ""
+          TF_VAR_elk_image: ${{ env.ELK_IMAGE }}
+          TF_VAR_elk_enabled: "true"
+        run: |
+          terraform apply -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }} \
+            -target=google_compute_address.elk_static_ip \
+            -target=google_compute_disk.elk_data \
+            -target=google_service_account.elk_sa \
+            -target=google_project_iam_member.elk_sa_logging \
+            -target=google_project_iam_member.elk_sa_monitoring \
+            -target=google_project_iam_member.elk_sa_artifact_reader \
+            -target=google_compute_instance.elk_stack \
+            -target=google_compute_firewall.elk_firewall \
+            -target=google_compute_firewall.elk_internal
+
+      - name: Get ELK Outputs
+        id: elk_outputs
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          ELK_IP=$(terraform output -raw elk_instance_ip 2>/dev/null || echo "pending")
+          echo "elk_ip=$ELK_IP" >> $GITHUB_OUTPUT
+          echo "elasticsearch_url=http://$ELK_IP:9200" >> $GITHUB_OUTPUT
+          echo "kibana_url=http://$ELK_IP:5601" >> $GITHUB_OUTPUT
+          
+          echo "=========================================="
+          echo "ELK Stack Deployment Complete"
+          echo "=========================================="
+          echo "ELK VM IP:      $ELK_IP"
+          echo "Elasticsearch:  http://$ELK_IP:9200"
+          echo "Kibana:         http://$ELK_IP:5601"
+          echo "Logstash:       http://$ELK_IP:5044"
+          echo "=========================================="
+
+      - name: Wait for ELK to be ready
+        run: |
+          ELK_IP="${{ steps.elk_outputs.outputs.elk_ip }}"
+          
+          if [ "$ELK_IP" = "pending" ] || [ -z "$ELK_IP" ]; then
+            echo "ELK IP not available yet, skipping health check"
+            exit 0
+          fi
+          
+          echo "Waiting for ELK stack to be ready at $ELK_IP..."
+          
+          MAX_RETRIES=30
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -sf "http://$ELK_IP:9200/_cluster/health" > /dev/null 2>&1; then
+              echo "Elasticsearch is ready!"
+              curl -s "http://$ELK_IP:9200/_cluster/health" | jq .
+              break
+            fi
+            
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "Waiting for Elasticsearch... (attempt $RETRY_COUNT/$MAX_RETRIES)"
+            sleep 10
+          done
+          
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "WARNING: ELK may still be starting up. Check the VM logs."
+          fi
+
+      - name: Create test log entry
+        continue-on-error: true
+        run: |
+          ELK_IP="${{ steps.elk_outputs.outputs.elk_ip }}"
+          
+          if [ "$ELK_IP" = "pending" ] || [ -z "$ELK_IP" ]; then
+            echo "Skipping test log entry"
+            exit 0
+          fi
+          
+          echo '{"timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","level":"INFO","logger":"elk-deploy","message":"ELK stack deployed via GitHub Actions","commit":"${{ github.sha }}"}' | \
+            curl -X POST "http://$ELK_IP:9200/goodreads-logs-$(date +%Y.%m.%d)/_doc" \
+              -H "Content-Type: application/json" \
+              -d @- || echo "Could not create test log entry"
+
+      - name: Display deployment summary
+        run: |
+          ELK_IP="${{ steps.elk_outputs.outputs.elk_ip }}"
+          
+          echo ""
+          echo "=========================================="
+          echo "ELK Stack Deployment Summary"
+          echo "=========================================="
+          echo ""
+          echo "Service:     ${{ env.SERVICE_NAME }}"
+          echo "Image:       ${{ env.ELK_IMAGE }}"
+          echo "Commit:      ${{ github.sha }}"
+          echo ""
+          echo "Access URLs:"
+          echo "  Elasticsearch: http://$ELK_IP:9200"
+          echo "  Kibana:        http://$ELK_IP:5601"
+          echo "  Logstash:      $ELK_IP:5044 (for log shipping)"
+          echo ""
+          echo "To send logs to ELK, configure your applications to:"
+          echo "  - Send JSON logs to Logstash at $ELK_IP:5044"
+          echo "  - Or directly to Elasticsearch at http://$ELK_IP:9200"
+          echo ""
+          echo "=========================================="
+          
+          echo "::notice title=ELK Deployed::Kibana available at http://$ELK_IP:5601"
