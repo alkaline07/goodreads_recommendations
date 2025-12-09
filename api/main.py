@@ -16,7 +16,6 @@ from .queries import (
     get_top_recommendations,
     get_global_top_recommendations,
     log_ctr_event,
-    get_book_details,
     get_books_read_by_user,
     get_books_not_read_by_user,
     insert_read_interaction
