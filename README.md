@@ -6,7 +6,7 @@ This project builds a machine learning-based book recommendation system using Go
 - [Team Members](#team-members)
 - [Phase 1. Data Pipeline](#data-pipeline)
 - [Phase 2. Model Development](#model-development)
-- [Phase3. Model Deployment](#model-deployment)
+- [Phase 3. Model Deployment](#model-deployment)
 - Project Recreation 
 
 ## Team Members
