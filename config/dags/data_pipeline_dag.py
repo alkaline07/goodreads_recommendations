@@ -27,7 +27,8 @@ from datetime import datetime, timedelta
 import os
 from airflow.utils.email import send_email
 import subprocess
-import logging
+from datapipeline.scripts.logger_setup import get_logger
+logger = get_logger("data-pipeline-dag")
 
 # Import pipeline modules
 from datapipeline.scripts.data_cleaning import main as data_cleaning_main
@@ -53,7 +54,7 @@ default_args = {
 def send_failure_email(context):
     """
     Send email notification when a DAG task fails.
-    
+
     Args:
         context: Airflow task context containing failure information
     """
@@ -73,7 +74,7 @@ def send_failure_email(context):
 def send_success_email(context):
     """
     Send email notification when a DAG completes successfully.
-    
+
     Args:
         context: Airflow task context containing success information
     """
@@ -89,10 +90,10 @@ def send_success_email(context):
 def log_query_results(**kwargs):
     """
     Log the results from the BigQuery data reading task.
-    
+
     This function retrieves the job ID from the previous task and logs
     the query results for monitoring and debugging purposes.
-    
+
     Args:
         **kwargs: Airflow task context
     """
@@ -109,90 +110,90 @@ def log_query_results(**kwargs):
     query_job = client.get_job(job_id)
     rows = list(query_job.result())
 
-    logging.info("Query Results:")
+    logger.info("Query Results")
     for row in rows:
-        logging.info(dict(row))
+        logger.info("Row data", data=str(dict(row)))
 
 def data_cleaning_run():
-    logging.info("Running Data Cleaning Tests")
+    logger.info("Running Data Cleaning Tests")
 
     result = subprocess.run(
         ["pytest", "datapipeline/tests/test_data_cleaning.py", "-q"],
         capture_output=True, text=True
     )
-    logging.info(result.stdout)
+    logger.info("Test output", output=result.stdout)
     if result.returncode != 0:
         raise Exception("Data Cleaning Tests Failed")
-    
-    logging.info("Data Cleaning Tests Passed Successfully")
+
+    logger.info("Data Cleaning Tests Passed Successfully")
 
     try:
         data_cleaning_main()
-        logging.info("Data cleaning completed")
+        logger.info("Data cleaning completed")
     except Exception as e:
-        logging.error(f"Data cleaning failed: {e}")
+        logger.error("Data cleaning failed", error=str(e))
         raise
 
 def author_gender_mapping_run():
     author_gender_mapping_main()
 
-    logging.info("Author Gender Mapping completed")
+    logger.info("Author Gender Mapping completed")
 
-    
+
 def feature_engg_run():
-    logging.info("Running Feature Engineering Tests")
+    logger.info("Running Feature Engineering Tests")
 
     result = subprocess.run(
         ["pytest", "datapipeline/tests/test_feature_engineering.py", "-q"],
         capture_output=True, text=True
     )
-    logging.info(result.stdout)
+    logger.info("Test output", output=result.stdout)
     if result.returncode != 0:
         raise Exception("Feature Engineering Tests Failed")
-    
-    logging.info("Feature Engineering Tests Passed Successfully")
+
+    logger.info("Feature Engineering Tests Passed Successfully")
 
     try:
         feature_engg_main()
-        logging.info("Feature Engineering completed")
+        logger.info("Feature Engineering completed")
     except Exception as e:
-        logging.error(f"Feature Engineering failed: {e}")
+        logger.error("Feature Engineering failed", error=str(e))
         raise
 
 def normalization_run():
-    logging.info("Running Normalization Tests")
+    logger.info("Running Normalization Tests")
 
     result = subprocess.run(
         ["pytest", "datapipeline/tests/test_normalization.py", "-q"],
         capture_output=True, text=True
     )
-    logging.info(result.stdout)
+    logger.info("Test output", output=result.stdout)
     if result.returncode != 0:
         raise Exception("Normalization Tests Failed")
-    
-    logging.info("Normalization Tests Passed Successfully")
+
+    logger.info("Normalization Tests Passed Successfully")
 
     try:
         normalization_main()
-        logging.info("Normalization completed")
+        logger.info("Normalization completed")
     except Exception as e:
-        logging.error(f"Normalization failed: {e}")
+        logger.error("Normalization failed", error=str(e))
         raise
 
 def data_versioning_run():
     feature_metadata_main()
     airflow_home = os.environ.get("AIRFLOW_HOME", "/opt/airflow")
-    logging.info("Configuring Git safe directory at runtime")
+    logger.info("Configuring Git safe directory at runtime")
 
     subprocess.run(
         ["git", "config", "--global", "--add", "safe.directory", airflow_home],
         capture_output=True,
         text=True
     )
-    logging.info("Configuring Git user identity")
+    logger.info("Configuring Git user identity")
     git_user_name = os.environ.get("GIT_USER_NAME", "Airflow Bot")
     git_user_email = os.environ.get("GIT_USER_EMAIL", "airflow@mlops.com")
-    
+
     subprocess.run(
         ["git", "config", "--global", "user.name", git_user_name],
         capture_output=True,
@@ -203,14 +204,14 @@ def data_versioning_run():
         capture_output=True,
         text=True
     )
-    logging.info(f"Git configured as: {git_user_name} <{git_user_email}>")
+    logger.info("Git configured", user_name=git_user_name, user_email=git_user_email)
     verify_result = subprocess.run(
         ["git", "config", "--global", "--get-all", "safe.directory"],
         capture_output=True,
         text=True
     )
-    logging.info(f"Safe directories configured: {verify_result.stdout}")
-    logging.info("Running DVC and Git Commands for Versioning")
+    logger.info("Safe directories configured", output=verify_result.stdout)
+    logger.info("Running DVC and Git Commands for Versioning")
     commands = [
         ["dvc", "add", "data/metadata/goodreads_features_metadata.json"],
         ["git", "add", "data/metadata/goodreads_features_metadata.json.dvc"],
@@ -220,30 +221,30 @@ def data_versioning_run():
 
     for cmd in commands:
         result = subprocess.run(cmd, capture_output=True, text=True)
-        logging.info(result.stdout)
+        logger.info("Command output", output=result.stdout)
         if result.returncode != 0:
             raise Exception(f"Command failed: {' '.join(cmd)}\nError: {result.stderr}")
-    
-    logging.info("Data Versioning completed successfully")
+
+    logger.info("Data Versioning completed successfully")
 
 def train_test_split_run():
-    logging.info("Running Splitting Tests")
+    logger.info("Running Splitting Tests")
 
     result = subprocess.run(
         ["pytest", "datapipeline/tests/test_goodreads_splitter.py", "-q"],
         capture_output=True, text=True
     )
-    logging.info(result.stdout)
+    logger.info("Test output", output=result.stdout)
     if result.returncode != 0:
         raise Exception("Splitting Tests Failed")
-    
-    logging.info("Splitting Tests Passed Successfully")
+
+    logger.info("Splitting Tests Passed Successfully")
 
     try:
         train_test_split_main()
-        logging.info("Train Test Split completed")
+        logger.info("Train Test Split completed")
     except Exception as e:
-        logging.error(f"Train Test Split failed: {e}")
+        logger.error("Train Test Split failed", error=str(e))
         raise
 
 # -----------------------------
@@ -346,29 +347,29 @@ with DAG(
     start >> author_gender_mapping_task >> end
 
 def etl_interactions_run():
-    logging.info("Running ETL Interactions Tests")
+    logger.info("Running ETL Interactions Tests")
 
     result = subprocess.run(
         ["pytest", "datapipeline/tests/test_etl_interactions.py", "-q"],
         capture_output=True, text=True
     )
-    logging.info(result.stdout)
+    logger.info("Test output", output=result.stdout)
     if result.returncode != 0:
         raise Exception("ETL Interactions Tests Failed")
-    
-    logging.info("ETL Interactions Tests Passed Successfully")
+
+    logger.info("ETL Interactions Tests Passed Successfully")
 
     try:
         etl_interactions_main()
-        logging.info("ETL Interactions completed")
+        logger.info("ETL Interactions completed")
     except Exception as e:
-        logging.error(f"ETL Interactions failed: {e}")
+        logger.error("ETL Interactions failed", error=str(e))
         raise
 
 # -----------------------------
 #  CTR DAG DEFINITION
 # -----------------------------
-       
+
 with DAG(
     dag_id='goodreads_ctr_data_pipeline',
     default_args=default_args,

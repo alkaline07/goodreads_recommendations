@@ -241,9 +241,7 @@ class DataCleaning:
             self.logger.info("Interactions sample:")
             self.logger.info("\n%s", df_interactions_sample)
         except Exception as e:
-            self.logger.error(f"Error fetching sample data: {e}", exc_info=True)
-            print("Books sample:")
-        
+            self.logger.error("Error fetching sample data", error=str(e), exc_info=True)
         # Log completion
         end_time = time.time()
         self.logger.info("=" * 60)

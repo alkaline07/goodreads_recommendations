@@ -22,6 +22,12 @@ from dataclasses import dataclass, asdict
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "bias_reports")
 os.makedirs(DOCS_DIR, exist_ok=True)
+from datapipeline.scripts.logger_setup import get_logger
+
+logger = get_logger("bias-mitigation")
+
+DOCS_DIR = os.path.join(PROJECT_ROOT, "docs", "bias_reports")
+os.makedirs(DOCS_DIR, exist_ok=True)
 
 @dataclass
 class MitigationConfig:
@@ -48,56 +54,54 @@ class BiasMitigator:
     """
     Implements various bias mitigation techniques for recommendation models.
     """
-    
+
     def __init__(self, project_id: Optional[str] = None):
         """
         Initialize the Bias Mitigator.
-        
+
         Args:
             project_id: GCP project ID (if None, uses default from credentials)
         """
         airflow_home = os.environ.get("AIRFLOW_HOME")
         if airflow_home:
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = airflow_home + "/gcp_credentials.json"        
-        
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = airflow_home + "/gcp_credentials.json"
+
         self.client = bigquery.Client(project=project_id)
         self.project_id = self.client.project
         self.dataset_id = "books"
-        
-        print(f"BiasMitigator initialized for project: {self.project_id}")
-    
+
+        logger.info("BiasMitigator initialized", project=self.project_id)
+
     def apply_shrinkage_mitigation(
-        self,
-        features_table: str,
-        output_table: str,
-        slice_dimension: str,
-        slice_expression: str,
-        lambda_shrinkage: float = 0.5
+            self,
+            features_table: str,
+            output_table: str,
+            slice_dimension: str,
+            slice_expression: str,
+            lambda_shrinkage: float = 0.5
     ) -> MitigationResult:
         """
         Apply shrinkage-based bias mitigation.
-        
+
         This technique pulls group-specific rating means toward the global mean,
         reducing the influence of group bias on recommendations.
-        
+
         Args:
             features_table: Input features table
             output_table: Output table with mitigated ratings
             slice_dimension: Name of the dimension (e.g., "Popularity")
             slice_expression: SQL expression to define the slice
             lambda_shrinkage: Shrinkage parameter (0=no shrinkage, 1=full shrinkage)
-            
+
         Returns:
             MitigationResult with before/after metrics
         """
-        print(f"\n{'='*80}")
-        print(f"APPLYING SHRINKAGE MITIGATION: {slice_dimension}")
-        print(f"Lambda: {lambda_shrinkage}")
-        print(f"{'='*80}\n")
-        
+        logger.info("Applying shrinkage mitigation", slice_dimension=slice_dimension,
+                    lambda_shrinkage=lambda_shrinkage)
+
         # Compute original metrics
         original_metrics = self._compute_group_metrics(features_table, slice_expression)
-        
+
         # Apply shrinkage
         query = f"""
         CREATE OR REPLACE TABLE `{output_table}` AS
@@ -139,19 +143,19 @@ class BiasMitigator:
             slice_group AS {slice_dimension}_group
         FROM mitigated
         """
-        
+
         try:
-            print(f"Executing shrinkage mitigation query...")
+            logger.info("Executing shrinkage mitigation query")
             job = self.client.query(query)
             job.result()
-            print(f"Mitigated data written to: {output_table}")
-            
+            logger.info("Mitigated data written", table=output_table)
+
             # Compute mitigated metrics
             mitigated_metrics = self._compute_group_metrics(output_table, slice_expression)
-            
+
             # Calculate improvements
             improvement_pct = self._calculate_improvements(original_metrics, mitigated_metrics)
-            
+
             result = MitigationResult(
                 technique="shrinkage",
                 timestamp=datetime.now().isoformat(),
@@ -160,44 +164,43 @@ class BiasMitigator:
                 improvement_pct=improvement_pct,
                 output_table=output_table
             )
-            
+
             self._print_mitigation_summary(result, slice_dimension)
-            
+
             return result
-            
+
         except Exception as e:
-            print(f"Error applying shrinkage mitigation: {e}")
+            logger.error("Error applying shrinkage mitigation", error=str(e),
+                         slice_dimension=slice_dimension)
             raise
-    
+
     def create_reweighted_training_table(
-        self,
-        training_table: str,
-        output_table: str,
-        slice_dimension: str,
-        slice_expression: str,
-        strategy: str = 'inverse_propensity'
+            self,
+            training_table: str,
+            output_table: str,
+            slice_dimension: str,
+            slice_expression: str,
+            strategy: str = 'inverse_propensity'
     ) -> MitigationResult:
         """
         Create a re-weighted training table to balance group representation.
-        
+
         Args:
             training_table: Input training table
             output_table: Output table with sample weights
             slice_dimension: Name of the dimension
             slice_expression: SQL expression to define the slice
             strategy: 'inverse_propensity' or 'balanced'
-            
+
         Returns:
             MitigationResult with weight statistics
         """
-        print(f"\n{'='*80}")
-        print(f"CREATING RE-WEIGHTED TRAINING TABLE: {slice_dimension}")
-        print(f"Strategy: {strategy}")
-        print(f"{'='*80}\n")
-        
+        logger.info("Creating re-weighted training table", slice_dimension=slice_dimension,
+                    strategy=strategy)
+
         # Compute original metrics
         original_metrics = self._compute_group_metrics(training_table, slice_expression)
-        
+
         if strategy == 'inverse_propensity':
             weight_formula = """
                 1.0 / (CAST(group_count AS FLOAT64) / total_count)
@@ -206,7 +209,7 @@ class BiasMitigator:
             weight_formula = """
                 (total_count / num_groups) / CAST(group_count AS FLOAT64)
             """
-        
+
         query = f"""
         CREATE OR REPLACE TABLE `{output_table}` AS
         WITH base AS (
@@ -244,16 +247,16 @@ class BiasMitigator:
             sample_weight
         FROM weighted
         """
-        
+
         try:
-            print(f"Creating re-weighted training table...")
+            logger.info("Creating re-weighted training table query")
             job = self.client.query(query)
             job.result()
-            print(f"Re-weighted training data written to: {output_table}")
-            
+            logger.info("Re-weighted training data written", table=output_table)
+
             # Analyze weight distribution
             weight_stats = self._analyze_weights(output_table)
-            
+
             result = MitigationResult(
                 technique="reweighting",
                 timestamp=datetime.now().isoformat(),
@@ -262,56 +265,55 @@ class BiasMitigator:
                 improvement_pct={},
                 output_table=output_table
             )
-            
+
             self._print_reweighting_summary(result, slice_dimension)
-            
+
             return result
-            
+
         except Exception as e:
-            print(f"Error creating re-weighted training table: {e}")
+            logger.error("Error creating re-weighted training table", error=str(e),
+                         slice_dimension=slice_dimension)
             raise
-    
+
     def apply_threshold_adjustments(
-        self,
-        predictions_table: str,
-        output_table: str,
-        slice_dimension: str,
-        slice_expression: str,
-        threshold_adjustments: Optional[Dict[str, float]] = None
+            self,
+            predictions_table: str,
+            output_table: str,
+            slice_dimension: str,
+            slice_expression: str,
+            threshold_adjustments: Optional[Dict[str, float]] = None
     ) -> MitigationResult:
         """
         Apply group-specific threshold adjustments to predictions.
-        
+
         Args:
             predictions_table: Input predictions table
             output_table: Output table with adjusted predictions
             slice_dimension: Name of the dimension
             slice_expression: SQL expression to define the slice
             threshold_adjustments: Dict mapping slice values to adjustment factors
-            
+
         Returns:
             MitigationResult with adjustment statistics
         """
-        print(f"\n{'='*80}")
-        print(f"APPLYING THRESHOLD ADJUSTMENTS: {slice_dimension}")
-        print(f"{'='*80}\n")
-        
+        logger.info("Applying threshold adjustments", slice_dimension=slice_dimension)
+
         # If no adjustments provided, compute optimal ones
         if threshold_adjustments is None:
             threshold_adjustments = self._compute_optimal_thresholds(
                 predictions_table,
                 slice_expression
             )
-        
+
         # Build CASE statement for adjustments
         case_statements = []
         for slice_value, adjustment in threshold_adjustments.items():
             case_statements.append(
                 f"WHEN slice_group = '{slice_value}' THEN predicted_rating + {adjustment}"
             )
-        
+
         case_sql = "\n                    ".join(case_statements)
-        
+
         query = f"""
         CREATE OR REPLACE TABLE `{output_table}` AS
         WITH base AS (
@@ -329,19 +331,18 @@ class BiasMitigator:
             END AS predicted_rating
         FROM base
         """
-        
+
         try:
-            print(f"Applying threshold adjustments...")
-            print(f"Adjustments: {threshold_adjustments}")
+            logger.info("Applying threshold adjustments", adjustments=threshold_adjustments)
             job = self.client.query(query)
             job.result()
-            print(f"Adjusted predictions written to: {output_table}")
-            
+            logger.info("Adjusted predictions written", table=output_table)
+
             # Compute metrics before and after
             original_metrics = self._compute_prediction_metrics(predictions_table)
             adjusted_metrics = self._compute_prediction_metrics(output_table)
             improvement_pct = self._calculate_improvements(original_metrics, adjusted_metrics)
-            
+
             result = MitigationResult(
                 technique="threshold_adjustment",
                 timestamp=datetime.now().isoformat(),
@@ -350,15 +351,16 @@ class BiasMitigator:
                 improvement_pct=improvement_pct,
                 output_table=output_table
             )
-            
+
             self._print_mitigation_summary(result, slice_dimension)
-            
+
             return result
-            
+
         except Exception as e:
-            print(f"Error applying threshold adjustments: {e}")
+            logger.error("Error applying threshold adjustments", error=str(e),
+                         slice_dimension=slice_dimension)
             raise
-    
+
     def _compute_group_metrics(self, table: str, slice_expression: str) -> Dict:
         """Compute group-level metrics."""
         query = f"""
@@ -377,7 +379,7 @@ class BiasMitigator:
         GROUP BY slice_group
         ORDER BY slice_group
         """
-        
+
         try:
             df = self.client.query(query).to_dataframe(create_bqstorage_client=False)
             metrics = {}
@@ -389,9 +391,9 @@ class BiasMitigator:
                 }
             return metrics
         except Exception as e:
-            print(f"Error computing group metrics: {e}")
+            logger.error("Error computing group metrics", error=str(e))
             return {}
-    
+
     def _compute_prediction_metrics(self, table: str) -> Dict:
         """Compute prediction metrics."""
         query = f"""
@@ -402,7 +404,7 @@ class BiasMitigator:
         FROM `{table}`
         WHERE actual_rating IS NOT NULL AND predicted_rating IS NOT NULL
         """
-        
+
         try:
             df = self.client.query(query).to_dataframe(create_bqstorage_client=False)
             return {
@@ -411,13 +413,13 @@ class BiasMitigator:
                 'rmse': float(df['rmse'].iloc[0])
             }
         except Exception as e:
-            print(f"Error computing prediction metrics: {e}")
+            logger.error("Error computing prediction metrics", error=str(e))
             return {}
-    
+
     def _compute_optimal_thresholds(
-        self,
-        predictions_table: str,
-        slice_expression: str
+            self,
+            predictions_table: str,
+            slice_expression: str
     ) -> Dict[str, float]:
         """Compute optimal threshold adjustments to minimize MAE per group."""
         query = f"""
@@ -434,7 +436,7 @@ class BiasMitigator:
         WHERE slice_group IS NOT NULL
         GROUP BY slice_group
         """
-        
+
         try:
             df = self.client.query(query).to_dataframe(create_bqstorage_client=False)
             adjustments = {}
@@ -442,9 +444,9 @@ class BiasMitigator:
                 adjustments[row['slice_group']] = float(row['mean_error'])
             return adjustments
         except Exception as e:
-            print(f"Error computing optimal thresholds: {e}")
+            logger.error("Error computing optimal thresholds", error=str(e))
             return {}
-    
+
     def _analyze_weights(self, table: str) -> Dict:
         """Analyze weight distribution in re-weighted table."""
         query = f"""
@@ -455,7 +457,7 @@ class BiasMitigator:
             STDDEV(sample_weight) AS std_weight
         FROM `{table}`
         """
-        
+
         try:
             df = self.client.query(query).to_dataframe(create_bqstorage_client=False)
             return {
@@ -465,13 +467,13 @@ class BiasMitigator:
                 'std_weight': float(df['std_weight'].iloc[0])
             }
         except Exception as e:
-            print(f"Error analyzing weights: {e}")
+            logger.error("Error analyzing weights", error=str(e))
             return {}
-    
+
     def _calculate_improvements(self, original: Dict, mitigated: Dict) -> Dict:
         """Calculate percentage improvements."""
         improvements = {}
-        
+
         # For group metrics
         if all(isinstance(v, dict) for v in original.values()):
             original_variance = np.var([v['mean_rating'] for v in original.values()])
@@ -480,7 +482,7 @@ class BiasMitigator:
                 (original_variance - mitigated_variance) / original_variance * 100
                 if original_variance > 0 else 0
             )
-        
+
         # For prediction metrics
         if 'mae' in original and 'mae' in mitigated:
             improvements['mae_improvement_pct'] = (
@@ -491,59 +493,44 @@ class BiasMitigator:
                 (original['rmse'] - mitigated['rmse']) / original['rmse'] * 100
                 if original['rmse'] > 0 else 0
             )
-        
+
         return improvements
-    
+
     def _print_mitigation_summary(self, result: MitigationResult, dimension: str):
-        """Print summary of mitigation results."""
-        print(f"\n{'='*80}")
-        print(f"MITIGATION SUMMARY: {result.technique.upper()}")
-        print(f"{'='*80}\n")
-        print(f"Dimension: {dimension}")
-        print(f"Timestamp: {result.timestamp}")
-        print(f"Output: {result.output_table}")
-        
-        if result.improvement_pct:
-            print("\n--- Improvements ---")
-            for metric, value in result.improvement_pct.items():
-                print(f"  {metric}: {value:+.2f}%")
-        
-        print(f"\n{'='*80}\n")
-    
+        """Log summary of mitigation results."""
+        logger.info("Mitigation summary",
+                    technique=result.technique,
+                    dimension=dimension,
+                    output_table=result.output_table,
+                    improvements=result.improvement_pct)
+
     def _print_reweighting_summary(self, result: MitigationResult, dimension: str):
-        """Print summary of re-weighting results."""
-        print(f"\n{'='*80}")
-        print(f"RE-WEIGHTING SUMMARY")
-        print(f"{'='*80}\n")
-        print(f"Dimension: {dimension}")
-        print(f"Output: {result.output_table}")
-        
-        print("\n--- Weight Statistics ---")
-        for key, value in result.mitigated_metrics.items():
-            print(f"  {key}: {value:.4f}")
-        
-        print(f"\n{'='*80}\n")
-    
+        """Log summary of re-weighting results."""
+        logger.info("Re-weighting summary",
+                    dimension=dimension,
+                    output_table=result.output_table,
+                    weight_stats=result.mitigated_metrics)
+
     def save_mitigation_report(self, result: MitigationResult, output_path: str):
         """Save mitigation report to JSON file."""
         report_dict = asdict(result)
-        
+
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        
+
         with open(output_path, 'w') as f:
             json.dump(report_dict, f, indent=2)
-        
-        print(f"Mitigation report saved to: {output_path}")
+
+        logger.info("Mitigation report saved", path=output_path)
 
 
 def main():
     """Example usage of BiasMitigator."""
     mitigator = BiasMitigator()
-    
+
     # Example 1: Apply shrinkage mitigation
     features_table = f"{mitigator.project_id}.{mitigator.dataset_id}.goodreads_features"
     output_table = f"{mitigator.project_id}.{mitigator.dataset_id}.goodreads_features_debiased"
-    
+
     result = mitigator.apply_shrinkage_mitigation(
         features_table=features_table,
         output_table=output_table,
@@ -557,7 +544,7 @@ def main():
         """,
         lambda_shrinkage=0.5
     )
-    
+
     output_path = os.path.join(DOCS_DIR, "shrinkage_mitigation_report.json")
     mitigator.save_mitigation_report(result, output_path)
 

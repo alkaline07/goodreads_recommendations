@@ -3,6 +3,9 @@ from .database import get_bq_client
 from .generate_predictions import GeneratePredictions
 from .log_click_event import LogClickEvent
 from datetime import datetime
+from datapipeline.scripts.logger_setup import get_logger
+
+logger = get_logger("api-queries")
 
 _client = None
 _project = None
@@ -14,6 +17,7 @@ def _get_client():
     if _client is None:
         _client = get_bq_client()
         _project = _client.project
+        logger.info("BigQuery client initialized", project=_project)
     return _client, _project
 
 # ---------------------------------------------------------------------
@@ -39,13 +43,14 @@ def get_top_recommendations(user_id: str):
     Return model-generated recommendations (MF or BT) using GeneratePredictions.
     No fallback to BQ predictions table.
     """
-
+    logger.info("Fetching recommendations", user_id=user_id)
     generator = GeneratePredictions()
     df = generator.get_predictions(user_id)
 
     # If model returns NO recommendations, return empty list.
     # (This will only happen if model can't score this user.)
     if df is None or len(df) == 0:
+        logger.warning("No recommendations found", user_id=user_id)
         return []
 
     # Convert DataFrame → list of dicts for main.py
@@ -57,7 +62,7 @@ def get_top_recommendations(user_id: str):
             "author": row.get("author_names", "Unknown"),
             "predicted_rating": row["rating"]
         })
-
+    logger.info("Recommendations fetched", user_id=user_id, count=len(results))
     return results
 
 
@@ -65,6 +70,7 @@ def get_top_recommendations(user_id: str):
 # GET GLOBAL TOP 10 BOOKS FOR NEW USERS
 # ---------------------------------------------------------------------
 def get_global_top_recommendations():
+    logger.info("Fetching global top recommendations")
     client, project = _get_client()
     query = f"""
     SELECT
@@ -86,18 +92,19 @@ def log_ctr_event(user_id: str, book_id: int, event_type: str = "click", book_ti
     """
     Wrapper around LogClickEvent so API does NOT change.
     """
-    logger = LogClickEvent()
+    event_logger = LogClickEvent()
     try:
-        result = logger.log_user_event(
+        result = event_logger.log_user_event(
             user_id=user_id,
             book_id=int(book_id),     # BigQuery table uses STRING
             event_type=event_type,
             book_title=book_title
         )
+        logger.info("CTR event logged", user_id=user_id, book_id=book_id, event_type=event_type)
         return bool(result)
 
     except Exception as e:
-        print(f"CTR logging failed: {e}")
+        logger.error("CTR logging failed", error=str(e), user_id=user_id, book_id=book_id)
         return False
 
 
@@ -105,6 +112,7 @@ def log_ctr_event(user_id: str, book_id: int, event_type: str = "click", book_ti
 # GET BOOKS USER HAS READ
 # ---------------------------------------------------------------------
 def get_books_read_by_user(user_id: str):
+    logger.info("Fetching read books", user_id=user_id)
     client, project = _get_client()
     query = f"""
     -- First extract authors from books table
@@ -211,7 +219,7 @@ def insert_read_interaction(user_id: str, book_id: int, rating: int = None):
     
     # If total_rows is 0, the book doesn't exist. Stop here.
     if check_job.result().total_rows == 0:
-        print(f"Error: Book ID {book_id} not found in database.")
+        logger.error("Books ID not found in database", book_id=book_id)
         return False
     
     table = f"{project}.{dataset}.goodreads_interactions_mystery_thriller_crime"
