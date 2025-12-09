@@ -27,33 +27,40 @@ class MonitorDecay:
         # Query: Calculate CTR for the last 24 hours
         query = f"""
             SELECT
-                COUNTIF(event_type = 'view') as views,
-                COUNTIF(event_type = 'click') as clicks,
-                SAFE_DIVIDE(COUNTIF(event_type = 'click'), COUNTIF(event_type = 'view')) as ctr
-            FROM `{self.full_table_id}`
-            WHERE event_timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+                AVG(SAFE_DIVIDE(user_clicks, user_views)) as avg_ctr,
+                COUNT(*) as distinct_users_counted
+            FROM (
+                SELECT
+                    user_id,
+                    COUNTIF(event_type = 'view') as user_views,
+                    COUNTIF(event_type = 'click') as user_clicks
+                FROM `{self.full_table_id}`
+                WHERE event_timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+                GROUP BY user_id
+            )
+            WHERE user_clicks > 0
         """
 
         try:
             job = self.client.query(query)
             result = list(job.result()) # Wait for job to complete
             
-            if not result:
+            if not result or not result[0].avg_ctr:
                 print("No data found for the last 24 hours.")
+                sys.exit(0)
                 return
 
             row = result[0]
-            views = row.views
-            clicks = row.clicks
-            ctr = row.ctr if row.ctr is not None else 0.0
+            avg_ctr = row.avg_ctr
+            user_count = row.distinct_users_counted
 
-            print(f"Metrics (Last 24h): Views={views}, Clicks={clicks}, CTR={ctr:.4f}")
+            print(f"Metrics (Last 24h): Avg Per-User CTR={avg_ctr:.4f} (calculated from {user_count} users)")
 
-            if views > 0 and ctr < self.CTR_THRESHOLD:
-                print(f"DECAY DETECTED! CTR ({ctr:.2%}) is below threshold ({self.CTR_THRESHOLD:.2%})")
+            if avg_ctr < self.CTR_THRESHOLD:
+                print(f"DECAY DETECTED! Avg CTR ({avg_ctr:.2%}) is below threshold ({self.CTR_THRESHOLD:.2%})")
                 sys.exit(1) # Exit 1 to notify GitHub Actions that decay happened
             else:
-                print(f"Model performance is healthy. CTR ({ctr:.2%}) is above threshold.")
+                print(f"Model performance is healthy. Avg CTR ({avg_ctr:.2%}) is above threshold.")
                 sys.exit(0)
 
         except Exception as e:

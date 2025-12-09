@@ -8,7 +8,7 @@ on:
         description: 'DAG ID to trigger'
         required: true
         type: string
-        default: 'goodreads_recommendation_pipeline'
+        default: 'goodreads_ctr_data_pipeline'
       wait_for_completion:
         description: 'Wait for DAG to complete'
         required: false
@@ -166,7 +166,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             DAG_ID="${{ inputs.dag_id }}"
           else
-            DAG_ID="goodreads_recommendation_pipeline"
+            DAG_ID="goodreads_ctr_data_pipeline"
           fi
           
           echo "Triggering DAG: $DAG_ID"

@@ -102,7 +102,7 @@ It uses GitHub Actions to automate the complete ML pipeline from data loading to
          │
          ▼
 ┌─────────────────┐
-│  1. Load Data   │ (Manual Trigger)
+│  1. Load Data   │ (Auto: After Airflow Pipeline OR Manual)
 └────────┬────────┘
          │
          ▼
@@ -389,6 +389,62 @@ jobs:
 3. **Trigger**: GitHub Actions workflow dispatch to retraining pipeline
 4. **Fallback**: Manual retraining approval for critical alerts
 
+## ELK Stack (Log Aggregation)
+
+### Overview
+
+The project includes a complete **ELK Stack** (Elasticsearch, Logstash, Kibana) deployment for centralized log aggregation and monitoring. This enables real-time visibility into application logs, API requests, and system events.
+
+### Components
+
+| Component | Purpose | Port |
+|-----------|---------|------|
+| Elasticsearch | Log storage and search engine | 9200 |
+| Logstash | Log ingestion and processing | 5044 |
+| Kibana | Visualization dashboard | 5601 |
+| Filebeat | Log shipping from containers | - |
+
+### Deployment Options
+
+**Option 1: Local Docker Compose**
+```bash
+docker compose -f docker-compose.elk.yaml up -d
+```
+
+**Option 2: GCP Compute Engine (via Terraform)**
+```bash
+# Deploy via GitHub Actions
+GitHub → Actions → "Deploy ELK Stack" → Run workflow
+
+# Or manually via Terraform
+cd terraform
+terraform apply -target=google_compute_instance.elk_stack
+```
+
+### Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.elk.yaml` | Local ELK stack orchestration |
+| `elk/elasticsearch/elasticsearch.yml` | Elasticsearch configuration |
+| `elk/logstash/pipeline/logstash.conf` | Log parsing rules |
+| `elk/kibana/kibana.yml` | Kibana dashboard settings |
+| `elk/filebeat/filebeat.yml` | Log shipping configuration |
+| `terraform/elk.tf` | GCP infrastructure for ELK |
+
+### Access URLs
+
+- **Kibana Dashboard**: `http://<ELK_IP>:5601`
+- **Elasticsearch API**: `http://<ELK_IP>:9200`
+
+### Workflow
+
+The `deploy_elk.yml` workflow automatically deploys the ELK stack when:
+- Changes are pushed to `terraform/elk.tf`
+- Manually triggered via GitHub Actions
+
+![ELK](assets/elk_logs.png)
+
 ## API Architecture
 
 ### FastAPI Backend Overview
@@ -649,8 +705,10 @@ class RecommendationResponse:
 | Workflow | File | Purpose | Trigger |
 |----------|------|---------|---------|
 | Model Deployment | `8_model_deploy_endpoint.yml` | Deploy model to Vertex AI endpoint | Manual dispatch, after training |
-| Model Monitoring | `9_model_monitoring.yml` | Run drift detection and performance checks | Scheduled (cron), manual |
-| Decay Monitoring | `model_decay.yml` | CTR monitoring and retraining triggers | Scheduled daily |
+| Model Monitoring | `9_model_monitoring.yml` | Run drift detection and performance checks | Auto: After Model Deployment |
+| Decay Monitoring | `model_decay.yml` | CTR monitoring and retraining triggers | Scheduled daily (cron), auto-triggers retraining on decay |
+| Docker Model Build | `docker-model-build-push.yml` | Build ML Docker image and push to GHCR | Auto: Push to `src/**`, manual |
+| ELK Stack | `deploy_elk.yml` | Deploy ELK stack for log aggregation | Auto: Push to `terraform/elk.tf`, manual |
 | API Backend | `deploy-api-backend.yml` | Deploy FastAPI to Cloud Run | Push to main, manual |
 | Infrastructure | `terraform_infra.yml` | Provision GCP resources | Manual dispatch |
 

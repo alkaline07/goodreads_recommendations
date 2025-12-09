@@ -385,6 +385,16 @@ Access the monitoring dashboard at: `{API_BASE_URL}/report`
 
 ![Monitoring Metrics](assets/monitoring-3.png)
 
+### ELK Stack Integration (Optional)
+
+For centralized log aggregation and analysis, the project includes an ELK Stack (Elasticsearch, Logstash, Kibana) deployment. This provides:
+
+- **Kibana Dashboard**: Visual log exploration at `http://<ELK_IP>:5601`
+- **Centralized Logging**: All container logs (frontend, backend, Airflow) aggregated in Elasticsearch
+- **Log Search**: Full-text search across application logs
+
+**Setup**: See [ELK Setup Guide](README_project_replication.md#step-11-elk-stack-setup-optional) for deployment instructions.
+
 ---
 
 ## Troubleshooting
