@@ -45,8 +45,9 @@ class MonitorDecay:
             job = self.client.query(query)
             result = list(job.result()) # Wait for job to complete
             
-            if not result or result[0].avg_ctr is None:
+            if not result or not result[0].avg_ctr:
                 print("No data found for the last 24 hours.")
+                sys.exit(0)
                 return
 
             row = result[0]
