@@ -49,7 +49,7 @@ class MonitorDecay:
 
             print(f"Metrics (Last 24h): Views={views}, Clicks={clicks}, CTR={ctr:.4f}")
 
-            if ctr < self.CTR_THRESHOLD:
+            if views > 0 and ctr < self.CTR_THRESHOLD:
                 print(f"DECAY DETECTED! CTR ({ctr:.2%}) is below threshold ({self.CTR_THRESHOLD:.2%})")
                 sys.exit(1) # Exit 1 to notify GitHub Actions that decay happened
             else:
