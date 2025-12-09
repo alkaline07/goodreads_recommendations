@@ -163,6 +163,7 @@ class GeneratePredictions:
             raise ValueError("No model selected for predictions.")
         
         model_name = model_info['display_name']
+        # model_name = "matrix_factorization" # Uncomment to force MF model for testing
 
         bq_model_id = self.get_model_from_registry(model_name)
 
