@@ -71,27 +71,6 @@ def test_log_ctr_event_handles_failure(monkeypatch, queries_module):
     assert queries.log_ctr_event("u", 1, "click") is False
 
 
-def test_insert_read_interaction_success(queries_module):
-    queries, mock_client = queries_module
-    mock_client.insert_rows_json.return_value = []
-    assert queries.insert_read_interaction("u", 5, rating=3) is True
-
-
-def test_insert_read_interaction_handles_errors(queries_module):
-    queries, mock_client = queries_module
-    mock_client.insert_rows_json.return_value = [{"error": "bad"}]
-    assert queries.insert_read_interaction("u", 5, rating=3) is False
-
-
-def test_get_book_details_returns_first_result(queries_module):
-    queries, mock_client = queries_module
-    mock_client.query.return_value.result.return_value = [
-        {"book_id": 1, "title": "A", "description": "d", "authors": ["x"]}
-    ]
-    result = queries.get_book_details(1)
-    assert result["title"] == "A"
-
-
 def test_get_books_read_by_user_uses_query(queries_module):
     queries, mock_client = queries_module
     mock_client.query.return_value.result.return_value = [

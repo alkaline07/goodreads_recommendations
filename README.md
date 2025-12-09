@@ -7,6 +7,7 @@ This project builds a machine learning-based book recommendation system using Go
 - [Phase 1. Data Pipeline](#data-pipeline)
 - [Phase 2. Model Development](#model-development)
 - [Phase 3. Model Deployment](#model-deployment)
+- [Project Frontend](#project-frontend)
 - [Project Recreation](#project-recreation)
 
 ## Team Members
@@ -235,9 +236,7 @@ For complete model development documentation, see [`README_model.md`](README_mod
 
 ## Phase 3. Model Deployment
 
-![img.png](assets/model_dep_arch.png)
-
-![img_2.png](assets/img_2.png)
+![Model Deployment Architecture](assets/model_dep_arch.png)
 
 ### Cloud Deployment Strategy
 
@@ -274,23 +273,6 @@ These logs are then used to:
 - Automatically initiate model retraining when necessary
 
 CTR is one of the most direct indicators of how well your recommendation model is performing in real-world usage.
-### CTR Architecture
-
-```mermaid
-graph TD
-    A[Streamlit Frontend] --> B["track_api_call()"]
-    A --> C["send_click_event()"]
-    B --> D["FastAPI /frontend-metrics"]
-    C --> E["FastAPI /book-click"]
-    D --> F[("BigQuery: user_interactions")]
-    E --> F
-    F --> G[CTR Calculation Job]
-    G --> H[Monitoring Dashboard]
-    H --> I{"CTR < 20%"}
-    I -->|Yes| J[Alert: Model Decay]
-    I -->|Yes| K[Trigger Retraining]
-    I -->|No| L[Continue Monitoring]
-```
 
 ### CTR Data Schema
 
@@ -641,35 +623,6 @@ class RecommendationResponse:
 │   └── Personal reading history with dates
 ```
 
-### User Interaction Flow
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant S as Streamlit App
-    participant F as FastAPI Backend
-    participant B as BigQuery
-    participant V as Vertex AI
-
-    U->>S: Enter user ID
-    S->>F: Request recommendations
-    F->>V: Get predictions (if existing user)
-    V-->>F: Return predictions
-    F->>S: Send recommendations
-    S-->>U: Display book cards
-
-    U->>S: Click book "View Details"
-    S->>F: Log click event (CTR)
-    S->>S: Fetch Google Books details
-    S-->>U: Show detailed book info
-
-    U->>S: Mark book as read
-    S-->>U: Show rating slider modal
-    U->>S: Submit rating 1-5 stars
-    S->>F: Store rating in BigQuery
-    F->>S: Confirm successful storage
-```
-
 #### Detailed Deployment Steps
 
 **Environment Setup**:
@@ -870,6 +823,11 @@ steps:
 - Notification systems for model health and retraining status
 
 For comprehensive documentation on all pipeline components, see [`README_data.md`](README_data.md) and [`README_model.md`](README_model.md).
+
+## Project Frontend
+
+For detailed guide of the project frontend , see **[`README_frontend.md`](README_frontend.md)**.
+
 
 ## Project Recreation
 

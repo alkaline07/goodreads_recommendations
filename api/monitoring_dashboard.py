@@ -11,7 +11,6 @@ Date: 2025
 """
 
 import os
-import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Callable
 from functools import wraps
@@ -26,8 +25,8 @@ from google.cloud import bigquery
 import secrets
 
 from .database import get_bq_client
-
-logger = logging.getLogger(__name__)
+from datapipeline.scripts.logger_setup import get_logger
+logger = get_logger("monitoring-dashboard")
 
 
 class MonitoringBQClientCache:
@@ -54,8 +53,9 @@ class MonitoringBQClientCache:
                 try:
                     cls._instance = get_bq_client()
                     cls._last_refresh = now
+                    logger.info("BigQuery client refreshed")
                 except Exception as e:
-                    logger.error(f"Failed to create BQ client: {e}")
+                    logger.error("Failed to create BQ client", error=str(e))
                     if cls._instance is None:
                         raise
             
@@ -187,15 +187,16 @@ def get_metrics_history(client: bigquery.Client, days: int = 30) -> List[Dict]:
         df = run_query_with_timeout(client, query)
         result = df.to_dict('records')
         monitoring_cache.set(cache_key, result, ttl_seconds=300)
+        logger.info("Metrics history fetched", count=len(result), days=days)
         return result
     except TimeoutError as e:
-        logger.error(f"Metrics history query timed out: {e}")
+        logger.error("Metrics history query timed out", error=str(e), days=days)
         return []
     except Exception as e:
         if '404' in str(e) or 'not found' in str(e).lower():
-            logger.warning(f"Table not found: model_metrics_history. Run 'python scripts/init_monitoring.py' to create tables.")
+            logger.warning("Table not found: model_metrics_history", hint="Run init_monitoring.py")
         else:
-            logger.error(f"Error fetching metrics history: {e}")
+            logger.error("Error fetching metrics history", error=str(e), days=days)
         return []
 
 
@@ -242,15 +243,16 @@ def get_latest_metrics(client: bigquery.Client) -> Dict[str, Dict]:
                 result[model] = {'timestamp': str(row['timestamp']), 'metrics': {}}
             result[model]['metrics'][row['metric_name']] = round(row['metric_value'], 4)
         monitoring_cache.set(cache_key, result, ttl_seconds=300)
+        logger.info("Latest metrics fetched", model_count=len(result))
         return result
     except TimeoutError as e:
-        logger.error(f"Latest metrics query timed out: {e}")
+        logger.error("Latest metrics query timed out", error=str(e))
         return {}
     except Exception as e:
         if '404' in str(e) or 'not found' in str(e).lower():
-            logger.warning(f"Table not found: model_metrics_history. Run 'python scripts/init_monitoring.py' to create tables.")
+            logger.warning("Table not found: model_metrics_history", hint="Run init_monitoring.py")
         else:
-            logger.error(f"Error fetching latest metrics: {e}")
+            logger.error("Error fetching latest metrics", error=str(e))
         return {}
 
 
@@ -282,15 +284,16 @@ def get_drift_history(client: bigquery.Client, days: int = 7) -> List[Dict]:
         df = run_query_with_timeout(client, query)
         result = df.to_dict('records')
         monitoring_cache.set(cache_key, result, ttl_seconds=300)
+        logger.info("Drift history fetched", count=len(result), days=days)
         return result
     except TimeoutError as e:
-        logger.error(f"Drift history query timed out: {e}")
+        logger.error("Drift history query timed out", error=str(e), days=days)
         return []
     except Exception as e:
         if '404' in str(e) or 'not found' in str(e).lower():
-            logger.warning(f"Table not found: data_drift_history. Run 'python scripts/init_monitoring.py' to create tables.")
+            logger.warning("Table not found: data_drift_history", hint="Run init_monitoring.py")
         else:
-            logger.error(f"Error fetching drift history: {e}")
+            logger.error("Error fetching drift history", error=str(e), days=days)
         return []
 
 
@@ -333,12 +336,15 @@ def get_prediction_stats(client: bigquery.Client) -> Dict:
             'accuracy_within_1_0': round(float(row['accuracy_1_0']), 2)
         }
         monitoring_cache.set(cache_key, result, ttl_seconds=300)
+        logger.info("Prediction stats fetched",
+                    total_predictions=result.get('total_predictions', 0),
+                    rmse=result.get('rmse', 0))
         return result
     except TimeoutError as e:
-        logger.error(f"Prediction stats query timed out: {e}")
+        logger.error("Prediction stats query timed out", error=str(e))
         return {}
     except Exception as e:
-        logger.error(f"Error fetching prediction stats: {e}")
+        logger.error("Error fetching prediction stats", error=str(e))
         return {}
 
 
@@ -1264,15 +1270,15 @@ async def get_metrics_api(username: str = Depends(verify_admin)):
             history_future,
             return_exceptions=True
         )
-        
+
         if isinstance(current_stats, Exception):
-            logger.error(f"Error fetching prediction stats: {current_stats}")
+            logger.error("Error fetching prediction stats", error=str(current_stats))
             current_stats = {}
         if isinstance(latest_metrics, Exception):
-            logger.error(f"Error fetching latest metrics: {latest_metrics}")
+            logger.error("Error fetching latest metrics", error=str(latest_metrics))
             latest_metrics = {}
         if isinstance(history, Exception):
-            logger.error(f"Error fetching history: {history}")
+            logger.error("Error fetching history", error=str(history))
             history = []
         
         return {
@@ -1282,7 +1288,7 @@ async def get_metrics_api(username: str = Depends(verify_admin)):
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
-        logger.error(f"Metrics API error: {e}")
+        logger.error("Metrics API error", error=str(e))
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
@@ -1302,17 +1308,17 @@ async def get_drift_api(username: str = Depends(verify_admin)):
         drift_history = await loop.run_in_executor(
             QUERY_EXECUTOR, lambda: get_drift_history(client, days=7)
         )
-        
+
         if isinstance(drift_history, Exception):
-            logger.error(f"Error fetching drift history: {drift_history}")
+            logger.error("Error fetching drift history", error=str(drift_history))
             drift_history = []
-        
+
         return {
             "drift_history": drift_history,
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
-        logger.error(f"Drift API error: {e}")
+        logger.error("Drift API error", error=str(e))
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
@@ -1371,7 +1377,7 @@ async def get_api_metrics_api(username: str = Depends(verify_admin)):
                 timeout=10.0
             )
         except asyncio.TimeoutError:
-            logger.error("API metrics collection timed out")
+            logger.warning("API metrics collection timed out")
             api_stats = {"error": "Metrics collection timed out", "summary": {"total_requests": 0, "total_errors": 0, "error_rate": 0, "active_requests": 0, "uptime_seconds": 0, "uptime_human": "--", "requests_per_minute": 0, "avg_latency_ms": 0, "p95_latency_ms": 0, "p99_latency_ms": 0}, "endpoints": [], "recent_errors": []}
         
         frontend_metrics_store = get_frontend_metrics_store()
@@ -1383,7 +1389,7 @@ async def get_api_metrics_api(username: str = Depends(verify_admin)):
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
-        logger.error(f"API metrics error: {e}")
+        logger.error("API metrics error", error=str(e))
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}

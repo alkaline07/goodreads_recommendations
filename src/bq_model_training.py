@@ -10,16 +10,19 @@ from google.cloud import bigquery
 import mlflow
 from pathlib import Path
 from dotenv import load_dotenv
+from datapipeline.scripts.logger_setup import get_logger
+logger = get_logger("bq-model-training")
 root_env = Path(__file__).resolve().parents[1] / ".env"
 load_dotenv(root_env)
 print("Loaded .env from:", root_env)
+
 
 def safe_mlflow_log(func, *args, **kwargs):
     """Safely log to MLflow, continue if it fails."""
     try:
         return func(*args, **kwargs)
     except Exception as e:
-        print(f"MLflow logging warning: {e}")
+        logger.warning("MLflow logging warning", error=str(e))
         return None
 
 
@@ -34,7 +37,8 @@ class BigQueryMLModelTraining:
         """
         if os.environ.get("AIRFLOW_HOME"):
             # Running locally or through Airflow
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("AIRFLOW_HOME")+"/gcp_credentials.json"
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get(
+                "AIRFLOW_HOME") + "/gcp_credentials.json"
 
         self.client = bigquery.Client()
         self.project_id = self.client.project
@@ -56,8 +60,8 @@ class BigQueryMLModelTraining:
         Check for existing models and running jobs, cleanup if needed.
         """
         try:
-            print("Checking for existing models and running jobs...")
-           
+            logger.info("Checking for existing models and running jobs")
+
             # Check for running jobs
             jobs_query = """
             SELECT
@@ -71,44 +75,45 @@ class BigQueryMLModelTraining:
             ORDER BY creation_time DESC
             LIMIT 10
             """
-           
+
             try:
-                running_jobs = self.client.query(jobs_query).to_dataframe(create_bqstorage_client=False)
+                running_jobs = self.client.query(jobs_query).to_dataframe(
+                    create_bqstorage_client=False)
                 if not running_jobs.empty:
-                    print(f"Found {len(running_jobs)} running model training jobs")
-                    print("Waiting for existing jobs to complete...")
+                    logger.warning("Found running model training jobs, waiting",
+                                   count=len(running_jobs))
                     time.sleep(30)  # Wait 30 seconds
             except Exception as e:
-                print(f"Could not check running jobs: {e}")
-           
+                logger.warning("Could not check running jobs", error=str(e))
+
             # List existing models
             models_to_check = [
                 self.matrix_factorization_model.split('.')[-1],
                 self.boosted_tree_model.split('.')[-1],
                 self.automl_regressor_model.split('.')[-1]
             ]
-           
+
             for model_name in models_to_check:
                 try:
                     # Try to get model info
                     model_ref = f"{self.project_id}.{self.dataset_id}.{model_name}"
                     self.client.get_model(model_ref)
-                    print(f"Model {model_name} exists")
-                   
+                    logger.info("Model exists", model=model_name)
+
                     # Optionally delete existing model
                     # self.client.delete_model(model_ref)
                     # print(f"Deleted existing model {model_name}")
-                   
+
                 except Exception:
-                    print(f"Model {model_name} does not exist")
-                   
+                    logger.info("Model does not exist", model=model_name)
+
         except Exception as e:
-            print(f"Error checking existing models: {e}")
+            logger.error("Error checking existing models", error=str(e))
 
     def safe_train_model(self, model_name, query, model_type, max_retries=3):
         """
         Safely train a model with retry logic and error handling.
-       
+
         Args:
             model_name: Full model path
             query: CREATE MODEL query
@@ -117,43 +122,46 @@ class BigQueryMLModelTraining:
         """
         for attempt in range(max_retries):
             try:
-                print(f"Training {model_type} model (attempt {attempt + 1}/{max_retries})...")
-               
+                logger.info("Training model", model_type=model_type,
+                            attempt=f"{attempt + 1}/{max_retries}")
+
                 # Add a unique job ID to prevent conflicts
                 job_config = bigquery.QueryJobConfig()
                 job_id_prefix = f"{model_type.lower()}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-               
+
                 job = self.client.query(query, job_config=job_config, job_id_prefix=job_id_prefix)
-               
+
                 # Wait with timeout
                 result = job.result(timeout=3600)  # 1 hour timeout
-               
-                print(f"{model_type} model training completed successfully")
+
+                logger.info("Model training completed successfully", model_type=model_type)
                 return True
-               
+
             except Exception as e:
                 error_msg = str(e)
-               
+
                 if "multiple create model query jobs" in error_msg.lower():
-                    print(f"Model is being updated by another job. Waiting...")
+                    logger.warning("Model being updated by another job, waiting",
+                                   attempt=attempt + 1)
                     time.sleep(60 * (attempt + 1))  # Exponential backoff
-                   
+
                 elif "already exists" in error_msg.lower():
-                    print(f"Model already exists. Using timestamp suffix...")
-                    # Modify model name with timestamp
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     new_model_name = f"{model_name}_{timestamp}"
                     query = query.replace(model_name, new_model_name)
-                    print(f"Retrying with new model name: {new_model_name}")
-                   
+                    logger.warning("Model already exists, using timestamp suffix",
+                                   new_model_name=new_model_name)
+
                 elif attempt < max_retries - 1:
-                    print(f"Error training {model_type}: {e}. Retrying...")
+                    logger.warning("Error training model, retrying", model_type=model_type,
+                                   error=str(e), attempt=attempt + 1)
                     time.sleep(30 * (attempt + 1))
-                   
+
                 else:
-                    print(f"Failed to train {model_type} after {max_retries} attempts: {e}")
+                    logger.error("Failed to train model after max retries", model_type=model_type,
+                                 max_retries=max_retries, error=str(e))
                     return False
-                   
+
         return False
 
     def train_matrix_factorization(self):
@@ -161,9 +169,7 @@ class BigQueryMLModelTraining:
         Train MATRIX_FACTORIZATION model with error handling.
         """
         try:
-            print("=" * 60)
-            print("Training MATRIX_FACTORIZATION Model")
-            print("=" * 60)
+            logger.info("Starting Matrix Factorization training")
 
             hyperparams = {
                 "model_type": "MATRIX_FACTORIZATION",
@@ -209,17 +215,17 @@ class BigQueryMLModelTraining:
                 "MATRIX_FACTORIZATION"
             )
             training_time = time.time() - start_time
-           
+
             if success:
                 safe_mlflow_log(mlflow.log_metric, "mf_training_time_seconds", training_time)
                 self.evaluate_model(self.matrix_factorization_model, "MATRIX_FACTORIZATION")
-           
+
             safe_mlflow_log(mlflow.log_param, "mf_model_name", self.matrix_factorization_model)
             safe_mlflow_log(mlflow.log_metric, "mf_training_success", 1 if success else 0)
             return success
 
         except Exception as e:
-            print(f"Unexpected error in train_matrix_factorization: {e}", exc_info=True)
+            logger.error("Unexpected error in train_matrix_factorization", error=str(e))
             safe_mlflow_log(mlflow.log_metric, "mf_training_success", 0)
             return False
 
@@ -228,9 +234,7 @@ class BigQueryMLModelTraining:
         Train BOOSTED_TREE_REGRESSOR model with error handling.
         """
         try:
-            print("=" * 60)
-            print("Training BOOSTED_TREE_REGRESSOR Model")
-            print("=" * 60)
+            logger.info("Starting Boosted Tree Regressor training")
 
             feature_columns = self.get_feature_columns()
             feature_list = ", ".join(feature_columns)
@@ -287,17 +291,17 @@ class BigQueryMLModelTraining:
                 "BOOSTED_TREE_REGRESSOR"
             )
             training_time = time.time() - start_time
-           
+
             if success:
                 safe_mlflow_log(mlflow.log_metric, "bt_training_time_seconds", training_time)
                 self.evaluate_model(self.boosted_tree_model, "BOOSTED_TREE_REGRESSOR")
-           
+
             safe_mlflow_log(mlflow.log_param, "bt_model_name", self.boosted_tree_model)
             safe_mlflow_log(mlflow.log_metric, "bt_training_success", 1 if success else 0)
             return success
 
         except Exception as e:
-            print(f"Unexpected error in train_boosted_tree_regressor: {e}", exc_info=True)
+            logger.error("Unexpected error in train_boosted_tree_regressor", error=str(e))
             safe_mlflow_log(mlflow.log_metric, "bt_training_success", 0)
             return False
 
@@ -306,18 +310,18 @@ class BigQueryMLModelTraining:
         try:
             table = self.client.get_table(self.train_table)
             all_columns = [field.name for field in table.schema]
-           
+
             exclude_columns = {
                 'user_id_clean', 'book_id', 'rating', 'is_read',
                 'user_days_to_read', 'user_book_recency'
             }
-           
+
             feature_columns = [col for col in all_columns if col not in exclude_columns]
-            print(f"Found {len(feature_columns)} feature columns")
+            logger.info("Feature columns retrieved", count=len(feature_columns))
             return feature_columns
-           
+
         except Exception as e:
-            print(f"Error getting feature columns: {e}")
+            logger.error("Error getting feature columns", error=str(e))
             # Return a default set
             return [
                 'num_books_read', 'avg_rating_given', 'user_activity_count',
@@ -337,8 +341,8 @@ class BigQueryMLModelTraining:
     def evaluate_model(self, model_name, model_type):
         """Evaluate model with error handling."""
         try:
-            print(f"Evaluating {model_type} model...")
-           
+            logger.info("Evaluating model", model_type=model_type)
+
             eval_query = f"""
             SELECT *
             FROM ML.EVALUATE(MODEL `{model_name}`, (
@@ -348,31 +352,33 @@ class BigQueryMLModelTraining:
                 LIMIT 5000
             ))
             """
-           
+
             eval_result = self.client.query(eval_query).to_dataframe(create_bqstorage_client=False)
-           
+
             if not eval_result.empty:
-                print(f"{model_type} Evaluation Metrics:")
                 prefix = "mf_" if "MATRIX_FACTORIZATION" in model_type else "bt_"
-                
+                metrics = {}
+
                 for col in eval_result.columns:
                     value = eval_result[col].iloc[0]
                     if isinstance(value, float):
-                        print(f"  {col}: {value:.4f}")
+                        metrics[col] = round(value, 4)
                         # Log metrics to MLflow
                         safe_mlflow_log(mlflow.log_metric, f"{prefix}{col.lower()}", value)
-                       
+
+                logger.info("Model evaluation completed", model_type=model_type, metrics=metrics)
+
         except Exception as e:
-            print(f"Could not evaluate {model_type}: {e}")
-    
+            logger.error("Could not evaluate model", model_type=model_type, error=str(e))
+
     def analyze_data_characteristics(self):
         """
         Analyze the training data to understand its characteristics.
         This helps in setting appropriate hyperparameters.
         """
         try:
-            print("Analyzing training data characteristics...")
-           
+            logger.info("Analyzing training data characteristics")
+
             stats_query = f"""
             SELECT
                 COUNT(DISTINCT user_id_clean) as num_users,
@@ -386,17 +392,16 @@ class BigQueryMLModelTraining:
             FROM `{self.train_table}`
             WHERE rating IS NOT NULL
             """
-           
+
             stats = self.client.query(stats_query).to_dataframe(create_bqstorage_client=False)
-           
-            print("Training Data Statistics:")
-            for col in stats.columns:
-                if col != 'rating_quartiles':
-                    print(f"  {col}: {stats[col].iloc[0]}")
-           
+
+            stats_dict = {col: stats[col].iloc[0] for col in stats.columns if
+                          col != 'rating_quartiles'}
+            logger.info("Training data statistics", stats=stats_dict)
+
             # Store for later use
             self.data_stats = stats.iloc[0].to_dict()
-           
+
             # Check for cold-start problem
             cold_start_query = f"""
             WITH user_counts AS (
@@ -410,22 +415,22 @@ class BigQueryMLModelTraining:
                 COUNTIF(cnt < 5) / COUNT(*) as cold_start_ratio
             FROM user_counts
             """
-           
-            cold_start = self.client.query(cold_start_query).to_dataframe(create_bqstorage_client=False)
-            print(f"Cold-start ratio: {cold_start['cold_start_ratio'].iloc[0]:.2%} of users have < 5 ratings")
-           
-        except Exception as e:
-            print(f"Error analyzing data: {e}")
-            self.data_stats = {}
 
+            cold_start = self.client.query(cold_start_query).to_dataframe(
+                create_bqstorage_client=False)
+            cold_start_ratio = cold_start['cold_start_ratio'].iloc[0]
+            logger.info("Cold-start analysis", ratio=f"{cold_start_ratio:.2%}",
+                        users_with_few_ratings=cold_start['users_with_few_ratings'].iloc[0])
+
+        except Exception as e:
+            logger.error("Error analyzing data", error=str(e))
+            self.data_stats = {}
 
     def run(self):
         """Execute the training pipeline with proper error handling."""
         start_time = time.time()
-        print("=" * 60)
-        print("BigQuery ML Model Training Pipeline")
-        print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print("=" * 60)
+        logger.info("BigQuery ML Model Training Pipeline started",
+                    timestamp=datetime.now().isoformat())
 
         # Start MLflow run
         experiment_name = "bigquery_ml_training"
@@ -435,7 +440,7 @@ class BigQueryMLModelTraining:
             mlflow.set_tracking_uri(mlflow_uri)
             mlflow.set_experiment(experiment_name)
         except Exception as e:
-            print(f"MLflow initialization warning: {e}. Continuing with MLflow tracking (errors will be handled gracefully).")
+            logger.warning("MLflow initialization warning, continuing anyway", error=str(e))
 
         with mlflow.start_run(run_name=f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
             # Log run metadata
@@ -450,7 +455,7 @@ class BigQueryMLModelTraining:
 
             # Analyze data characteristics
             self.analyze_data_characteristics()
-            
+
             # Log data statistics if available
             if hasattr(self, 'data_stats') and self.data_stats:
                 for key, value in self.data_stats.items():
@@ -464,21 +469,24 @@ class BigQueryMLModelTraining:
             # Summary
             end_time = time.time()
             total_runtime = end_time - start_time
-            
+
             # Log final metrics
             safe_mlflow_log(mlflow.log_metric, "total_runtime_seconds", total_runtime)
-            safe_mlflow_log(mlflow.log_metric, "all_models_success", 1 if (mf_success and bt_success) else 0)
-            
-            print("=" * 60)
-            print(f"Training completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print(f"Matrix Factorization: {'SUCCESS' if mf_success else 'FAILED'}")
-            print(f"Boosted Tree: {'SUCCESS' if bt_success else 'FAILED'}")
-            print(f"Total runtime: {total_runtime:.2f} seconds")
+            safe_mlflow_log(mlflow.log_metric, "all_models_success",
+                            1 if (mf_success and bt_success) else 0)
+
+            mlflow_run_id = None
             try:
-                print(f"MLflow run ID: {mlflow.active_run().info.run_id}")
+                mlflow_run_id = mlflow.active_run().info.run_id
             except Exception:
                 pass
-            print("=" * 60)
+
+            logger.info("Training completed",
+                        timestamp=datetime.now().isoformat(),
+                        mf_success=mf_success,
+                        bt_success=bt_success,
+                        total_runtime_seconds=round(total_runtime, 2),
+                        mlflow_run_id=mlflow_run_id)
 
 
 def main():
@@ -487,8 +495,9 @@ def main():
         trainer = BigQueryMLModelTraining()
         trainer.run()
     except Exception as e:
-        print(f"Fatal error: {e}")
+        logger.error("Fatal error in training pipeline", error=str(e))
         raise
+
 
 if __name__ == "__main__":
     main()
