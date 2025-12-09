@@ -12,6 +12,7 @@ COPY docs/bias_reports/model_selection_report.json ./docs/bias_reports/model_sel
 COPY datapipeline/scripts/logger_setup.py ./datapipeline/scripts/logger_setup.py 
 
 ENV PORT=8080
+ENV ELK_HOST=http://34.60.167.248:9200
 EXPOSE 8080
 
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
