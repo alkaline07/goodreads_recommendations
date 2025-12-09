@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir streamlit requests pandas
 
 COPY pages/app ./pages/app
 COPY pages/data/books_database.json ./data/books_database.json
+COPY datapipeline/scripts/logger_setup.py ./datapipeline/scripts/logger_setup.py 
 
 ENV PORT=8501
 EXPOSE 8501

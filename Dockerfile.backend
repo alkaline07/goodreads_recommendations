@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY api ./api
 
 COPY docs/bias_reports/model_selection_report.json ./docs/bias_reports/model_selection_report.json
+COPY datapipeline/scripts/logger_setup.py ./datapipeline/scripts/logger_setup.py 
 
 ENV PORT=8080
 EXPOSE 8080
