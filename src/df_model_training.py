@@ -8,7 +8,9 @@ the full BigQuery ML pipeline.
 """
 
 import pandas as pd
+from datapipeline.scripts.logger_setup import get_logger
 
+logger = get_logger("df-model-training")
 
 class DataFrameModelTraining:
     """Wrapper class that mimics the public API of the BigQuery trainer."""
@@ -24,9 +26,9 @@ class DataFrameModelTraining:
         """
         Placeholder training hook; replace with scikit-learn / XGBoost logic as needed.
 
-        The stub prints shape information to make CI logs and notebooks explicit.
+        The stub logs shape information to make CI logs and notebooks explicit.
         """
-        print("Training model with DataFrame of shape:", self.df.shape)
+        logger.info(f"Training model with shape {self.df.shape}")
 
 
 if __name__ == "__main__":

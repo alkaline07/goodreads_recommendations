@@ -58,7 +58,6 @@ class FeatureMetadata:
         """
         try:
             self.logger.info("Starting feature metadata collection")
-            print("Starting feature metadata collection")
             
             # Query to get row count from the features table
             query = f"SELECT COUNT(*) FROM `{self.project_id}.{self.dataset_id}.goodreads_features`"
@@ -91,8 +90,7 @@ class FeatureMetadata:
             metadata_path = "data/metadata/goodreads_features_metadata.json"
             with open(metadata_path, "w") as f:
                 json.dump(metadata, f, indent=2)
-            self.logger.info("Wrote metadata to %s", metadata_path)
-            print("Wrote metadata to %s", metadata_path)
+            self.logger.info("Wrote metadata to file", path=metadata_path)
         except Exception:
             self.logger.exception("Failed to run feature metadata collection")
             raise

@@ -7,6 +7,9 @@ import os
 import time
 from datetime import datetime
 from urllib.parse import quote
+from datapipeline.scripts.logger_setup import get_logger
+
+logger = get_logger("book-recommendation-app")
 # Restore session state BEFORE Streamlit renders widgets
 current_user = st.session_state.get("current_user", None)
 
@@ -458,7 +461,7 @@ def send_click_event(user_id: str, book_id: int, event_type: str, book_title: st
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Error tracking event: {e}")
+        logger.error("Error tracking event", error=str(e), user_id=user_id, book_id=book_id, event_type=event_type)
         return {"status": "error", "message": str(e)}
 
 
