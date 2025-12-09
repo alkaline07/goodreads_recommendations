@@ -539,7 +539,7 @@ inject_web_vitals_monitoring(st.session_state.session_id, API_BASE_URL)
 
 # Sidebar with navigation
 with st.sidebar:
-    st.title("📚 Navigation")
+    st.title("Navigation")
 
     if st.session_state.api_call_count > 0:
         avg_latency = st.session_state.total_api_latency / st.session_state.api_call_count
@@ -560,6 +560,16 @@ with st.sidebar:
         st.markdown("---")
 
         if st.button("🏠 Home", use_container_width=True, key="nav_home"):
+            if st.session_state.current_user:
+                st.session_state.recommendations = get_recommendations(
+                    st.session_state.current_user)
+                for book in st.session_state.recommendations:
+                    send_click_event(
+                        st.session_state.current_user,
+                        book['book_id'],
+                        "view",
+                        book['title']
+                    )
             st.session_state.view_mode = 'recommendations'
             st.session_state.show_rating_modal = False
             st.rerun()
@@ -583,7 +593,7 @@ with st.sidebar:
             st.session_state.show_rating_modal = False
             st.rerun()
     else:
-        st.info("Please login to access features")
+        st.info("Please login to access all features")
 
 
 # Helper function to display book card
@@ -706,7 +716,7 @@ if st.session_state.view_mode == 'user_selection':
                 st.rerun()
 
 elif st.session_state.view_mode == 'recommendations':
-    st.title(f"📚 Recommendations for User-{st.session_state.current_user[:4]}")
+    st.title(f"Recommendations for User-{st.session_state.current_user[:4]}")
     st.markdown("### Top 10 Books Just for You")
 
     # Display books in a grid (2 columns)
