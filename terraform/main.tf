@@ -50,6 +50,7 @@ resource "google_project_service" "required_apis" {
     "logging.googleapis.com",
     "monitoring.googleapis.com",
     "bigquery.googleapis.com",
+    "compute.googleapis.com",
   ])
 
   service            = each.key

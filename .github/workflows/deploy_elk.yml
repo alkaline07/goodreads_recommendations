@@ -1,0 +1,124 @@
+name: Deploy ELK Stack
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'terraform/elk.tf'
+  workflow_dispatch:
+
+concurrency:
+  group: elk-deploy-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || 'recommendation-system-475301' }}
+  TF_WORKING_DIR: terraform
+  TF_LOCK_TIMEOUT: '300s'
+
+jobs:
+  deploy-elk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Install gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Clear stale locks
+        run: |
+          LOCK_FILE="gs://recommendation-system-475301-terraform-state/model-deployment/default.tflock"
+          if gsutil -q stat "$LOCK_FILE" 2>/dev/null; then
+            echo "Removing stale lock..."
+            gsutil rm "$LOCK_FILE" || true
+          fi
+
+      - name: Terraform Apply (ELK)
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          TF_VAR_region: ${{ env.REGION }}
+          TF_VAR_service_name: "recommendation-service"
+          TF_VAR_image: ""
+          TF_VAR_elk_enabled: "true"
+        run: |
+          terraform apply -auto-approve -lock-timeout=${{ env.TF_LOCK_TIMEOUT }} \
+            -target=google_project_service.required_apis \
+            -target=google_compute_address.elk_static_ip \
+            -target=google_service_account.elk_sa \
+            -target=google_project_iam_member.elk_sa_logging \
+            -target=google_project_iam_member.elk_sa_monitoring \
+            -target=google_project_iam_member.elk_sa_artifact_reader \
+            -target=google_compute_instance.elk_stack \
+            -target=google_compute_firewall.elk_firewall \
+            -target=google_compute_firewall.elk_internal
+
+      - name: Get ELK IP
+        id: elk_ip
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          ELK_IP=$(terraform output -raw elk_instance_ip 2>/dev/null || echo "")
+          echo "elk_ip=$ELK_IP" >> $GITHUB_OUTPUT
+          echo "ELK IP: $ELK_IP"
+
+      - name: Wait for VM startup script to complete
+        run: |
+          echo "Waiting 3 minutes for VM startup script to install Docker and start ELK..."
+          sleep 180
+
+      - name: Wait for Elasticsearch
+        run: |
+          ELK_IP="${{ steps.elk_ip.outputs.elk_ip }}"
+          
+          echo "Waiting for Elasticsearch at $ELK_IP:9200..."
+          
+          for i in {1..30}; do
+            if curl -sf "http://$ELK_IP:9200/_cluster/health" > /dev/null 2>&1; then
+              echo "Elasticsearch is ready!"
+              curl -s "http://$ELK_IP:9200/_cluster/health?pretty"
+              exit 0
+            fi
+            echo "Attempt $i/30 - waiting..."
+            sleep 10
+          done
+          
+          echo "WARNING: Elasticsearch may still be starting. Check VM logs."
+
+      - name: Display ELK URLs
+        run: |
+          ELK_IP="${{ steps.elk_ip.outputs.elk_ip }}"
+          
+          echo "=========================================="
+          echo "ELK Stack Deployed!"
+          echo "=========================================="
+          echo ""
+          echo "Kibana:        http://$ELK_IP:5601"
+          echo "Elasticsearch: http://$ELK_IP:9200"
+          echo "Logstash:      $ELK_IP:5044"
+          echo ""
+          echo "=========================================="
+          
+          echo "::notice title=ELK Ready::Kibana at http://$ELK_IP:5601"

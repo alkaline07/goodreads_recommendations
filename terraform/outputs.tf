@@ -37,3 +37,26 @@ output "region" {
   description = "The GCP region"
   value       = var.region
 }
+
+# -----------------------------
+# ELK Stack Outputs
+# -----------------------------
+output "elk_instance_ip" {
+  description = "External IP address of the ELK stack VM"
+  value       = var.elk_enabled ? google_compute_address.elk_static_ip[0].address : "not_deployed"
+}
+
+output "elk_elasticsearch_url" {
+  description = "URL for Elasticsearch"
+  value       = var.elk_enabled ? "http://${google_compute_address.elk_static_ip[0].address}:9200" : "not_deployed"
+}
+
+output "elk_kibana_url" {
+  description = "URL for Kibana UI"
+  value       = var.elk_enabled ? "http://${google_compute_address.elk_static_ip[0].address}:5601" : "not_deployed"
+}
+
+output "elk_logstash_url" {
+  description = "URL for Logstash input"
+  value       = var.elk_enabled ? "http://${google_compute_address.elk_static_ip[0].address}:5044" : "not_deployed"
+}
