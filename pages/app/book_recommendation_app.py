@@ -6,6 +6,8 @@ import json
 import os
 import time
 from datetime import datetime
+# Restore session state BEFORE Streamlit renders widgets
+current_user = st.session_state.get("current_user", None)
 
 API_BASE_URL = "https://recommendation-service-491512947755.us-central1.run.app"
 
@@ -560,17 +562,12 @@ with st.sidebar:
         st.markdown("---")
 
         if st.button("🏠 Home", use_container_width=True, key="nav_home"):
-            if st.session_state.current_user:
-                st.session_state.recommendations = get_recommendations(
-                    st.session_state.current_user)
+            if current_user:
+                st.session_state.recommendations = get_recommendations(current_user)
                 for book in st.session_state.recommendations:
-                    send_click_event(
-                        st.session_state.current_user,
-                        book['book_id'],
-                        "view",
-                        book['title']
-                    )
-            st.session_state.view_mode = 'recommendations'
+                    send_click_event(current_user, book["book_id"], "view", book["title"])
+
+            st.session_state.view_mode = "recommendations"
             st.session_state.show_rating_modal = False
             st.rerun()
 
