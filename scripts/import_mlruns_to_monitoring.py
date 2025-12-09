@@ -5,7 +5,11 @@ Reads MLflow experiment data from mlruns folder and imports it into
 BigQuery monitoring tables for historical analysis.
 
 Usage:
-    python config/import_mlflow_to_monitoring.py
+    python scripts/import_mlruns_to_monitoring.py
+
+Or call programmatically:
+    from scripts.import_mlruns_to_monitoring import ensure_mlruns_imported
+    ensure_mlruns_imported()
 
 Author: Goodreads Recommendation Team
 Date: 2025
@@ -248,6 +252,120 @@ class MLflowToMonitoringImporter:
                 return 0
 
         return 0
+
+
+def has_mlruns_data(mlruns_path: str = "mlruns") -> bool:
+    """
+    Check if mlruns folder exists and has experiment data.
+    
+    Returns:
+        bool: True if mlruns folder has importable data
+    """
+    mlruns_dir = Path(mlruns_path)
+    
+    if not mlruns_dir.exists():
+        return False
+    
+    for experiment_dir in mlruns_dir.iterdir():
+        if not experiment_dir.is_dir():
+            continue
+        if experiment_dir.name in ['.trash', 'models']:
+            continue
+        for run_dir in experiment_dir.iterdir():
+            if run_dir.is_dir() and (run_dir / 'meta.yaml').exists():
+                return True
+    
+    return False
+
+
+def is_monitoring_data_imported(project_id: str = None) -> bool:
+    """
+    Check if monitoring table already has data.
+    
+    Returns:
+        bool: True if model_metrics_history table has records
+    """
+    try:
+        airflow_home = os.environ.get("AIRFLOW_HOME")
+        if airflow_home:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
+                airflow_home + "/gcp_credentials.json"
+            )
+        
+        client = bigquery.Client(project=project_id)
+        project_id = client.project
+        dataset_id = "books"
+        
+        query = f"""
+        SELECT COUNT(*) as count
+        FROM `{project_id}.{dataset_id}.model_metrics_history`
+        LIMIT 1
+        """
+        
+        result = client.query(query).result()
+        for row in result:
+            return row.count > 0
+        
+        return False
+        
+    except Exception as e:
+        logger.warning("Error checking monitoring data", error=str(e))
+        return False
+
+
+def ensure_mlruns_imported(
+    mlruns_path: str = "mlruns",
+    project_id: str = None,
+    silent: bool = True
+) -> bool:
+    """
+    Ensure MLflow data is imported to monitoring tables if available.
+    
+    This function is idempotent - safe to call multiple times.
+    Only imports if:
+    1. mlruns folder exists and has data
+    2. Monitoring table is empty (no existing data)
+    
+    Args:
+        mlruns_path: Path to mlruns folder
+        project_id: GCP project ID (uses default if not provided)
+        silent: If True, suppresses most output (for automatic startup)
+    
+    Returns:
+        bool: True if import completed or not needed, False on error
+    """
+    if not has_mlruns_data(mlruns_path):
+        logger.debug("No MLflow data to import")
+        return True
+    
+    if is_monitoring_data_imported(project_id):
+        logger.info("Monitoring data already exists - skipping MLflow import")
+        if not silent:
+            print("Monitoring data already exists - skipping MLflow import")
+        return True
+    
+    logger.info("Importing MLflow data to monitoring tables...")
+    if not silent:
+        print("Importing MLflow data to monitoring tables...")
+    
+    try:
+        importer = MLflowToMonitoringImporter(mlruns_path=mlruns_path, project_id=project_id)
+        count = importer.import_all_runs(dry_run=False)
+        
+        if count > 0:
+            logger.info("MLflow import completed", records=count)
+            if not silent:
+                print(f"  ✅ Imported {count} metrics from MLflow")
+            return True
+        else:
+            logger.warning("No metrics imported from MLflow")
+            return True
+            
+    except Exception as e:
+        logger.error("Error during MLflow import", error=str(e))
+        if not silent:
+            print(f"  ❌ Error importing MLflow data: {e}")
+        return False
 
 
 def main():

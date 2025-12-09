@@ -4,7 +4,11 @@ Bootstrap Script for Monitoring System
 Creates required BigQuery tables and initializes monitoring infrastructure.
 
 Run this script once before using the monitoring dashboard:
-    python config/init_monitoring.py
+    python scripts/init_monitoring.py
+
+Or call programmatically:
+    from scripts.init_monitoring import ensure_monitoring_setup
+    ensure_monitoring_setup()
 
 Author: Goodreads Recommendation Team
 Date: 2025
@@ -12,6 +16,7 @@ Date: 2025
 
 import os
 import sys
+import logging
 from pathlib import Path
 
 project_root = Path(__file__).resolve().parents[1]
@@ -21,6 +26,8 @@ from google.cloud import bigquery
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 def initialize_monitoring_tables(project_id: str = None):
     """
@@ -220,6 +227,137 @@ def insert_sample_data(client: bigquery.Client, project_id: str, dataset_id: str
         print(f"  ❌ Error inserting drift data: {errors}")
     else:
         print(f"  ✅ Inserted {len(sample_drift)} sample drift records")
+
+
+def is_monitoring_setup_complete(project_id: str = None) -> bool:
+    """
+    Check if monitoring tables already exist in BigQuery.
+    
+    Returns:
+        bool: True if both monitoring tables exist, False otherwise
+    """
+    try:
+        airflow_home = os.environ.get("AIRFLOW_HOME")
+        if airflow_home:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
+                airflow_home + "/gcp_credentials.json"
+            )
+        
+        client = bigquery.Client(project=project_id)
+        project_id = client.project
+        dataset_id = "books"
+        
+        required_tables = ["model_metrics_history", "data_drift_history"]
+        
+        for table_name in required_tables:
+            full_table_id = f"{project_id}.{dataset_id}.{table_name}"
+            try:
+                client.get_table(full_table_id)
+            except Exception:
+                logger.debug(f"Table not found: {full_table_id}")
+                return False
+        
+        return True
+        
+    except Exception as e:
+        logger.warning(f"Error checking monitoring setup: {e}")
+        return False
+
+
+def ensure_monitoring_setup(project_id: str = None, silent: bool = True) -> bool:
+    """
+    Ensure monitoring tables are set up. Creates them if they don't exist.
+    
+    This function is idempotent - safe to call multiple times.
+    
+    Args:
+        project_id: GCP project ID (uses default if not provided)
+        silent: If True, suppresses most output (for automatic startup)
+    
+    Returns:
+        bool: True if setup is complete (either already existed or created successfully)
+    """
+    if is_monitoring_setup_complete(project_id):
+        if not silent:
+            print("Monitoring tables already exist - setup complete")
+        logger.info("Monitoring setup already complete")
+        return True
+    
+    logger.info("Monitoring tables not found - initializing...")
+    if not silent:
+        print("Monitoring tables not found - initializing...")
+    
+    try:
+        airflow_home = os.environ.get("AIRFLOW_HOME")
+        if airflow_home:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
+                airflow_home + "/gcp_credentials.json"
+            )
+        
+        client = bigquery.Client(project=project_id)
+        project_id = client.project
+        dataset_id = "books"
+        
+        tables_to_create = {
+            "model_metrics_history": f"""
+            CREATE TABLE IF NOT EXISTS `{project_id}.{dataset_id}.model_metrics_history` (
+                timestamp TIMESTAMP,
+                model_name STRING,
+                model_version STRING,
+                metric_name STRING,
+                metric_value FLOAT64,
+                predictions_count INT64,
+                evaluation_dataset STRING
+            )
+            PARTITION BY DATE(timestamp)
+            OPTIONS(
+                description="Model performance metrics history for monitoring and decay detection"
+            )
+            """,
+            
+            "data_drift_history": f"""
+            CREATE TABLE IF NOT EXISTS `{project_id}.{dataset_id}.data_drift_history` (
+                timestamp TIMESTAMP,
+                feature_name STRING,
+                baseline_mean FLOAT64,
+                baseline_std FLOAT64,
+                current_mean FLOAT64,
+                current_std FLOAT64,
+                ks_statistic FLOAT64,
+                ks_pvalue FLOAT64,
+                psi_score FLOAT64,
+                drift_detected BOOL
+            )
+            PARTITION BY DATE(timestamp)
+            OPTIONS(
+                description="Data drift detection history for monitoring distribution shifts"
+            )
+            """
+        }
+        
+        for table_name, create_statement in tables_to_create.items():
+            try:
+                query_job = client.query(create_statement)
+                query_job.result()
+                logger.info(f"Created/verified table: {project_id}.{dataset_id}.{table_name}")
+                if not silent:
+                    print(f"  ✅ Created table: {table_name}")
+            except Exception as e:
+                logger.error(f"Error creating table {table_name}: {e}")
+                if not silent:
+                    print(f"  ❌ Error creating table {table_name}: {e}")
+                return False
+        
+        logger.info("Monitoring setup completed successfully")
+        if not silent:
+            print("✅ Monitoring setup completed successfully")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error during monitoring setup: {e}")
+        if not silent:
+            print(f"❌ Error during monitoring setup: {e}")
+        return False
 
 
 if __name__ == "__main__":
