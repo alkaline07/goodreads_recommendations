@@ -635,7 +635,7 @@ def display_book_card(book: Dict, col, button_prefix: str = "btn"):
 
             with st.spinner(f'Fetching details for "{book["title"]}"...'):
                 # Get API rating
-                api_rating = book.get('predicted_rating') or book.get('average_rating') or book.get('rating') or 0
+                api_rating = book.get('predicted_rating') or book.get('average_rating') or book.get('rating')
 
                 book_details = get_book_details_from_google(
                     book['title'],
