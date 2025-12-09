@@ -1,3 +1,6 @@
+from contextlib import asynccontextmanager
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,7 +26,59 @@ from .queries import (
 from .monitoring_dashboard import router as monitoring_router
 from .middleware import MonitoringMiddleware, get_metrics_collector
 from fastapi import HTTPException
-app = FastAPI(title="Goodreads Recommendation API")
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for application startup/shutdown.
+    Automatically initializes monitoring tables and imports MLflow data if not already set up.
+    """
+    import sys
+    from pathlib import Path
+    
+    project_root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(project_root))
+    
+    # Step 1: Initialize monitoring tables
+    try:
+        from scripts.init_monitoring import ensure_monitoring_setup
+        
+        logger.info("Checking monitoring setup on startup...")
+        success = ensure_monitoring_setup(silent=True)
+        
+        if success:
+            logger.info("Monitoring tables ready")
+        else:
+            logger.warning("Could not initialize monitoring tables - dashboard may show no data")
+    except ImportError as e:
+        logger.warning(f"Could not import init_monitoring: {e}")
+    except Exception as e:
+        logger.warning(f"Error during monitoring setup: {e}")
+    
+    # Step 2: Import MLflow data if available and not already imported
+    try:
+        from scripts.import_mlruns_to_monitoring import ensure_mlruns_imported
+        
+        logger.info("Checking for MLflow data to import...")
+        mlruns_path = os.environ.get("MLFLOW_RUNS_PATH", "mlruns")
+        success = ensure_mlruns_imported(mlruns_path=mlruns_path, silent=True)
+        
+        if success:
+            logger.info("MLflow data check complete")
+        else:
+            logger.warning("Could not import MLflow data")
+    except ImportError as e:
+        logger.debug(f"Could not import mlruns importer: {e}")
+    except Exception as e:
+        logger.warning(f"Error during MLflow import: {e}")
+    
+    yield
+
+
+app = FastAPI(title="Goodreads Recommendation API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
