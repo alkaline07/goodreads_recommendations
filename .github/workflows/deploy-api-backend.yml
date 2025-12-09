@@ -8,6 +8,8 @@ on:
       - 'api/**'
       - 'terraform/**'
       - 'Dockerfile.backend'
+      - 'datapipeline/scripts/logger_setup.py'
+
       
   workflow_dispatch:
 
