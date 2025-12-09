@@ -1,15 +1,16 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+
 ENV PYTHONUNBUFFERED=1
 
 RUN pip install --no-cache-dir streamlit requests pandas
 
 COPY pages/app ./pages/app
 COPY pages/data/books_database.json ./data/books_database.json
-COPY datapipeline ./datapipeline
-RUN touch /app/datapipeline/__init__.py && \
-    touch /app/datapipeline/scripts/__init__.py
+COPY datapipeline/scripts/logger_setup.py ./datapipeline/scripts/logger_setup.py
+COPY datapipeline/scripts/__init__.py ./datapipeline/scripts/__init__.py
+COPY datapipeline/scripts/__init__.py ./datapipeline/scripts/__init__.py
+
 ENV PORT=8501
 EXPOSE 8501
 
