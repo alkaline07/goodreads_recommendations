@@ -2,11 +2,11 @@ WITH
   -- 0. Get Books Already Read by User
   read_books AS (
     SELECT DISTINCT
-      user_id_clean,
+      user_id,
       CAST(book_id AS STRING) AS book_id
-    FROM `{project_id}.{dataset}.goodreads_features`
+    FROM `{project_id}.{dataset}.goodreads_interactions_mystery_thriller_crime`
     WHERE is_read = TRUE
-        AND user_id_clean = @user_id
+        AND user_id = @user_id
   ),
   -- 1. Generate Raw Recommendations from ML Model
   raw_recommendations AS (
@@ -27,7 +27,7 @@ WITH
       NOT EXISTS(
         SELECT 1
         FROM `read_books` AS rb
-        WHERE rb.user_id_clean = r.user_id_clean AND rb.book_id = r.book_id
+        WHERE rb.user_id = r.user_id_clean AND rb.book_id = r.book_id
       )
   ),
   -- 3. Fetch Titles and Aggregate Authors for recommended books

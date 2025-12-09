@@ -66,11 +66,11 @@ book_author_names AS (
  
 read_books AS (
   SELECT DISTINCT
-    user_id_clean,
+    user_id,
     book_id
-  FROM `{project_id}.{dataset}.goodreads_features`
+  FROM `{project_id}.{dataset}.goodreads_interactions_mystery_thriller_crime`
   WHERE is_read = TRUE
-    AND user_id_clean = @user_id 
+    AND user_id = @user_id 
 ),
  
 unread_pairs AS (
@@ -82,7 +82,7 @@ unread_pairs AS (
   WHERE NOT EXISTS (
     SELECT 1
     FROM read_books r
-    WHERE r.user_id_clean = u.user_id_clean
+    WHERE r.user_id = u.user_id_clean
       AND r.book_id = b.book_id
   )
 ),
