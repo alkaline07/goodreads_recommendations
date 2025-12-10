@@ -676,6 +676,21 @@ DASHBOARD_HTML = """
         </div>
         
         <h2 class="section-title">API Performance</h2>
+        <div style="text-align: right; margin-bottom: 15px;">
+        <a href="http://34.60.167.248:5601/app/management/data/index_management/indices"
+       target="_blank"
+       style="
+           background:#0F6DB5;
+           color:white;
+           padding:8px 16px;
+           border-radius:5px;
+           text-decoration:none;
+           font-weight:600;
+       ">
+        View Kibana Logs
+        </a>
+    </div>
+
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="label">Total Requests</div>
