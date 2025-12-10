@@ -863,7 +863,12 @@ if st.session_state.view_mode == 'user_selection':
                     if admin_username == "admin" and admin_password == "admin":
                         st.success("Login successful! Redirecting to monitoring dashboard...")
                         admin_url = f"{API_BASE_URL}/report"
-                        st.markdown(f'<meta http-equiv="refresh" content="1;url={admin_url}" />', unsafe_allow_html=True)
+                        # st.markdown(f'<meta http-equiv="refresh" content="1;url={admin_url}" />', unsafe_allow_html=True)
+                        components.html(f"""
+                            <script>
+                                window.open("{admin_url}", "_blank");
+                            </script>
+                        """, height=0)
                         st.markdown(f"[Click here if not redirected]({admin_url})")
                     else:
                         st.error("Invalid credentials!")
