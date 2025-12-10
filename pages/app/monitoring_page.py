@@ -29,21 +29,25 @@ st.markdown("Quick monitoring overview - [Full Dashboard →]({}/report)".format
 tab1, tab2, tab3 = st.tabs(["API Performance", "Model Metrics", "Data Drift"])
 
 with tab1:
+
     Kibana_url = "http://34.60.167.248:5601/app/management/data/index_management/indices"
+
     col_h1, col_h2 = st.columns([6, 1])
 
     with col_h1:
-        st.header("API Performance Metrics")
+        st.subheader("API Performance Metrics")
 
     with col_h2:
         st.markdown(
             f"""
             <a href="{Kibana_url}" target="_blank" style="
+                display:inline-block;
+                padding:8px 16px;
                 background-color:#0F6DB5;
                 color:white;
-                padding:8px 16px;
                 border-radius:5px;
                 text-decoration:none;
+                text-align:center;
                 font-weight:600;
             ">
                 View Kibana Logs
@@ -51,7 +55,7 @@ with tab1:
             """,
             unsafe_allow_html=True
         )
-    
+
     try:
         response = requests.get(f"{API_BASE_URL}/metrics", timeout=10)
         if response.status_code == 200:
