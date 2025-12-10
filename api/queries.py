@@ -245,12 +245,13 @@ def insert_read_interaction(user_id: str, book_id: int, rating: int = None):
         date_updated = S.now_ts,
         read_at = S.now_ts,
         date_added = S.now_ts,
-        is_read = TRUE
+        is_read = TRUE,
+        interaction_type = 'read'
         
     -- If the record does NOT exist, INSERT it
     WHEN NOT MATCHED THEN
-      INSERT (user_id, book_id, review_id, date_added, date_updated, read_at, started_at, review_text_incomplete, rating, is_read)
-      VALUES (S.user_id, S.book_id, NULL, S.now_ts, S.now_ts, S.now_ts, '', '', S.rating, TRUE)
+      INSERT (user_id, book_id, review_id, date_added, date_updated, read_at, started_at, review_text_incomplete, rating, is_read, interaction_type)
+      VALUES (S.user_id, S.book_id, NULL, S.now_ts, S.now_ts, S.now_ts, '', '', S.rating, TRUE, 'read')
     """
 
     try:
