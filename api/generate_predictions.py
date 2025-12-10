@@ -129,6 +129,7 @@ class GeneratePredictions:
             return None
     
     def get_bq_model_id_by_version(self, display_name, version_id):
+        print(f"Retrieving BigQuery model ID for {display_name} version {version_id}")
         model_resource_name = f"projects/{self.project_id}/locations/{self.location}/models/{display_name}@{version_id}"
         model_version = aiplatform.Model(model_resource_name)
         model_dict = model_version.to_dict()
@@ -149,13 +150,12 @@ class GeneratePredictions:
         return bq_model_id
 
     def get_model_from_registry(self, display_name: str) -> Optional[str]:
-        if "boosted_tree" in display_name:
-            return f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
-        elif "matrix_factorization" in display_name:
-            return f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
-        else:
-            logger.warning("Model type not recognized", display_name=display_name)
+        version_id = self.get_version(display_name)
+        if not version_id:
+            logger.error("No version found for model", display_name=display_name)
             return None
+        bq_model_id = self.get_bq_model_id_by_version(display_name, version_id)
+        return bq_model_id
     
     def get_predictions(self, user_id):
         """
@@ -166,7 +166,7 @@ class GeneratePredictions:
             raise ValueError("No model selected for predictions.")
         
         model_name = model_info['display_name']
-        # model_name = "matrix_factorization" # Uncomment to force MF model for testing
+        # model_name = "goodreads_matrix_factorization" # Uncomment to force MF model for testing
 
         bq_model_id = self.get_model_from_registry(model_name)
 

@@ -66,6 +66,10 @@ class ETLInteractions:
             self.client.update_table(table, ["schema"])
             self.backfill_rows()  # Backfill existing rows after adding column
 
+        if not self.client.get_table(self.full_source_table_id):
+            self.logger.info(f"Source table {self.full_source_table_id} does not exist. Exiting migration.")
+            return
+
         # 2. The Migration Query
         # We populate the mandatory legacy fields with defaults, and put the real value in 'interaction_type'
         migration_query = f"""

@@ -863,7 +863,12 @@ if st.session_state.view_mode == 'user_selection':
                     if admin_username == "admin" and admin_password == "admin":
                         st.success("Login successful! Redirecting to monitoring dashboard...")
                         admin_url = f"{API_BASE_URL}/report"
-                        st.markdown(f'<meta http-equiv="refresh" content="1;url={admin_url}" />', unsafe_allow_html=True)
+                        # st.markdown(f'<meta http-equiv="refresh" content="1;url={admin_url}" />', unsafe_allow_html=True)
+                        components.html(f"""
+                            <script>
+                                window.open("{admin_url}", "_blank");
+                            </script>
+                        """, height=0)
                         st.markdown(f"[Click here if not redirected]({admin_url})")
                     else:
                         st.error("Invalid credentials!")
@@ -908,9 +913,9 @@ if st.session_state.view_mode == 'user_selection':
     st.markdown("### Try Sample Users")
     
     quick_users = {
-        "User-4b1af": {"id": "4b1af908229844ec02bc4b40aa6ea4dd"},
-        "User-2faa2": {"id": "2faa2ef7e9062a7339ed1e4299c7ecaf"},
-        "User-4597b": {"id": "4597ba0bb52054eae1e87534c78b13b8"}
+        "Prad Bitt": {"id": "4b1af908229844ec02bc4b40aa6ea4dd"},
+        "Dark Mamon": {"id": "2faa2ef7e9062a7339ed1e4299c7ecaf"},
+        "Com Truise": {"id": "4597ba0bb52054eae1e87534c78b13b8"}
     }
     
     cols = st.columns(3)
