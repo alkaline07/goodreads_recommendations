@@ -112,29 +112,21 @@ class TestGeneratePredictions:
 
     def test_get_model_from_registry_boosted_tree(self, generator):
         """Test get_model_from_registry for boosted tree"""
-        with patch.object(generator, 'get_version', return_value='v1') as mock_version, \
-             patch.object(generator, 'get_bq_model_id_by_version', return_value='test-project.books.boosted_tree_regressor_model') as mock_bq_id:
-            
-            result = generator.get_model_from_registry("boosted_tree_regressor_model")
-            
-            assert result == "test-project.books.boosted_tree_regressor_model"
-            mock_version.assert_called_once_with("boosted_tree_regressor_model")
-            mock_bq_id.assert_called_once_with("boosted_tree_regressor_model", "v1")
+        result = generator.get_model_from_registry("boosted_tree_regressor_model")
+        
+        assert result == "test-project.books.boosted_tree_regressor_model"
 
     def test_get_model_from_registry_matrix_factorization(self, generator):
         """Test get_model_from_registry for matrix factorization"""
-        with patch.object(generator, 'get_version', return_value='v1') as mock_version, \
-             patch.object(generator, 'get_bq_model_id_by_version', return_value='test-project.books.matrix_factorization_model') as mock_bq_id:
-            
-            result = generator.get_model_from_registry("matrix_factorization_model")
-            
-            assert result == "test-project.books.matrix_factorization_model"
+        result = generator.get_model_from_registry("matrix_factorization_model")
+        
+        assert result == "test-project.books.matrix_factorization_model"
 
     def test_get_model_from_registry_invalid(self, generator):
         """Test get_model_from_registry with invalid model type"""
-        with patch.object(generator, 'get_version', return_value=None):
-            result = generator.get_model_from_registry("unknown_model_type")
-            assert result is None
+        result = generator.get_model_from_registry("unknown_model_type")
+        
+        assert result is None
 
     def test_get_mf_predictions_success(self, generator):
         """Test get_mf_predictions returns expected dataframe"""
@@ -195,15 +187,13 @@ class TestGeneratePredictions:
         with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
-            # FIX: Mock get_model_from_registry to avoid complex internal calls
-            with patch.object(generator, 'get_model_from_registry', return_value='mf_model_id'):
-                with patch.object(generator, 'get_mf_predictions') as mock_mf:
-                    mock_mf.return_value = mock_df
-                    
-                    result = generator.get_predictions("user_123")
-                    
-                    assert len(result) == 3
-                    mock_mf.assert_called_once()
+            with patch.object(generator, 'get_mf_predictions') as mock_mf:
+                mock_mf.return_value = mock_df
+                
+                result = generator.get_predictions("user_123")
+                
+                assert len(result) == 3
+                mock_mf.assert_called_once()
 
     def test_get_predictions_boosted_tree(self, generator):
         """Test get_predictions with boosted tree model"""
@@ -218,14 +208,13 @@ class TestGeneratePredictions:
         with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
-            with patch.object(generator, 'get_model_from_registry', return_value='bt_model_id'):
-                with patch.object(generator, 'get_bt_predictions') as mock_bt:
-                    mock_bt.return_value = mock_df
-                    
-                    result = generator.get_predictions("user_123")
-                    
-                    assert len(result) == 3
-                    mock_bt.assert_called_once()
+            with patch.object(generator, 'get_bt_predictions') as mock_bt:
+                mock_bt.return_value = mock_df
+                
+                result = generator.get_predictions("user_123")
+                
+                assert len(result) == 3
+                mock_bt.assert_called_once()
 
     def test_get_predictions_no_model_selected(self, generator):
         """Test get_predictions raises error when no model is selected"""
@@ -242,9 +231,8 @@ class TestGeneratePredictions:
         with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
             mock_get_model.return_value = mock_model_info
             
-            with patch.object(generator, 'get_model_from_registry', return_value=None):
-                with pytest.raises(ValueError, match="Could not retrieve"):
-                    generator.get_predictions("user_123")
+            with pytest.raises(ValueError, match="Could not retrieve"):
+                generator.get_predictions("user_123")
 
 
 class TestGeneratePredictionsIntegration:
@@ -268,39 +256,18 @@ class TestGeneratePredictionsIntegration:
             'author_names': ['Author 1', 'Author 2']
         })
         
-        mock_version = Mock()
-        mock_version.version_aliases = ['default']
-        mock_version.version_id = 'v1'
-        
-        mock_parent_model = Mock()
-        mock_parent_model.resource_name = "projects/test/locations/us-central1/models/123" 
-        mock_parent_model.versioning_registry.list_versions.return_value = [mock_version]
-
-        with patch('api.generate_predictions.aiplatform') as mock_ai:
-            mock_ai.Model.list.return_value = [mock_parent_model]
+        with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
+            mock_get_model.return_value = mock_model_info
             
-            # Mock the Model constructor used in get_bq_model_id_by_version
-            mock_version_model = Mock()
-            mock_version_model.to_dict.return_value = {'versionCreateTime': '2025-01-01T12:00:00Z'}
-            mock_ai.Model.return_value = mock_version_model
-
-            with patch.object(GeneratePredictions, 'get_selected_model_info') as mock_get_model:
-                mock_get_model.return_value = mock_model_info
+            with patch.object(generator, 'get_mf_predictions') as mock_mf:
+                mock_mf.return_value = mock_df
                 
-                # Mock BigQuery Query Job
-                mock_query_job = Mock()
-                mock_query_job.to_dataframe.return_value = mock_df
-                generator.client.query.return_value = mock_query_job
+                result = generator.get_predictions("user_123")
                 
-                with patch('builtins.open', create=True) as mock_open:
-                    mock_open.return_value.__enter__.return_value.read.return_value = "SELECT * FROM ..."
-                    
-                    result = generator.get_predictions("user_123")
-                    
-                    # Verify result structure and content
-                    assert isinstance(result, pd.DataFrame)
-                    assert len(result) == 2
-                    assert all(col in result.columns for col in ['book_id', 'title', 'rating', 'author_names'])
+                # Verify result structure and content
+                assert isinstance(result, pd.DataFrame)
+                assert len(result) == 2
+                assert all(col in result.columns for col in ['book_id', 'title', 'rating', 'author_names'])
 
 
 if __name__ == "__main__":
