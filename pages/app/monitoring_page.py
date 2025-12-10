@@ -13,22 +13,41 @@ import requests
 import pandas as pd
 from datetime import datetime
 import os
+import streamlit.components.v1 as components
 
 API_BASE_URL = os.environ.get("API_BASE_URL", "https://recommendation-service-491512947755.us-central1.run.app")
 
 st.set_page_config(
     page_title="ML Monitoring",
-    page_icon="📊",
+    page_icon="",
     layout="wide"
 )
 
-st.title("📊 ML Model & API Monitoring")
+st.title("ML Model & API Monitoring")
 st.markdown("Quick monitoring overview - [Full Dashboard →]({}/report)".format(API_BASE_URL))
 
-tab1, tab2, tab3 = st.tabs(["📈 API Performance", "🤖 Model Metrics", "🔍 Data Drift"])
+tab1, tab2, tab3 = st.tabs(["API Performance", "Model Metrics", "Data Drift"])
 
 with tab1:
-    st.header("API Performance Metrics")
+    Kibana_url = "http://34.60.167.248:5601/app/management/data/index_management/indices"
+    col_h1, col_h2 = st.columns([6, 1])
+
+    with col_h1:
+        st.header("API Performance Metrics")
+
+    with col_h2:
+        st.write("")
+        st.write("")
+        st.button("View Kibana Logs", key="kibana_btn")
+
+        # If button clicked → open Kibana
+        if st.session_state.get("kibana_btn"):
+
+         components.html(f"""
+                                    <script>
+                                        window.open("{Kibana_url}", "_blank");
+                                    </script>
+                                """, height=0)
     
     try:
         response = requests.get(f"{API_BASE_URL}/metrics", timeout=10)
@@ -127,11 +146,11 @@ st.markdown("---")
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("🔄 Refresh Metrics", type="primary", use_container_width=True):
+    if st.button("Refresh Metrics", type="primary", use_container_width=True):
         st.rerun()
 
 with col2:
-    if st.button("📊 Open Full Dashboard", use_container_width=True):
+    if st.button("Open Full Dashboard", use_container_width=True):
         st.markdown(f'<meta http-equiv="refresh" content="0;url={API_BASE_URL}/report" />', 
                     unsafe_allow_html=True)
         st.markdown(f"[Click here to open monitoring dashboard]({API_BASE_URL}/report)")
