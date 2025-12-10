@@ -185,6 +185,7 @@ predictions AS (
         user_avg_rating_vs_book,
         user_reading_speed_ratio,
         user_pages_per_day_this_book,
+        3 as interaction_weight,
         user_id_clean,
         book_id
       FROM unread_features
