@@ -1,5 +1,6 @@
 import os
 from google.cloud import bigquery, aiplatform
+from google.api_core.exceptions import NotFound
 from typing import Optional, Dict
 import datetime
 import argparse
@@ -127,9 +128,21 @@ class GeneratePredictions:
         except Exception as e:
             logger.error("Error retrieving model version", error=str(e))
             return None
-    
+
     def get_bq_model_id_by_version(self, display_name, version_id):
         print(f"Retrieving BigQuery model ID for {display_name} version {version_id}")
+        
+        dataset_ref = self.client.dataset(self.dataset_id)
+
+        # 1. Determine Model Name Prefix based on display name
+        if "boosted_tree" in display_name:
+            prefix = "boosted_tree_regressor_model_"
+        elif "matrix_factorization" in display_name:
+            prefix = "matrix_factorization_model_"
+        else:
+            raise ValueError(f"Model type for {display_name} not recognized.")
+
+        # 2. Try to construct the specific ID using the Vertex timestamp
         model_resource_name = f"projects/{self.project_id}/locations/{self.location}/models/{display_name}@{version_id}"
         model_version = aiplatform.Model(model_resource_name)
         model_dict = model_version.to_dict()
@@ -139,15 +152,36 @@ class GeneratePredictions:
         # Convert to datetime and format as YYYYMMDD_HHMMSS
         create_datetime = datetime.datetime.fromisoformat(version_create_time.replace('Z', '+00:00'))
         timestamp_str = create_datetime.strftime("%Y%m%d_%H%M%S")
+        
+        specific_model_id = f"{prefix}{timestamp_str}"
+        
+        # 3. Check if this specific model exists
+        try:
+            model_ref = dataset_ref.model(specific_model_id)
+            self.client.get_model(model_ref) # This triggers the API call
+            print(f"Success: Found exact match {specific_model_id}")
+            return specific_model_id
+            
+        except NotFound:
+            print(f"Model {specific_model_id} not found (likely due to timestamp drift).")
+            print("Falling back to the latest available model...")
 
-        if "boosted_tree" in display_name:
-            bq_model_id = f"boosted_tree_regressor_model_{timestamp_str}"
-        elif "matrix_factorization" in display_name:
-            bq_model_id = f"matrix_factorization_model_{timestamp_str}"
-        else:
-            raise ValueError(f"Model type for {display_name} not recognized.")
+            # 4. Fallback: List all models and find the latest one matching the prefix
+            models = list(self.client.list_models(dataset_ref))
+            
+            # Filter for models that belong to this group
+            relevant_models = [m for m in models if m.model_id.startswith(prefix)]
+            
+            if not relevant_models:
+                raise ValueError(f"No models found in dataset {self.dataset_id} starting with {prefix}")
 
-        return bq_model_id
+            # Sort by creation time (descending) to get the newest
+            relevant_models.sort(key=lambda x: x.model_id, reverse=True)
+            
+            latest_model_id = relevant_models[0].model_id
+            print(f"Returning latest model: {latest_model_id}")
+            
+            return f"{self.dataset_id}.{latest_model_id}"
 
     def get_model_from_registry(self, display_name: str) -> Optional[str]:
         version_id = self.get_version(display_name)

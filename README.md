@@ -196,16 +196,6 @@ The system analyzes bias across multiple dimensions:
 
 #### Optimization
 - **Feature Sensitivity Analysis**: Identifies features with greatest impact using SHAP-based feature importance analysis
-  - Features Analysed:
-    - 1. book_popularity_normalized - Normalized popularity score 
-    - 2. num_genres - Number of genres associated with the book 
-    - 3. average_rating - Average rating of the book 
-    - 4. ratings_count - Total number of ratings 
-    - 5. num_pages - Book length in pages 
-    - 6. publication_year - Year the book was published 
-    - 7. book_era - Publication era category (categorical)
-    - 8. book_length_category - Book length category (Short/Medium/Long)
-    - 9. author_gender_group - Author gender grouping (categorical)
 - **Performance Trade-offs**: Visualizes accuracy vs computational cost
 - **Optimization Results**: Optimal parameter combinations documented
 
