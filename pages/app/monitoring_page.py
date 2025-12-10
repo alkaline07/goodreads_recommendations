@@ -36,18 +36,21 @@ with tab1:
         st.header("API Performance Metrics")
 
     with col_h2:
-        st.write("")
-        st.write("")
-        st.button("View Kibana Logs", key="kibana_btn")
-
-        # If button clicked → open Kibana
-        if st.session_state.get("kibana_btn"):
-
-         components.html(f"""
-                                    <script>
-                                        window.open("{Kibana_url}", "_blank");
-                                    </script>
-                                """, height=0)
+        st.markdown(
+            f"""
+            <a href="{Kibana_url}" target="_blank" style="
+                background-color:#0F6DB5;
+                color:white;
+                padding:8px 16px;
+                border-radius:5px;
+                text-decoration:none;
+                font-weight:600;
+            ">
+                View Kibana Logs
+            </a>
+            """,
+            unsafe_allow_html=True
+        )
     
     try:
         response = requests.get(f"{API_BASE_URL}/metrics", timeout=10)
