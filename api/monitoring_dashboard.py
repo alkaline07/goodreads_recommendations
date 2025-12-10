@@ -617,7 +617,31 @@ DASHBOARD_HTML = """
             margin-bottom: 20px;
             color: #fff;
         }
-        
+        .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 16px;
+    }
+    
+    .section-header .section-title {
+        margin-bottom: 0;
+    }
+    
+    .kibana-button {
+        background: #0F6DB5;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .kibana-button:hover {
+        opacity: 0.9;
+    }
+
         .alert-banner {
             background: rgba(248, 113, 113, 0.1);
             border: 1px solid rgba(248, 113, 113, 0.3);
@@ -675,21 +699,15 @@ DASHBOARD_HTML = """
             </div>
         </div>
         
-        <h2 class="section-title">API Performance</h2>
-        <div style="text-align: right; margin-bottom: 15px;">
-        <a href="http://34.60.167.248:5601/app/management/data/index_management/indices"
-       target="_blank"
-       style="
-           background:#0F6DB5;
-           color:white;
-           padding:8px 16px;
-           border-radius:5px;
-           text-decoration:none;
-           font-weight:600;
-       ">
-        View Kibana Logs
-        </a>
-    </div>
+        <div class="section-header">
+            <h2 class="section-title">API Performance</h2>
+            <a href="http://34.60.167.248:5601/app/management/data/index_management/indices"
+               target="_blank"
+               class="kibana-button">
+                View Kibana Logs
+            </a>
+        </div>
+
 
         <div class="metrics-grid">
             <div class="metric-card">
