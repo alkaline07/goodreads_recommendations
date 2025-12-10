@@ -130,7 +130,7 @@ class GeneratePredictions:
             return None
 
     def get_bq_model_id_by_version(self, display_name, version_id):
-        print(f"Retrieving BigQuery model ID for {display_name} version {version_id}")
+        logger.info(f"Retrieving BigQuery model ID for {display_name} version {version_id}")
         
         dataset_ref = self.client.dataset(self.dataset_id)
 
@@ -159,12 +159,12 @@ class GeneratePredictions:
         try:
             model_ref = dataset_ref.model(specific_model_id)
             self.client.get_model(model_ref) # This triggers the API call
-            print(f"Success: Found exact match {specific_model_id}")
+            logger.info(f"Success: Found exact match {specific_model_id}")
             return specific_model_id
             
         except NotFound:
-            print(f"Model {specific_model_id} not found (likely due to timestamp drift).")
-            print("Falling back to the latest available model...")
+            logger.info(f"Model {specific_model_id} not found (likely due to timestamp drift).")
+            logger.info("Falling back to the latest available model...")
 
             # 4. Fallback: List all models and find the latest one matching the prefix
             models = list(self.client.list_models(dataset_ref))
@@ -179,9 +179,9 @@ class GeneratePredictions:
             relevant_models.sort(key=lambda x: x.model_id, reverse=True)
             
             latest_model_id = relevant_models[0].model_id
-            print(f"Returning latest model: {latest_model_id}")
+            logger.info(f"Returning latest model: {latest_model_id}")
             
-            return f"{self.dataset_id}.{latest_model_id}"
+            return f"{self.project_id}.{self.dataset_id}.{latest_model_id}"
 
     def get_model_from_registry(self, display_name: str) -> Optional[str]:
         version_id = self.get_version(display_name)
@@ -189,6 +189,15 @@ class GeneratePredictions:
             logger.error("No version found for model", display_name=display_name)
             return None
         bq_model_id = self.get_bq_model_id_by_version(display_name, version_id)
+        if not bq_model_id:
+            logger.info("Falling back to default model registry path")
+            if "matrix_factorization" in display_name:
+                bq_model_id = f"{self.project_id}.{self.dataset_id}.matrix_factorization_model"
+            elif "boosted_tree" in display_name:
+                bq_model_id = f"{self.project_id}.{self.dataset_id}.boosted_tree_regressor_model"
+            else:
+                logger.error("Model type for display name not recognized", display_name=display_name)
+                return None
         return bq_model_id
     
     def get_predictions(self, user_id):
