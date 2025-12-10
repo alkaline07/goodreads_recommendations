@@ -2,8 +2,9 @@ name: 9. Model Monitoring
 run-name: Run Model Monitoring & Drift Detection
 
 on:
+  workflow_dispatch:
   workflow_run:
-    workflows: ["8. Deploy Model"]
+    workflows: ["8. Deploy Model Endpoint"]
     types: [completed]
 
 jobs:
