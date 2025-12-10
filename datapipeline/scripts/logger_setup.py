@@ -20,6 +20,10 @@ import logging
 import json
 import os
 import sys
+import threading
+import queue
+import urllib.request
+import urllib.error
 from datetime import datetime
 from typing import Any, Optional
 
@@ -52,6 +56,73 @@ class PlainFormatter(logging.Formatter):
 
     def __init__(self):
         super().__init__('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+
+
+class ElasticsearchHandler(logging.Handler):
+    """Async handler that ships logs to Elasticsearch"""
+    
+    def __init__(self, host: str = None, index_prefix: str = "goodreads-logs"):
+        super().__init__()
+        self.host = host or os.environ.get("ELK_HOST", "http://34.60.167.248:9200")
+        self.index_prefix = index_prefix
+        self.log_queue = queue.Queue()
+        self._start_worker()
+    
+    def _start_worker(self):
+        """Start background thread to ship logs"""
+        worker = threading.Thread(target=self._ship_logs, daemon=True)
+        worker.start()
+    
+    def _ship_logs(self):
+        """Background worker that sends logs to Elasticsearch"""
+        while True:
+            try:
+                log_data = self.log_queue.get(timeout=5)
+                self._send_to_elasticsearch(log_data)
+            except queue.Empty:
+                continue
+            except Exception:
+                pass
+    
+    def _send_to_elasticsearch(self, log_data: dict):
+        """Send a single log entry to Elasticsearch"""
+        try:
+            index = f"{self.index_prefix}-{datetime.utcnow().strftime('%Y.%m.%d')}"
+            url = f"{self.host}/{index}/_doc"
+            
+            data = json.dumps(log_data).encode('utf-8')
+            req = urllib.request.Request(
+                url,
+                data=data,
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            urllib.request.urlopen(req, timeout=5)
+        except (urllib.error.URLError, Exception):
+            pass
+    
+    def emit(self, record: logging.LogRecord):
+        """Queue log record for async shipping"""
+        try:
+            log_data = {
+                "@timestamp": datetime.utcnow().isoformat() + "Z",
+                "level": record.levelname,
+                "logger": record.name,
+                "message": record.getMessage(),
+                "module": record.module,
+                "function": record.funcName,
+                "line": record.lineno,
+            }
+            
+            if record.exc_info:
+                log_data["exception"] = self.format(record)
+            
+            if hasattr(record, "extra_fields") and record.extra_fields:
+                log_data.update(record.extra_fields)
+            
+            self.log_queue.put_nowait(log_data)
+        except Exception:
+            pass
 
 
 class ELKLogger(logging.Logger):
@@ -130,6 +201,9 @@ def get_logger(name: str, use_json: bool = True) -> ELKLogger:
             json_handler = logging.StreamHandler(sys.stdout)
             json_handler.setFormatter(JSONFormatter())
             logger.addHandler(json_handler)
+        
+        elk_handler = ElasticsearchHandler()
+        logger.addHandler(elk_handler)
 
     logger.propagate = False
     _loggers[name] = logger

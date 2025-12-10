@@ -325,6 +325,7 @@ start → read_data_from_bigquery → log_bq_results → validate_data_quality
 - **Logging:** Comprehensive logging at each stage for debugging and monitoring
 - **Data Quality Gates:** Pipeline stops if critical data quality issues are detected
 - **BigQuery Integration:** Seamless integration with Google Cloud Platform for scalable data processing
+- **ELK Stack Integration (Optional):** Logs can be aggregated to Elasticsearch via Filebeat for centralized monitoring. See [ELK Setup](README_project_replication.md#step-11-elk-stack-setup-optional) for configuration details.
 
 ### Data Quality Validation Framework
 

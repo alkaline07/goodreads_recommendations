@@ -4,9 +4,9 @@ This project builds a machine learning-based book recommendation system using Go
 
 ## Table of Contents
 - [Team Members](#team-members)
-- [Phase 1. Data Pipeline](#data-pipeline)
-- [Phase 2. Model Development](#model-development)
-- [Phase 3. Model Deployment](#model-deployment)
+- [Phase 1. Data Pipeline](#phase-1-data-pipeline)
+- [Phase 2. Model Development](#phase-2-model-development)
+- [Phase 3. Model Deployment](#phase-3-model-deployment)
 - [Project Frontend](#project-frontend)
 - [Project Recreation](#project-recreation)
 
@@ -24,7 +24,6 @@ This project builds a machine learning-based book recommendation system using Go
 ### Overview
 
 The data pipeline leverages **Apache Airflow** with **Google Cloud Platform (GCP)** to process Goodreads book ratings data from the mystery/thriller/crime genre subset. The pipeline transforms raw data into ML-ready features through automated processing stages.
-![architecture.jpg](assets/architecture.jpg)
 ### Key Components
 
 #### Data Architecture
@@ -102,7 +101,7 @@ It uses GitHub Actions to automate the complete ML pipeline from data loading to
          │
          ▼
 ┌─────────────────┐
-│  1. Load Data   │ (Manual Trigger)
+│  1. Load Data   │ (Auto: After Airflow Pipeline OR Manual)
 └────────┬────────┘
          │
          ▼
@@ -261,9 +260,9 @@ The project implements **cloud-based deployment** on **Google Cloud Platform (GC
 - **Service Accounts**: Dedicated Cloud Run service account for secure API access
 - **Environment Management**: Supports dev/staging/prod environments
 
-## CTR (Click Through Rate) System
+### CTR (Click Through Rate) System
 
-### Overview
+#### Overview
 The CTR system measures how users interact with the recommendations they receive.
 It tracks every view, click, and engagement event that occurs on the frontend and stores these as structured interaction logs.
 These logs are then used to:
@@ -274,7 +273,7 @@ These logs are then used to:
 
 CTR is one of the most direct indicators of how well your recommendation model is performing in real-world usage.
 
-### CTR Data Schema
+#### CTR Data Schema
 
 **Table**: `books.user_interactions`
 
@@ -287,7 +286,7 @@ CTR is one of the most direct indicators of how well your recommendation model i
 | `event_type` | STRING | `view`, `click`, `like`, `add_to_list` |
 | `event_timestamp` | TIMESTAMP | Partitioned timestamp |
 
-### How it works
+#### How it works
 **1. User Interactions Are Logged**
 - Whenever a user sees or interacts with a recommendation on the frontend, an event is generated automatically.
 - These include:
@@ -337,7 +336,7 @@ CTR is one of the most direct indicators of how well your recommendation model i
   - Model Manager decides whether to promote the new version
 - This creates a self-correcting feedback loop that keeps the recommendation engine fresh and relevant.
 
-### CTR Calculation
+#### CTR Calculation
 
 ```sql
 -- 24-hour CTR calculation
@@ -349,7 +348,7 @@ FROM `project.books.user_interactions`
 WHERE event_timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
 ```
 
-### CTR Monitoring Workflow
+#### CTR Monitoring Workflow
 
 **Workflow**: `9_model_monitoring.yml`
 1. Monitor: Continuously compute CTR over the most recent 24 hours 
@@ -375,23 +374,23 @@ jobs:
           "
 ```
 
-### CTR Thresholds & Alerts
+#### CTR Thresholds & Alerts
 
 - **Decay Threshold**: CTR < 20% triggers model decay alerts (defined in `src/monitor_decay.py`)
 - **Alert Channels**: Email notifications to ML team
 - **Recovery Action**: Automatic retraining pipeline initiation
 - **Reporting**: Daily CTR reports in monitoring dashboard
 
-### CTR-Driven Retraining
+#### CTR-Driven Retraining
 
 1. **Detection**: 24-hour rolling CTR calculation
 2. **Validation**: Multiple checks to avoid false positives
 3. **Trigger**: GitHub Actions workflow dispatch to retraining pipeline
 4. **Fallback**: Manual retraining approval for critical alerts
 
-## API Architecture
+### API Architecture
 
-### FastAPI Backend Overview
+#### FastAPI Backend Overview
 
 **Base URL**: `https://recommendation-service-{PROJECT_NUMBER}-{REGION}.run.app`
 
@@ -403,7 +402,7 @@ jobs:
 - **Caching**: Redis (optional, for high traffic)
 - **Monitoring**: Custom middleware with real-time metrics
 
-### Core API Endpoints
+#### Core API Endpoints
 
 #### 1. Recommendation Engine
 
@@ -505,7 +504,7 @@ GET /metrics                   # Real-time API metrics
 GET /metrics/timeline          # Request timeline data
 ```
 
-### API Performance Monitoring
+#### API Performance Monitoring
 
 **Middleware Integration** (`api/middleware.py`):
 - **Response Times**: P50, P95, P99 percentiles tracked per endpoint
@@ -536,7 +535,7 @@ collector = get_metrics_collector()
 
 **Dashboard Integration**: Real-time metrics displayed in admin dashboard at `/report` with automatic alerting for performance degradation.
 
-### API Data Models (`api/data_models.py`)
+#### API Data Models (`api/data_models.py`)
 
 **Request Models**:
 ```python
@@ -576,7 +575,7 @@ class RecommendationResponse:
     recommendations: List[BookRecommendation]
 ```
 
-### API Security & Authentication
+#### API Security & Authentication
 
 - **CORS**: Configured for Streamlit frontend access (`allow_origins=["*"]`)
 - **Rate Limiting**: Implemented via Cloud Run concurrency controls (80 req/instance)
@@ -584,8 +583,7 @@ class RecommendationResponse:
 - **BigQuery IAM**: Service account with read-only access to model tables
 - **Environment Variables**: GCP project, dataset, and model names via env vars
 
-## Frontend Application (Streamlit)
-
+## Project Frontend 
 ### Overview
 
 **URL**: Served as static files via FastAPI `/app` endpoint
@@ -593,54 +591,6 @@ class RecommendationResponse:
 **Features**: Full book recommendation interface with rich user interactions
 **Performance**: Web Vitals monitoring integrated into user experience
 
-### Page Structure
-
-```python
-# Main Application Flow
-├── User Selection/Login
-│   ├── Input user ID
-│   ├── Quick-select sample users
-│   └── Admin access (credentials: admin/admin)
-│
-├── Recommendations Display
-│   ├── Top-10 personalized recommendations
-│   ├── Card-based UI with ratings and authors
-│   └── Click tracking for CTR monitoring
-│
-├── Book Details Modal
-│   ├── Google Books API integration
-│   ├── Rich metadata display
-│   ├── User interaction buttons
-│   └── Rating submission for marked-as-read
-│
-├── Search Functionality
-│   ├── Real-time book search
-│   ├── Local database with Google Books fallback
-│   ├── Read/ unread filtering
-│   └── Persistent search results
-│
-├── My Read Books
-│   └── Personal reading history with dates
-```
-
-#### Detailed Deployment Steps
-
-**Environment Setup**:
-1. Enable required GCP APIs (AI Platform, Cloud Run, Cloud Build, BigQuery)
-2. Configure service accounts with BigQuery access
-3. Set up Artifact Registry for Docker containers
-
-**Model Deployment**:
-1. Retrieve selected model from Vertex AI Model Registry
-2. Create/update endpoint with specified configuration
-3. Deploy model with traffic split and resource allocation
-4. Verify deployment health and accessibility
-
-**API Backend Deployment**:
-1. Build Docker container with FastAPI application
-2. Deploy to Cloud Run v2 service with autoscaling
-3. Configure domain mapping and health checks
-4. Enable public access for web client consumption
 
 #### Repository Integration & CI/CD
 
@@ -649,8 +599,10 @@ class RecommendationResponse:
 | Workflow | File | Purpose | Trigger |
 |----------|------|---------|---------|
 | Model Deployment | `8_model_deploy_endpoint.yml` | Deploy model to Vertex AI endpoint | Manual dispatch, after training |
-| Model Monitoring | `9_model_monitoring.yml` | Run drift detection and performance checks | Scheduled (cron), manual |
-| Decay Monitoring | `model_decay.yml` | CTR monitoring and retraining triggers | Scheduled daily |
+| Model Monitoring | `9_model_monitoring.yml` | Run drift detection and performance checks | Auto: After Model Deployment |
+| Decay Monitoring | `model_decay.yml` | CTR monitoring and retraining triggers | Scheduled daily (cron), auto-triggers retraining on decay |
+| Docker Model Build | `docker-model-build-push.yml` | Build ML Docker image and push to GHCR | Auto: Push to `src/**`, manual |
+| ELK Stack | `deploy_elk.yml` | Deploy ELK stack for log aggregation | Auto: Push to `terraform/elk.tf`, manual |
 | API Backend | `deploy-api-backend.yml` | Deploy FastAPI to Cloud Run | Push to main, manual |
 | Infrastructure | `terraform_infra.yml` | Provision GCP resources | Manual dispatch |
 
@@ -824,10 +776,64 @@ steps:
 
 For comprehensive documentation on all pipeline components, see [`README_data.md`](README_data.md) and [`README_model.md`](README_model.md).
 
+### ELK Stack (Log Aggregation)
+
+#### Overview
+
+The project includes a complete **ELK Stack** (Elasticsearch, Logstash, Kibana) deployment for centralized log aggregation and monitoring. This enables real-time visibility into application logs, API requests, and system events.
+
+#### Components
+
+| Component | Purpose | Port |
+|-----------|---------|------|
+| Elasticsearch | Log storage and search engine | 9200 |
+| Logstash | Log ingestion and processing | 5044 |
+| Kibana | Visualization dashboard | 5601 |
+| Filebeat | Log shipping from containers | - |
+
+#### Deployment Options
+
+**Option 1: Local Docker Compose**
+```bash
+docker compose -f docker-compose.elk.yaml up -d
+```
+
+**Option 2: GCP Compute Engine (via Terraform)**
+```bash
+# Deploy via GitHub Actions
+GitHub → Actions → "Deploy ELK Stack" → Run workflow
+
+# Or manually via Terraform
+cd terraform
+terraform apply -target=google_compute_instance.elk_stack
+```
+
+#### Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.elk.yaml` | Local ELK stack orchestration |
+| `elk/elasticsearch/elasticsearch.yml` | Elasticsearch configuration |
+| `elk/logstash/pipeline/logstash.conf` | Log parsing rules |
+| `elk/kibana/kibana.yml` | Kibana dashboard settings |
+| `elk/filebeat/filebeat.yml` | Log shipping configuration |
+| `terraform/elk.tf` | GCP infrastructure for ELK |
+
+#### Access URLs
+
+- **Kibana Dashboard**: `http://<ELK_IP>:5601`
+- **Elasticsearch API**: `http://<ELK_IP>:9200`
+
+#### Workflow
+
+The `deploy_elk.yml` workflow automatically deploys the ELK stack when:
+- Changes are pushed to `terraform/elk.tf`
+- Manually triggered via GitHub Actions
+
+![ELK](assets/elk_logs.png)
+
 ## Project Frontend
-
-For detailed guide of the project frontend , see **[`README_frontend.md`](README_frontend.md)**.
-
+For details about the Streamlit frontend, including setup, deployment, and validation steps, see **[`README_frontend.md`](README_frontend.md)**.
 
 ## Project Recreation
 

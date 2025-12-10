@@ -226,6 +226,265 @@ Metrics are automatically sent to `/frontend-metrics` endpoint.
 
 ---
 
+# Pages & Views
+
+The frontend application consists of six main views, each serving a specific purpose in the user journey.
+
+---
+
+## 1. Landing Page (User Selection)
+
+The entry point of the application featuring a modern hero section and multiple ways to get started.
+
+![Landing Page](assets/landing_page.png)
+
+**Key Components:**
+- **Hero Section**: Gradient banner with app title and value proposition
+- **User ID Input**: Text field for entering custom user IDs
+- **Quick Access Users**: Pre-configured sample users for demo purposes
+- **Features Showcase**: Four-column grid highlighting app capabilities
+- **Admin Access**: Lock icon button (🔐) in top-right for admin login
+
+**Sample Users Available:**
+
+| Display Name | User ID |
+|--------------|---------|
+| User-4b1af | `4b1af908229844ec02bc4b40aa6ea4dd` |
+| User-2faa2 | `2faa2ef7e9062a7339ed1e4299c7ecaf` |
+| User-4597b | `4597ba0bb52054eae1e87534c78b13b8` |
+
+---
+
+## 2. Recommendations Page
+
+Displays personalized book recommendations powered by the ML model.
+
+![Recommendations Page](assets/recommendations-page.png)
+
+**Key Components:**
+- **User Header**: Shows truncated user ID and recommendation count
+- **Book Cards Grid**: 2-column responsive layout of recommended books
+- **Each Card Displays**:
+  - Book title (2-line clamp)
+  - Author name
+  - Predicted rating badge (gradient pill)
+  - "View Details" button
+
+**Interaction Events Tracked:**
+- `view` - When recommendations load (automatic)
+- `click` - When user clicks "View Details"
+
+---
+
+## 3. My Read Books Page
+
+Shows the user's reading history with completion dates.
+
+![Read Books Page](assets/read-books.png)
+
+**Key Components:**
+- **Book Cards**: Similar layout to recommendations
+- **Read Indicator**: Green checkmark with read date
+- **Rating Display**: Shows the user's rating for each book
+- **View Details**: Access full book information
+
+**Data Source:** `/books-read/{user_id}` API endpoint
+
+---
+
+## 4. Search Page
+
+Enables users to search the entire book catalog.
+
+![Search Page](assets/search-page.png)
+
+**Key Components:**
+- **Search Form**: Text input with submit button
+- **Results List**: Up to 10 books displayed
+- **Read Status Indicator**: Shows "(Already Read)" for completed books
+- **Quick View Button**: Access book details directly from results
+
+**Search Behavior:**
+- Searches by title and author name
+- Case-insensitive matching
+- Returns up to 20 results (displays 10)
+- Real-time read status checking against user's history
+
+---
+
+## 5. Book Details Page
+
+Comprehensive view of a single book with rich metadata from Google Books API.
+
+![Book Details Page](assets/book_details.png)
+
+**Layout Structure:**
+
+| Left Column (25%) | Right Column (75%) |
+|-------------------|-------------------|
+| Book cover image | Title & Author |
+| Publication date | Rating & review count |
+| Page count | Category tags |
+| Language | |
+| Google Books link | |
+
+**Description Section:**
+- Full book description with styled container
+- Left border accent for visual hierarchy
+
+**Action Buttons (for unread books):**
+
+| Button | Icon | Event Type | Description |
+|--------|------|------------|-------------|
+| Like | ❤️ | `like` | Add to favorites |
+| Add to List | 📚 | `add_to_list` | Add to reading list |
+| Mark as Read | ✓ | `rating` | Opens rating modal |![image (23).png](..%2F..%2FDownloads%2Fimage%20%2823%29.png)
+
+---
+
+## 6. Rating Modal
+
+Inline modal that appears when marking a book as read.
+
+![Rating Modal](assets/rating_modal.png)
+
+**Components:**
+- **Star Slider**: 1-5 rating selection
+- **Visual Stars**: Dynamic star display (⭐/☆)
+- **Submit Button**: Confirms rating and marks as read
+- **Cancel Button**: Closes modal without action
+
+**API Call:** `POST /mark-read` with `{user_id, book_id, book_title, rating}`
+
+---
+
+## 7. Admin Login Modal
+
+Authentication modal for accessing the monitoring dashboard.
+
+
+**Default Credentials:**
+- Username: `admin`
+- Password: `admin`
+
+**On Success:** Redirects to `{API_BASE_URL}/report`
+
+---
+
+## 8. Monitoring Dashboard
+
+Admin-only dashboard for system metrics and performance monitoring.
+
+![Monitoring Metrics](assets/monitoring-1.png)
+
+**Metrics Available:**
+- API performance (latency, error rates)
+- Model performance indicators
+- Data drift detection status
+- Real-time request statistics
+
+**Access URL:** `{API_BASE_URL}/report`
+
+---
+
+## Navigation Sidebar
+
+Persistent sidebar available after user login.
+
+![Sidebar Navigation](assets/sidebar-navigation.png)
+
+**Navigation Items:**
+
+| Button | Action |
+|--------|--------|
+| Home | Return to recommendations |
+| My Read Books | View reading history |
+| Search Books | Open search page |
+| Logout | Clear session and return to landing |
+
+**Sidebar Features:**
+- Dark gradient background
+- Current user display (truncated ID)
+- Full-width buttons with hover effects
+
+---
+
+## Session State Variables
+
+The application maintains the following state across page navigation:
+
+| Variable | Type | Purpose                      |
+|----------|------|------------------------------|
+| `current_user` | `str` | Logged-in user ID            |
+| `view_mode` | `str` | Current page/view identifier |
+| `recommendations` | `List[Dict]` | Recommendations              |
+| `read_books` | `List[Dict]` | User's read books            |
+| `selected_book` | `Dict` | Book being viewed in detail  |
+| `search_results` | `List[Dict]` | Current search results       |
+| `show_rating_modal` | `bool` | Rating modal visibility      |
+| `rating_book_info` | `Dict` | Book being rated             |
+| `previous_view` | `str` | For back navigation          |
+| `session_id` | `str` | UUID for analytics tracking  |
+
+---
+
+                         ┌─────────────────┐
+                         │  Landing Page   │
+                         │(user_selection) │
+                         └────────┬────────┘
+                                  │
+                ┌─────────────────┴─────────────────┐
+                │                                   │
+                ▼                                   ▼
+       ┌─────────────────┐                ┌─────────────────┐
+       │   Admin Login   │                │   User Login    │
+       │      (🔐)       │                │  (Enter ID or   │
+       │                 │                │  Sample User)   │
+       └────────┬────────┘                └────────┬────────┘
+                │                                  │
+                ▼                                  ▼
+       ┌─────────────────┐                ┌─────────────────┐
+       │   Monitoring    │                │ Recommendations │
+       │   Dashboard     │                └────────┬────────┘
+       │   (/report)     │                         │
+       └─────────────────┘          ┌──────────────┼──────────────┐
+                                    │              │              │
+                                    ▼              ▼              ▼
+                            ┌────────────┐ ┌────────────┐ ┌────────────┐
+                            │   Search   │ │ Read Books │ │  Direct    │
+                            └─────┬──────┘ └─────┬──────┘ │  Click     │
+                                  │              │        └─────┬──────┘
+                                  │              │              │
+                                  │              ▼              │
+                                  │        ┌────────────┐       │
+                                  │        │   Book     │       │
+                                  │        │  Details   │       │
+                                  │        │(View Only) │       │
+                                  │        └────────────┘       │
+                                  │                             │
+                                  └──────────────┬──────────────┘
+                                                 │
+                                                 ▼
+                                          ┌────────────┐
+                                          │   Book     │
+                                          │  Details   │
+                                          │ (Actions)  │
+                                          └─────┬──────┘
+                                                │
+                                  ┌─────────────┼─────────────┐
+                                  │             │             │
+                                  ▼             ▼             ▼
+                            ┌──────────┐ ┌──────────┐ ┌──────────┐
+                            │   Like   │ │ Add to   │ │ Mark as  │
+                            │   (❤️)   │ │  List    │ │   Read   │
+                            └──────────┘ └──────────┘ └────┬─────┘
+                                                           │
+                                                           ▼
+                                                     ┌──────────┐
+                                                     │  Rating  │
+                                                     │  Modal   │
+                                                     └──────────┘
+
 ## API Integration
 
 ### Backend Endpoints
@@ -384,6 +643,16 @@ Access the monitoring dashboard at: `{API_BASE_URL}/report`
 ![Monitoring Metrics](assets/monitoring-2.png)
 
 ![Monitoring Metrics](assets/monitoring-3.png)
+
+### ELK Stack Integration (Optional)
+
+For centralized log aggregation and analysis, the project includes an ELK Stack (Elasticsearch, Logstash, Kibana) deployment. This provides:
+
+- **Kibana Dashboard**: Visual log exploration at `http://<ELK_IP>:5601`
+- **Centralized Logging**: All container logs (frontend, backend, Airflow) aggregated in Elasticsearch
+- **Log Search**: Full-text search across application logs
+
+**Setup**: See [ELK Setup Guide](README_project_replication.md#step-11-elk-stack-setup-optional) for deployment instructions.
 
 ---
 
