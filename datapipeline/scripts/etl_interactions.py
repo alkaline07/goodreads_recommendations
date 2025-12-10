@@ -1,6 +1,7 @@
 import os
 from google.cloud import bigquery
 from datapipeline.scripts.logger_setup import get_logger
+from google.api_core.exceptions import NotFound
 
 class ETLInteractions:
     def __init__(self):
@@ -66,7 +67,9 @@ class ETLInteractions:
             self.client.update_table(table, ["schema"])
             self.backfill_rows()  # Backfill existing rows after adding column
 
-        if not self.client.get_table(self.full_source_table_id):
+        try:
+            self.client.get_table(self.full_source_table_id)
+        except NotFound:
             self.logger.info(f"Source table {self.full_source_table_id} does not exist. Exiting migration.")
             return
 
