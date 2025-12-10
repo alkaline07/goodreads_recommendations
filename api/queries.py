@@ -20,6 +20,7 @@ def _get_client():
         logger.info("BigQuery client initialized", project=_project)
     return _client, _project
 
+
 # ---------------------------------------------------------------------
 # CHECK IF USER EXISTS IN PREDICTION TABLE
 # ---------------------------------------------------------------------
@@ -96,7 +97,7 @@ def log_ctr_event(user_id: str, book_id: int, event_type: str = "click", book_ti
     try:
         result = event_logger.log_user_event(
             user_id=user_id,
-            book_id=int(book_id),     # BigQuery table uses STRING
+            book_id=int(book_id),  # BigQuery table uses STRING
             event_type=event_type,
             book_title=book_title
         )
@@ -160,7 +161,6 @@ def get_books_read_by_user(user_id: str):
     return [dict(row) for row in job.result()]
 
 
-
 # ---------------------------------------------------------------------
 # GET BOOKS USER HAS NOT READ
 # ---------------------------------------------------------------------
@@ -204,6 +204,7 @@ def get_books_not_read_by_user(user_id: str):
     job = client.query(query)
     return [dict(row) for row in job.result()]
 
+
 # ---------------------------------------------------------------------
 # INSERT NEW BOOK INTO INTERACTIONS TABLE WHEN MARKED AS READ
 # ---------------------------------------------------------------------
@@ -216,12 +217,12 @@ def insert_read_interaction(user_id: str, book_id: int, rating: int = None):
         LIMIT 1
     """
     check_job = client.query(check_query)
-    
+
     # If total_rows is 0, the book doesn't exist. Stop here.
     if check_job.result().total_rows == 0:
         logger.error("Books ID not found in database", book_id=book_id)
         return False
-    
+
     table = f"{project}.{dataset}.goodreads_interactions_mystery_thriller_crime"
 
     now = datetime.utcnow().strftime("%a %b %d %H:%M:%S +0000 %Y")
@@ -237,7 +238,7 @@ def insert_read_interaction(user_id: str, book_id: int, rating: int = None):
         '{now}' as now_ts
     ) S
     ON T.user_id = S.user_id AND T.book_id = S.book_id
-    
+
     -- If the record exists, UPDATE it
     WHEN MATCHED THEN
       UPDATE SET 
@@ -247,7 +248,7 @@ def insert_read_interaction(user_id: str, book_id: int, rating: int = None):
         date_added = S.now_ts,
         is_read = TRUE,
         interaction_type = 'read'
-        
+
     -- If the record does NOT exist, INSERT it
     WHEN NOT MATCHED THEN
       INSERT (user_id, book_id, review_id, date_added, date_updated, read_at, started_at, review_text_incomplete, rating, is_read, interaction_type)
