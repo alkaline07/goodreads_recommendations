@@ -2,6 +2,8 @@
 
 This project builds a machine learning-based book recommendation system using Goodreads data, with an end-to-end MLOps-ready architecture that includes data processing, model training, recommendation logic, automated deployment, APIs for serving, Click-Through Rate calculation, and continuous monitoring.
 
+We have implemented Click Through Rate which makes our static data dynamic, where we monitor the click to view ratio per user for the recommendations provided to identify the model decay and data drift and then use this new data with the old to retrain the model.
+
 ## Table of Contents
 - [Team Members](#team-members)
 - [Phase 1. Data Pipeline](#phase-1-data-pipeline)
@@ -19,6 +21,10 @@ This project builds a machine learning-based book recommendation system using Go
 - Shivam Sah
 - Shivani Sharma
 
+## Demo
+
+[Demo Link](https://drive.google.com/drive/folders/1ShGyE2b47LKBQ6ERAAftbwLJdV6FyiUy)
+
 ## Phase 1. Data Pipeline
 
 ### Overview
@@ -27,13 +33,14 @@ The data pipeline leverages **Apache Airflow** with **Google Cloud Platform (GCP
 ### Key Components
 
 #### Data Architecture
-- **Source**: Books and interactions data from Goodbooks dataset
+- **Source**: Books, interactions and authors data from Goodbooks dataset
 - **Storage**: Google BigQuery for scalable data processing
-- **Orchestration**: Apache Airflow DAG (`goodreads_recommendation_pipeline`)
+- **Orchestration**: Apache Airflow DAG (`goodreads_ctr_data_pipeline`)
 - **Version Control**: DVC for data versioning with GCS integration
 
 #### Pipeline Tasks
 1. **Data Reading**: Extracts data from BigQuery source tables with validation
+2. **Data ETL**: Prepares the interaction data to accomodate CTR logic
 2. **Data Cleaning**: Removes duplicates, standardizes text, handles missing values
 3. **Feature Engineering**: Creates book-level, user-level, and interaction features
 4. **Data Normalization**: Applies Min-Max scaling for ML model consumption
@@ -54,22 +61,7 @@ The data pipeline leverages **Apache Airflow** with **Google Cloud Platform (GCP
 - **Feature Engineering**: Computes book popularity, user activity patterns, reading times
 - **Final Dataset**: Train/val/test splits ready for ML model training
 
-### Data Analysis and Insights
-- **Raw Data Analysis**: 
-  - Zero missing values across all columns
-  - 9,599 unique titles out of 10,000 books
-  - 235 unique average rating values
-  - 1,353 unique ratings count values
-  - 7,367 unique descriptions
-  
-- **Visualizations Generated:**
-  - Average rating distribution histogram with KDE curve
-  - Ratings count distribution (log scale)
-  - Description length distribution (word count)
-  - Missing values percentage per column
-  - Sample data saved to `../raw/goodreads_sample.csv`
-
-### Bias Analysis & Fairness Assessment [(`bias_analysis.ipynb`)](https://github.com/purva-agarwal/goodreads_recommendations/blob/master/datapipeline/data/notebooks/bias_analysis.ipynb)
+### Bias Analysis & Fairness Assessment on the data [(`bias_analysis.ipynb`)](https://github.com/purva-agarwal/goodreads_recommendations/blob/master/datapipeline/data/notebooks/bias_analysis.ipynb)
 - **Analysis Dimensions:**
   - 1. **Popularity Bias** - High/Medium/Low popularity groups (based on book_popularity_normalized)
   - 2. **Book Length Bias** - Categories based on book_length_category
@@ -77,15 +69,10 @@ The data pipeline leverages **Apache Airflow** with **Google Cloud Platform (GCP
   - 4. **User Activity Bias** - High/Medium/Low activity user groups (based on user_activity_count)
   - 5. **Reading Pace Bias** - Fast/Medium/Slow reader categories (reading_pace_category)
   - 6. **Author Gender Bias** - Male/Female author groups (using gender_guesser library)
-
-- **Visualizations Generated:**
-  - Side-by-side bar charts comparing before/after ratings for each dimension
-  - Side-by-side bar charts showing % read behavior (unchanged)
-  - Equity index summary bar chart across all dimensions
-  - Detailed explanations for each dimension's bias patterns and mitigation effects
   
 ![db_tables_gcp.png](assets/db_tables_gcp.png)<div>
-![DAG_task_instances.jpeg](assets/DAG_task_instances.jpeg)
+![DAG_task_instances.jpeg](assets/DAG_task_instances.jpeg)<div>
+![gantt_chart.jpeg](assets/gantt_chart.jpeg)
 
 For more detailed data pipeline documentation, see [`README_data.md`](README_data.md)
 
@@ -124,20 +111,32 @@ It uses GitHub Actions to automate the complete ML pipeline from data loading to
          │
          ▼
 ┌──────────────────────┐
-│ 5. Bias Detection     │ (Auto: After Evaluation)
-│    & Mitigation       │
-└────────┬──────────────┘
+│ 5. Bias Detection    │ (Auto: After Evaluation)
+│    & Mitigation      │
+└────────┬─────────────┘
          │
          ▼
 ┌─────────────────┐
-│ 6. Model         │ (Auto: After Bias Pipeline)
+│ 6. Model        │ (Auto: After Bias Pipeline)
 │    Validation   │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
 │ 7. Model Manager│ (Auto: After Validation)
-└─────────────────┘
+└────────┬────────┘
+         │
+         ▼
+┌──────────────────────┐
+│   8. Deploy Model    │ (Auto: After Model Manager)
+│       Endpoint       │
+└────────┬─────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ 9. Model        │ (Auto: After Model Endpoint Deployment)
+│    Monitoring   │
+└────────-────────┘
 
 ┌─────────────────┐
 │ Send Email      │ (Called by all workflows)
@@ -146,11 +145,6 @@ It uses GitHub Actions to automate the complete ML pipeline from data loading to
 ```
 **GitHub Actions Workflow Screenshots:**
 
-![PR-worflow-iii.png](assets/PR-worflow-iii.png)
-![PR-worflow-iv.png](assets/PR-worflow-iv.png)
-![PR-worflows-V.png](assets/PR-worflows-V.png)
-![PR-worflows-VI.png](assets/PR-worflows-VI.png)
-![artifacts_bot_branches.png](assets/artifacts_bot_branches.png)
 
 
 ### Algorithm Selection
@@ -199,9 +193,6 @@ The system analyzes bias across multiple dimensions:
 - **Metrics Logging**: RMSE, MAE, R², SHAP feature importance
 - **Parameter Tracking**: Hyperparameters and training configurations
 - **Artifact Storage**: Evaluation reports, visualizations, model artifacts
-
-![mlflow_experiments.png](assets/mlflow_experiments.png)<div>
-![mlflow_runs.png](assets/mlflow_runs.png)
 
 #### Optimization
 - **Feature Sensitivity Analysis**: Identifies features with greatest impact using SHAP-based feature importance analysis
