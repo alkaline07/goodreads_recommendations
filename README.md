@@ -226,7 +226,7 @@ The project implements **cloud-based deployment** on **Google Cloud Platform (GC
 
 **1. Model Deployment Service**
 - **Service Used**: Vertex AI (Google Cloud Platform)
-- **Endpoint Details**: Automated endpoint creation with `goodreads-recommendation-endpoint` deployed on render for frontend and CloudRun for backend APIs
+- **Endpoint Details**: Automated endpoint creation with `goodreads-recommendation-endpoint` deployed on CloudRun for backend APIs, Streamlit frontend and a GCP compute VM for ELK stack
 - **Scaling**: Configurable instance counts (1-3 replicas)
 
 **2. Deployment Automation**
@@ -370,6 +370,8 @@ jobs:
 4. **Fallback**: Manual retraining approval for critical alerts
 
 ### API Architecture
+![api_endpoint.png](assets/api_endpoint.png)
+![api_endpoint2.png](assets/api_endpoint2.png)
 
 #### FastAPI Backend Overview
 
@@ -391,7 +393,7 @@ jobs:
 GET /load-recommendation?user_id={user_id}
 ```
 
-**Purpose**: Get personalized book recommendations
+**Purpose**: Get personalized book recommendations from ML model output based on user history for existing users and top 10 recommendation from universal ratings for new users
 - **New Users**: Returns global top-10 books
 - **Existing Users**: Queries Vertex AI endpoint for predictions
 - **Response**: JSON with `recommendations` array
