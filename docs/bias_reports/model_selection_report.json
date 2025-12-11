@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-12-10T04:17:04.974624",
+  "timestamp": "2025-12-11T07:07:31.343167",
   "selected_model": {
     "model_name": "boosted_tree_regressor",
     "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
-    "validation_mae": 0.45320364728577095,
-    "validation_rmse": 0.8309800866748857,
+    "validation_mae": 0.45311850802150666,
+    "validation_rmse": 0.83065308159963,
     "performance_score": 100.0,
     "fairness_score": 70,
     "bias_disparities": 2,
@@ -16,8 +16,8 @@
     {
       "model_name": "boosted_tree_regressor",
       "predictions_table": "recommendation-system-475301.books.boosted_tree_rating_predictions",
-      "validation_mae": 0.45320364728577095,
-      "validation_rmse": 0.8309800866748857,
+      "validation_mae": 0.45311850802150666,
+      "validation_rmse": 0.83065308159963,
       "performance_score": 100.0,
       "fairness_score": 70,
       "bias_disparities": 2,
@@ -28,8 +28,8 @@
     {
       "model_name": "matrix_factorization",
       "predictions_table": "recommendation-system-475301.books.matrix_factorization_rating_predictions",
-      "validation_mae": 1.7359348099873368,
-      "validation_rmse": 10.749300149434779,
+      "validation_mae": 1.7467377261430246,
+      "validation_rmse": 2.0396869574041383,
       "performance_score": 0.0,
       "fairness_score": 60,
       "bias_disparities": 3,
@@ -46,7 +46,7 @@
   },
   "trade_offs": {
     "best_performance_model": "boosted_tree_regressor",
-    "best_performance_mae": 0.45320364728577095,
+    "best_performance_mae": 0.45311850802150666,
     "best_fairness_model": "boosted_tree_regressor",
     "best_fairness_score": 70,
     "selected_model_is_best_performance": true,
