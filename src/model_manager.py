@@ -362,10 +362,7 @@ class ModelManager:
             # Add 'default' alias to the target version.
             # Vertex AI automatically transfers the alias from the old version -
             # you cannot explicitly remove the 'default' alias, only reassign it.
-            model_registry.add_version_aliases(
-                target_aliases=["default"],
-                version=version_id
-            )
+            model_registry.add_version_aliases(["default"], version_id)
 
             print(f"✓ Successfully set version {version_id} as default")
 
