@@ -341,7 +341,7 @@ class ModelManager:
             display_name: Display name of the model in Vertex AI
         """
         try:
-            # First, get the parent model to construct versioned resource names
+            # First, get the parent model to use with ModelRegistry
             models = aiplatform.Model.list(
                 filter=f'display_name="{display_name}"',
                 location=self.vertex_region
@@ -350,7 +350,9 @@ class ModelManager:
                 raise ValueError(f"No models found with display name: {display_name}")
             
             parent_model = models[0]
-            parent_resource_name = parent_model.resource_name
+            
+            # Use ModelRegistry for alias management
+            model_registry = aiplatform.models.ModelRegistry(model=parent_model)
 
             # Get all versions of the model
             all_versions = self.get_model_versions(display_name)
@@ -364,12 +366,11 @@ class ModelManager:
                 if "default" in aliases:
                     print(f"Removing 'default' alias from version {vinfo.version_id}")
 
-                    # Construct the versioned resource name: parent_resource_name@version_id
-                    versioned_resource_name = f"{parent_resource_name}@{vinfo.version_id}"
-                    version_model = aiplatform.Model(model_name=versioned_resource_name)
-
-                    # Now remove the alias using the real Model object
-                    version_model.remove_version_aliases(["default"])
+                    # Use ModelRegistry to remove alias from specific version
+                    model_registry.remove_version_aliases(
+                        target_aliases=["default"],
+                        version=vinfo.version_id
+                    )
 
             # ---------------------------------------------------------
             # 2. Add 'default' alias to the new target model version
@@ -378,11 +379,11 @@ class ModelManager:
 
             print(f"Setting version {version_id} as default")
 
-            # Convert the target model into a full Model resource object
-            model_version = aiplatform.Model(model_name=model.resource_name)
-
-            # Add default alias
-            model_version.add_version_aliases(["default"])
+            # Use ModelRegistry to add alias to target version
+            model_registry.add_version_aliases(
+                target_aliases=["default"],
+                version=version_id
+            )
 
             print(f"✓ Successfully set version {version_id} as default")
 
