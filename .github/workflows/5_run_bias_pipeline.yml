@@ -11,7 +11,7 @@ jobs:
   bias-pipeline:
     runs-on: ubuntu-latest
 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
 
     permissions:
       contents: write
@@ -43,7 +43,7 @@ jobs:
 
     - name: Create and merge PR with updated artifacts
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.ADMIN_PAT }}
       run: |                 
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
@@ -52,7 +52,7 @@ jobs:
         git checkout -b $BRANCH_NAME
           
         git add -A
-        git commit -m "Update model selection report and bias artifacts" || echo "No changes to commit"
+        git commit -m "Update model selection report and bias artifacts [skip ci]" || echo "No changes to commit"
         
         if git diff --cached --quiet && git diff HEAD~1 --quiet 2>/dev/null; then
           echo "No changes to commit"
