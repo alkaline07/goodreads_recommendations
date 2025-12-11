@@ -54,7 +54,7 @@ jobs:
         git checkout -b $BRANCH_NAME
           
         git add -A
-        git commit -m "Update model selection report and bias artifacts [skip ci]" || echo "No changes to commit"
+        git commit -m "Update model selection report and bias artifacts" || echo "No changes to commit"
         
         if git diff --cached --quiet && git diff HEAD~1 --quiet 2>/dev/null; then
           echo "No changes to commit"
@@ -71,7 +71,8 @@ jobs:
         
         echo "PR created: $PR_URL"
         
-        gh pr merge $PR_URL --merge --admin --delete-branch
+        gh pr review $PR_URL --approve
+        gh pr merge $PR_URL --merge --auto --delete-branch
 
     - name: Notify on success
       if: success()
