@@ -485,45 +485,48 @@ class TestModelManager:
         )
         
         assert result is False
-    
+
     @patch('src.model_manager.aiplatform.Model.list')
     @patch('src.model_manager.aiplatform.init')
     @patch('src.model_manager.mlflow.set_experiment')
     @patch('src.model_manager.mlflow.set_tracking_uri')
     @patch('src.model_manager.bigquery.Client')
     def test_set_default_version_success(self, mock_client_class, mock_mlflow_uri,
-                                        mock_mlflow_exp, mock_aiplatform_init,
-                                        mock_model_list):
+                                         mock_mlflow_exp, mock_aiplatform_init,
+                                         mock_model_list):
         """Test setting default version successfully"""
         mock_client = Mock()
         mock_client.project = "test-project"
         mock_client_class.return_value = mock_client
-        
+
         mock_old_version = Mock()
         mock_old_version.version_id = "1"
         mock_old_version.version_aliases = ["default"]
         mock_old_version.remove_version_aliases = Mock()
-        
+        # FIX: provide valid resource names
+        mock_old_version.resource_name = "projects/test/locations/us-central1/models/test-model@1"
+
         mock_new_version = Mock()
         mock_new_version.version_id = "2"
-        mock_new_version.version_aliases = []  # Empty list, not a Mock
+        mock_new_version.version_aliases = []
         mock_new_version.add_version_aliases = Mock()
-        
+        # FIX: provide valid resource names
+        mock_new_version.resource_name = "projects/test/locations/us-central1/models/test-model@2"
+
         # Create mock parent model with versioning_registry
         mock_parent_model = Mock()
         mock_versioning_registry = Mock()
         mock_versioning_registry.list_versions.return_value = [mock_new_version, mock_old_version]
         mock_parent_model.versioning_registry = mock_versioning_registry
-        
-        # Model.list() returns list of parent models
+
         mock_model_list.return_value = [mock_parent_model]
-        
+
         manager = ModelManager()
         manager.set_default_version(mock_new_version, "test-model")
-        
+
         mock_old_version.remove_version_aliases.assert_called_once_with(['default'])
         mock_new_version.add_version_aliases.assert_called_once_with(['default'])
-    
+
     @patch('src.model_manager.aiplatform.Model.list')
     @patch('src.model_manager.aiplatform.init')
     @patch('src.model_manager.mlflow.set_experiment')
