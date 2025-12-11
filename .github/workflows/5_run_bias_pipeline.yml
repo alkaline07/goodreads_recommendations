@@ -43,7 +43,7 @@ jobs:
 
     - name: Create and merge PR with updated artifacts
       env:
-        GITHUB_TOKEN: ${{ secrets.ADMIN_PAT }}
+        GH_TOKEN: ${{ secrets.ADMIN_PAT }}
       run: |                 
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
