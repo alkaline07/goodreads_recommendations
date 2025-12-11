@@ -329,30 +329,49 @@ class ModelManager:
             return False
 
     def set_default_version(
-        self,
-        model: aiplatform.Model,
-        display_name: str
+            self,
+            model: aiplatform.Model,
+            display_name: str
     ):
         """
         Set a specific model version as the default.
 
         Args:
-            model: Model object to set as default
-            display_name: Display name of the model
+            model: The Model object representing the version to set as default
+            display_name: Display name of the model in Vertex AI
         """
         try:
-            # Remove 'default' alias from all other versions
+            # Get all versions of the model
             all_versions = self.get_model_versions(display_name)
-            for version in all_versions:
-                if hasattr(version, 'version_aliases') and 'default' in version.version_aliases:
-                    print(f"Removing 'default' alias from version {version.version_id}")
-                    version.remove_version_aliases(['default'])
 
-            # Add 'default' alias to the target model
-            version_id = model.version_id if hasattr(model, 'version_id') else 'N/A'
+            # ---------------------------------------------------------
+            # 1. Remove 'default' alias from any version that has it
+            # ---------------------------------------------------------
+            for vinfo in all_versions:
+                aliases = vinfo.version_aliases or []
+
+                if "default" in aliases:
+                    print(f"Removing 'default' alias from version {vinfo.version_id}")
+
+                    # Convert VersionInfo → actual Model resource (required for alias updates)
+                    version_model = aiplatform.Model(model_name=vinfo.resource_name)
+
+                    # Now remove the alias using the real Model object
+                    version_model.remove_version_aliases(["default"])
+
+            # ---------------------------------------------------------
+            # 2. Add 'default' alias to the new target model version
+            # ---------------------------------------------------------
+            version_id = getattr(model, "version_id", None)
+
             print(f"Setting version {version_id} as default")
-            model.add_version_aliases(['default'])
-            
+
+            # Convert the target model into a full Model resource object
+            model_version = aiplatform.Model(model_name=model.resource_name)
+
+            # Add default alias
+            model_version.add_version_aliases(["default"])
+
             print(f"✓ Successfully set version {version_id} as default")
 
         except Exception as e:
