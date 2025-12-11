@@ -54,7 +54,7 @@ class GeneratePredictions:
         """
         Generate book recommendations for a given user_id using Boosted Tree model.
         """
-        logger.info(f"Generating MF predictions for {user_id} on model {model_name}")
+        logger.info(f"Generating BT predictions for {user_id} on model {model_name}")
         config = {
             "project_id": self.project_id,
             "dataset": self.dataset_id,
@@ -81,7 +81,6 @@ class GeneratePredictions:
             Dictionary with model_name and display_name
         """
         model_selection_path = "docs/bias_reports/model_selection_report.json"
-        logger.info(f"Retrieving selected model info from {model_selection_path}")
         
         default_info = {
             "model_name": "boosted_tree_regressor",
@@ -94,8 +93,6 @@ class GeneratePredictions:
             
             selected = report.get('selected_model', {})
             model_name = selected.get('model_name', 'boosted_tree_regressor')
-
-            logger.info(f"Selected model found {model_name}")
             
             return {
                 "model_name": model_name,
@@ -109,7 +106,6 @@ class GeneratePredictions:
             return default_info
     
     def get_version(self, display_name):
-        logger.info(f"Retrieving model version for {display_name}")
         try:
             models = aiplatform.Model.list(
                 filter=f'display_name="{display_name}"',
@@ -130,7 +126,6 @@ class GeneratePredictions:
                 if hasattr(v, 'version_aliases') and 'default' in v.version_aliases:
                     default_version = v
                     break
-            logger.info("Default version found", version_id=default_version.version_id if default_version else "None")
             return default_version.version_id if default_version else None
         except Exception as e:
             logger.error("Error retrieving model version", error=str(e))
@@ -186,18 +181,16 @@ class GeneratePredictions:
             relevant_models.sort(key=lambda x: x.model_id, reverse=True)
             
             latest_model_id = relevant_models[0].model_id
-            logger.info(f"Returning latest model: {latest_model_id}")
             
             return f"{self.project_id}.{self.dataset_id}.{latest_model_id}"
 
     def get_model_from_registry(self, display_name: str) -> Optional[str]:
         logger.info(f"Getting model from registry for {display_name}")
         version_id = self.get_version(display_name)
-        logger.info("Retrieved version ID {version_id}")
-        if not version_id:
-            logger.error("No version found for model", display_name=display_name)
-            return None
-        bq_model_id = self.get_bq_model_id_by_version(display_name, version_id)
+        logger.info(f"Retrieved version ID {version_id}")
+        bq_model_id = None
+        if version_id:
+            bq_model_id = self.get_bq_model_id_by_version(display_name, version_id)
         if not bq_model_id:
             logger.info("Falling back to default model registry path")
             if "matrix_factorization" in display_name:
