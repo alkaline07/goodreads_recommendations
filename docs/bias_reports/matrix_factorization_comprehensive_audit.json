@@ -1,12 +1,12 @@
 {
   "audit_metadata": {
     "model_name": "matrix_factorization",
-    "timestamp": "2025-12-11T23:07:02.625281",
+    "timestamp": "2025-12-11T23:17:26.751274",
     "predictions_table": "recommendation-system-475301.books.matrix_factorization_rating_predictions",
     "debiased_table": null
   },
   "bias_detection": {
-    "timestamp": "2025-12-11T23:07:07.096950",
+    "timestamp": "2025-12-11T23:17:30.969333",
     "total_slices_analyzed": 23,
     "disparities_found": 3,
     "high_risk_slices": 1,
