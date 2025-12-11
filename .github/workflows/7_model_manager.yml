@@ -3,6 +3,10 @@ run-name: Manage model versioning
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["6. Model Validation"]
+    types:
+      - completed
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
@@ -17,6 +21,7 @@ on:
 jobs:
   model-manager:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CALLER_GITHUB_TOKEN }}
     

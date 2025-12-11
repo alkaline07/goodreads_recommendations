@@ -34,6 +34,7 @@ root_env = Path(__file__).resolve().parents[1] / ".env"
 load_dotenv(root_env)
 print("Loaded .env from:", root_env)
 
+
 def safe_mlflow_log(func, *args, **kwargs):
     """Safely log to MLflow, continue if it fails."""
     try:
@@ -49,10 +50,10 @@ class ModelManager:
     """
 
     def __init__(
-        self,
-        project_id: Optional[str] = None,
-        vertex_region: str = "us-central1",
-        improvement_threshold: float = 0.0
+            self,
+            project_id: Optional[str] = None,
+            vertex_region: str = "us-central1",
+            improvement_threshold: float = 0.0
     ):
         """
         Initialize the rollback manager.
@@ -73,7 +74,7 @@ class ModelManager:
         self.project_id = self.bq_client.project
         self.vertex_region = vertex_region
         self.improvement_threshold = improvement_threshold
-        
+
         aiplatform.init(project=self.project_id, location=self.vertex_region)
         mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI", "file:///app/mlruns")
 
@@ -99,26 +100,26 @@ class ModelManager:
                 filter=f'display_name="{display_name}"',
                 location=self.vertex_region
             )
-            
+
             if not models:
                 print(f"No models found with display name: {display_name}")
                 return []
-            
+
             parent_model = models[0]
-            
+
             # 2. Get version history
             # These are VersionInfo objects, NOT full Model resources
             versions = parent_model.versioning_registry.list_versions()
-            
+
             print(f"Found {len(versions)} version(s) of model '{display_name}'")
-            
+
             # Debug print to help inspect attributes if needed
             for v in versions:
                 print(f"ID: {v.version_id}, Aliases: {v.version_aliases}")
 
             # 3. Sort by version_id (converted to int) to get the latest
             versions.sort(key=lambda x: int(x.version_id), reverse=True)
-            
+
             return versions
 
         except Exception as e:
@@ -126,8 +127,8 @@ class ModelManager:
             return []
 
     def get_model_metrics_from_bq(
-        self,
-        predictions_table: str
+            self,
+            predictions_table: str
     ) -> Optional[Dict[str, float]]:
         """
         Compute performance metrics from a BigQuery predictions table.
@@ -184,9 +185,9 @@ class ModelManager:
             return None
 
     def compare_models(
-        self,
-        new_metrics: Dict[str, float],
-        current_metrics: Dict[str, float]
+            self,
+            new_metrics: Dict[str, float],
+            current_metrics: Dict[str, float]
     ) -> Tuple[bool, Dict[str, float]]:
         """
         Compare new model metrics against current model metrics.
@@ -201,37 +202,37 @@ class ModelManager:
             - improvements_dict: Dictionary showing metric improvements
         """
         improvements = {}
-        
+
         # Calculate improvements (negative = worse, positive = better)
         # For RMSE and MAE, lower is better, so we invert the calculation
         improvements['rmse_improvement'] = (
-            (current_metrics['rmse'] - new_metrics['rmse']) / current_metrics['rmse'] * 100
+                (current_metrics['rmse'] - new_metrics['rmse']) / current_metrics['rmse'] * 100
         )
         improvements['mae_improvement'] = (
-            (current_metrics['mae'] - new_metrics['mae']) / current_metrics['mae'] * 100
-        )
-        
-        # For R², higher is better
-        improvements['r_squared_improvement'] = (
-            (new_metrics['r_squared'] - current_metrics['r_squared']) / 
-            max(current_metrics['r_squared'], 0.01) * 100
+                (current_metrics['mae'] - new_metrics['mae']) / current_metrics['mae'] * 100
         )
 
-        print("\n" + "="*60)
+        # For R², higher is better
+        improvements['r_squared_improvement'] = (
+                (new_metrics['r_squared'] - current_metrics['r_squared']) /
+                max(current_metrics['r_squared'], 0.01) * 100
+        )
+
+        print("\n" + "=" * 60)
         print("MODEL COMPARISON")
-        print("="*60)
+        print("=" * 60)
         print(f"Current Model RMSE: {current_metrics['rmse']:.4f}")
         print(f"New Model RMSE:     {new_metrics['rmse']:.4f}")
         print(f"RMSE Improvement:   {improvements['rmse_improvement']:+.2f}%")
-        print("-"*60)
+        print("-" * 60)
         print(f"Current Model MAE:  {current_metrics['mae']:.4f}")
         print(f"New Model MAE:      {new_metrics['mae']:.4f}")
         print(f"MAE Improvement:    {improvements['mae_improvement']:+.2f}%")
-        print("-"*60)
+        print("-" * 60)
         print(f"Current Model R²:   {current_metrics['r_squared']:.4f}")
         print(f"New Model R²:       {new_metrics['r_squared']:.4f}")
         print(f"R² Improvement:     {improvements['r_squared_improvement']:+.2f}%")
-        print("="*60)
+        print("=" * 60)
 
         # Decision logic: primary metric is RMSE
         rmse_improvement_pct = improvements['rmse_improvement'] / 100
@@ -262,33 +263,33 @@ class ModelManager:
         try:
             dataset_ref = self.bq_client.dataset(dataset_id, project=self.project_id)
             models = list(self.bq_client.list_models(dataset_ref))
-            
+
             latest_model = None
             latest_time = 0
-            
+
             for model in models:
                 if model.model_id.startswith(model_prefix):
                     model_timestamp = model.created.timestamp()
                     if model_timestamp > latest_time:
                         latest_time = model_timestamp
                         latest_model = model
-            
+
             if latest_model:
                 full_model_id = f"{self.project_id}.{dataset_id}.{latest_model.model_id}"
                 print(f"Found latest BQML model: {full_model_id}")
                 return full_model_id
-            
+
             return None
         except Exception as e:
             print(f"Error finding latest BQML model: {e}")
             return None
 
     def generate_predictions_table(
-        self,
-        bqml_model_id: str,
-        val_table: str,
-        output_table: str,
-        sample_size: int = 5000
+            self,
+            bqml_model_id: str,
+            val_table: str,
+            output_table: str,
+            sample_size: int = 5000
     ) -> bool:
         """
         Generate predictions table from a BQML model.
@@ -305,7 +306,7 @@ class ModelManager:
         print(f"\nGenerating predictions...")
         print(f"  Model: {bqml_model_id}")
         print(f"  Output: {output_table}")
-        
+
         query = f"""
         CREATE OR REPLACE TABLE `{output_table}` AS
         SELECT 
@@ -319,7 +320,7 @@ class ModelManager:
             LIMIT {sample_size}
         ))
         """
-        
+
         try:
             self.bq_client.query(query).result()
             print(f"✓ Predictions generated successfully")
@@ -348,9 +349,9 @@ class ModelManager:
             )
             if not models:
                 raise ValueError(f"No models found with display name: {display_name}")
-            
+
             parent_model = models[0]
-            
+
             # Use ModelRegistry for alias management
             model_registry = aiplatform.models.ModelRegistry(model=parent_model)
 
@@ -371,10 +372,10 @@ class ModelManager:
             raise
 
     def manage_model_rollback(
-        self,
-        display_name: str,
-        new_model_predictions_table: str,
-        current_model_predictions_table: Optional[str] = None
+            self,
+            display_name: str,
+            new_model_predictions_table: str,
+            current_model_predictions_table: Optional[str] = None
     ) -> Dict:
         """
         Main method to manage model rollback based on performance comparison.
@@ -388,9 +389,9 @@ class ModelManager:
         Returns:
             Dictionary with rollback decision and details
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print(f"MODEL ROLLBACK MANAGEMENT: {display_name}")
-        print("="*80)
+        print("=" * 80)
 
         result = {
             'display_name': display_name,
@@ -410,7 +411,7 @@ class ModelManager:
 
             # Get all model versions
             versions = self.get_model_versions(display_name)
-            
+
             if not versions:
                 print("ERROR: No model versions found. Cannot perform rollback management.")
                 result['decision'] = 'ERROR_NO_VERSIONS'
@@ -420,7 +421,7 @@ class ModelManager:
             new_model = versions[0]
             print(f"\nEvaluating NEW model version: {new_model.version_id}")
             new_metrics = self.get_model_metrics_from_bq(new_model_predictions_table)
-            
+
             if not new_metrics:
                 print("ERROR: Could not compute metrics for new model")
                 result['decision'] = 'ERROR_NEW_METRICS'
@@ -448,7 +449,7 @@ class ModelManager:
 
             # Get current default model metrics
             print(f"\nEvaluating CURRENT default version: {current_default.version_id}")
-            
+
             if current_model_predictions_table:
                 current_metrics = self.get_model_metrics_from_bq(current_model_predictions_table)
             else:
@@ -466,16 +467,20 @@ class ModelManager:
             result['current_metrics'] = current_metrics
             safe_mlflow_log(mlflow.log_metric, "current_model_rmse", current_metrics['rmse'])
             safe_mlflow_log(mlflow.log_metric, "current_model_mae", current_metrics['mae'])
-            safe_mlflow_log(mlflow.log_metric, "current_model_r_squared", current_metrics['r_squared'])
+            safe_mlflow_log(mlflow.log_metric, "current_model_r_squared",
+                            current_metrics['r_squared'])
 
             # Compare models
             should_promote, improvements = self.compare_models(new_metrics, current_metrics)
             result['improvements'] = improvements
 
             # Log improvements
-            safe_mlflow_log(mlflow.log_metric, "rmse_improvement_pct", improvements['rmse_improvement'])
-            safe_mlflow_log(mlflow.log_metric, "mae_improvement_pct", improvements['mae_improvement'])
-            safe_mlflow_log(mlflow.log_metric, "r_squared_improvement_pct", improvements['r_squared_improvement'])
+            safe_mlflow_log(mlflow.log_metric, "rmse_improvement_pct",
+                            improvements['rmse_improvement'])
+            safe_mlflow_log(mlflow.log_metric, "mae_improvement_pct",
+                            improvements['mae_improvement'])
+            safe_mlflow_log(mlflow.log_metric, "r_squared_improvement_pct",
+                            improvements['r_squared_improvement'])
 
             # Make decision
             if should_promote:
@@ -493,9 +498,9 @@ class ModelManager:
             safe_mlflow_log(mlflow.log_param, "decision", result['decision'])
             safe_mlflow_log(mlflow.log_param, "promoted_version", result['promoted_version'])
 
-            print("\n" + "="*80)
+            print("\n" + "=" * 80)
             print(f"ROLLBACK MANAGEMENT COMPLETE: {result['decision']}")
-            print("="*80)
+            print("=" * 80)
 
         return result
 
@@ -503,17 +508,17 @@ class ModelManager:
 def get_selected_model_from_report() -> Optional[Dict]:
     """
     Read the model selection report to find which model was selected.
-    
+
     Returns:
         Dictionary with model_name and predictions_table, or None if not found
     """
     import json
-    
-    report_path = os.path.join(DOCS_DIR, "model_selection_report.json")    
+
+    report_path = os.path.join(DOCS_DIR, "model_selection_report.json")
     try:
         with open(report_path, 'r') as f:
             report = json.load(f)
-        
+
         selected = report.get('selected_model')
         if selected:
             print(f"Found selected model from report: {selected['model_name']}")
@@ -526,17 +531,17 @@ def get_selected_model_from_report() -> Optional[Dict]:
         print("Will use default model (boosted_tree_regressor)")
     except Exception as e:
         print(f"Error reading model selection report: {e}")
-    
+
     return None
 
 
 def get_vertex_ai_model_name(model_name: str) -> str:
     """
     Map model name to Vertex AI registry name.
-    
+
     Args:
         model_name: Model name from selection (e.g., 'boosted_tree_regressor')
-    
+
     Returns:
         Vertex AI display name (e.g., 'goodreads_boosted_tree_regressor')
     """
@@ -545,7 +550,7 @@ def get_vertex_ai_model_name(model_name: str) -> str:
         'matrix_factorization': 'goodreads_matrix_factorization'
         # 'automl_regressor': 'goodreads_automl_regressor'
     }
-    
+
     return mapping.get(model_name, f'goodreads_{model_name}')
 
 
@@ -554,23 +559,23 @@ def main():
     Main function to run automatic rollback management.
     """
     import sys
-    
+
     # Configuration
     improvement_threshold = 0.0  # Require any improvement
-    
+
     manager = ModelManager(improvement_threshold=improvement_threshold)
     client = bigquery.Client()
     project_id = client.project
     dataset_id = "books"
-    
-    print("\n" + "="*80)
+
+    print("\n" + "=" * 80)
     print("AUTOMATIC MODEL ROLLBACK MANAGER")
-    print("="*80)
-    
+    print("=" * 80)
+
     # 1. Determine Model and Tables
     print("\nChecking which model was selected...")
     selected_info = get_selected_model_from_report()
-    
+
     if selected_info:
         model_name = selected_info['model_name']
         new_predictions_table = selected_info['predictions_table']
@@ -583,7 +588,7 @@ def main():
         print(f"Using default model: {model_name}")
 
     print(f"Processing: {model_display_name}")
-    
+
     # 2. Verify New Predictions Exist
     try:
         client.get_table(new_predictions_table)
@@ -591,32 +596,32 @@ def main():
     except Exception:
         print(f"✗ ERROR: Predictions table not found: {new_predictions_table}")
         sys.exit(1)
-    
+
     # 3. Get Model Versions
     versions = manager.get_model_versions(model_display_name)
     if not versions:
         print("✗ ERROR: No versions found.")
         sys.exit(1)
-        
+
     new_model = versions[0]
-    
+
     # Find current default
     current_default = None
     for version in versions:
         if hasattr(version, 'version_aliases') and 'default' in version.version_aliases:
             current_default = version
             break
-    
+
     # Handle First Deployment
     if not current_default:
         print("\nNo current default found. Setting new model as default (First Deployment).")
         manager.set_default_version(new_model, model_display_name)
         sys.exit(0)
-        
+
     if new_model.version_id == current_default.version_id:
         print("\nLatest version is already the default - no action needed.")
         sys.exit(0)
-        
+
     print(f"\nNew Version: {new_model.version_id}")
     print(f"Current Default: {current_default.version_id}")
 
@@ -625,7 +630,7 @@ def main():
     current_predictions_table = f"{project_id}.{dataset_id}.{model_name}_predictions_current"
     current_bqml_model = None
     artifact_uri = None
-    
+
     try:
         # A) Try Vertex AI Metadata
         parents = aiplatform.Model.list(filter=f'display_name="{model_display_name}"')
@@ -640,7 +645,7 @@ def main():
                            getattr(current_model_resource, 'artifact_uri', None)
             if not artifact_uri:
                 artifact_uri = current_model_resource.to_dict().get("artifactUri")
-                
+
             if artifact_uri:
                 print(f"  ✓ Found URI in metadata: {artifact_uri}")
 
@@ -648,18 +653,18 @@ def main():
         if not artifact_uri:
             print("  ⚠ URI missing. Attempting to find BQ model by timestamp...")
             v_create_time = current_model_resource.create_time
-            bq_prefix = f"{model_name}_model_" # e.g. boosted_tree_regressor_model_
-            
+            bq_prefix = f"{model_name}_model_"  # e.g. boosted_tree_regressor_model_
+
             # Get all BQ models
             dataset_ref = client.dataset(dataset_id, project=project_id)
             bq_models = list(client.list_models(dataset_ref))
-            
+
             best_match = None
             min_diff = float('inf')
-            
+
             # Window: 24 hours (in seconds)
-            SEARCH_WINDOW = 86400 
-            
+            SEARCH_WINDOW = 86400
+
             for bq_model in bq_models:
                 if bq_model.model_id.startswith(bq_prefix):
                     # Compare timestamps (absolute difference)
@@ -667,13 +672,13 @@ def main():
                     if diff < SEARCH_WINDOW and diff < min_diff:
                         min_diff = diff
                         best_match = bq_model.model_id
-            
+
             if best_match:
-                print(f"  ✓ Found matching BQ model (diff {min_diff/60:.1f} min): {best_match}")
+                print(f"  ✓ Found matching BQ model (diff {min_diff / 60:.1f} min): {best_match}")
                 artifact_uri = f"bq://{project_id}.{dataset_id}.{best_match}"
             else:
                 print("  ✗ No matching timestamped model found.")
-                
+
         # C) Fallback: Legacy Static Name (The New Logic)
         if not artifact_uri:
             print("  ⚠ Checking for legacy model (no timestamp)...")
@@ -681,7 +686,7 @@ def main():
             # Based on bq_model_training.py, the base is "{model_name}_model"
             legacy_name = f"{model_name}_model"
             legacy_full_id = f"{project_id}.{dataset_id}.{legacy_name}"
-            
+
             try:
                 client.get_model(legacy_full_id)
                 print(f"  ✓ Found legacy model: {legacy_full_id}")
@@ -698,22 +703,23 @@ def main():
 
     # 5. Generate Predictions OR Force Promote
     force_promote = False
-    
+
     if current_bqml_model:
         # We have a model, generate predictions
         val_table = f"{project_id}.{dataset_id}.goodreads_test_set"
-        if manager.generate_predictions_table(current_bqml_model, val_table, current_predictions_table):
+        if manager.generate_predictions_table(current_bqml_model, val_table,
+                                              current_predictions_table):
             print("✓ Generated predictions for current default.")
         else:
             print("⚠ Failed to generate predictions for current model.")
             force_promote = True
     else:
         # We LOST the current model
-        print("\n" + "!"*80)
+        print("\n" + "!" * 80)
         print("WARNING: Current default model is broken or missing!")
         print(f"  Could not locate BQ artifact for version {current_default.version_id}.")
         print("  Cannot perform comparison.")
-        print("!"*80)
+        print("!" * 80)
         force_promote = True
 
     # 6. Execution Decision
@@ -730,7 +736,7 @@ def main():
             new_model_predictions_table=new_predictions_table,
             current_model_predictions_table=current_predictions_table
         )
-        
+
         if result['decision'] in ['PROMOTED_NEW_VERSION', 'PROMOTED_FIRST_DEFAULT']:
             sys.exit(0)
         elif result['decision'] == 'ROLLBACK_KEPT_CURRENT':

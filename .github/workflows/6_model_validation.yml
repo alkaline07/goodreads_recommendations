@@ -9,13 +9,13 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    
+
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     permissions:
       contents: write
       actions: read
-
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -75,16 +75,6 @@ jobs:
     - name: Notify validation failure
       if: failure()
       run: echo "Model validation failed — stopping pipeline."
-  
-  call-model-manager:
-    needs: validate
-    if: ${{ needs.validate.result == 'success' }}
-    uses: ./.github/workflows/7_model_manager.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      CALLER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
-      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
 
   notify:
     needs: validate
