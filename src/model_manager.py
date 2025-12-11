@@ -341,6 +341,17 @@ class ModelManager:
             display_name: Display name of the model in Vertex AI
         """
         try:
+            # First, get the parent model to construct versioned resource names
+            models = aiplatform.Model.list(
+                filter=f'display_name="{display_name}"',
+                location=self.vertex_region
+            )
+            if not models:
+                raise ValueError(f"No models found with display name: {display_name}")
+            
+            parent_model = models[0]
+            parent_resource_name = parent_model.resource_name
+
             # Get all versions of the model
             all_versions = self.get_model_versions(display_name)
 
@@ -353,8 +364,9 @@ class ModelManager:
                 if "default" in aliases:
                     print(f"Removing 'default' alias from version {vinfo.version_id}")
 
-                    # Convert VersionInfo → actual Model resource (required for alias updates)
-                    version_model = aiplatform.Model(model_name=vinfo.resource_name)
+                    # Construct the versioned resource name: parent_resource_name@version_id
+                    versioned_resource_name = f"{parent_resource_name}@{vinfo.version_id}"
+                    version_model = aiplatform.Model(model_name=versioned_resource_name)
 
                     # Now remove the alias using the real Model object
                     version_model.remove_version_aliases(["default"])
