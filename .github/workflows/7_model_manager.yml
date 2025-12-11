@@ -84,25 +84,11 @@ jobs:
       if: failure()
       run: echo "Model management failed — stopping pipeline."
 
-  trigger-deployment:
-    name: Trigger Model Deployment
-    needs: model-manager
-    if: needs.model-manager.result == 'success'
-    uses: ./.github/workflows/8_model_deploy_endpoint.yml
-    with:
-      environment: prod
-      traffic_split: 100
-      dry_run: false
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-      SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
-      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-
   notify:
-    needs: [model-manager, trigger-deployment]
+    needs: [model-manager]
     if: always()
     uses: ./.github/workflows/send_email.yml
     with:
-      status: ${{ needs.trigger-deployment.result || needs.model-manager.result }}
+      status: ${{ needs.model-manager.result }}
       workflow_name: ${{ github.workflow }}  
     secrets: inherit

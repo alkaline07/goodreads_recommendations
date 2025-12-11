@@ -2,32 +2,10 @@ name: 8. Deploy Model Endpoint
 run-name: Deploy model to Vertex AI Endpoint
 
 on:
-  workflow_call:
-    inputs:
-      environment:
-        description: 'Deployment environment (dev, staging, prod)'
-        required: false
-        type: string
-        default: 'prod'
-      traffic_split:
-        description: 'Traffic percentage for the new model (0-100)'
-        required: false
-        type: number
-        default: 100
-      dry_run:
-        description: 'Perform a dry run without actual deployment'
-        required: false
-        type: boolean
-        default: false
-    secrets:
-      GCP_CREDENTIALS:
-        required: true
-      CALLER_GITHUB_TOKEN:
-        required: false
-      SMTP_EMAIL:
-        required: false
-      SMTP_PASSWORD:
-        required: false
+  workflow_run:
+    workflows: ["7. Model Manager"]
+    types:
+      - completed
 
   workflow_dispatch:
     inputs:
@@ -69,6 +47,7 @@ jobs:
   validate:
     name: Validate Deployment Requirements
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     outputs:
       model_ready: ${{ steps.check_model.outputs.ready }}
       model_display_name: ${{ steps.check_model.outputs.display_name }}
@@ -226,7 +205,7 @@ jobs:
     name: Verify Deployment Health
     needs: [validate, deploy]
     runs-on: ubuntu-latest
-    if: inputs.dry_run != true
+    if: ${{ !inputs.dry_run }}
     
     steps:
       - name: Checkout repository
