@@ -8,8 +8,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    if: github.actor != 'github-actions[bot]'
     steps:
+    - name: Skip for bot PRs
+      run: echo "Skipping tests for automated PR"
+
     - name: Checkout code
       uses: actions/checkout@v4
 
