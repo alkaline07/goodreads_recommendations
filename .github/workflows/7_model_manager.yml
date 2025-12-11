@@ -2,6 +2,7 @@ name: 7. Model Manager
 run-name: Manage model versioning
 
 on:
+  workflow_dispatch:
   workflow_call:
     secrets:
       GCP_CREDENTIALS:
