@@ -93,7 +93,10 @@ jobs:
       environment: prod
       traffic_split: 100
       dry_run: false
-    secrets: inherit
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
 
   notify:
     needs: [model-manager, trigger-deployment]
