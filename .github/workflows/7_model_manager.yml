@@ -8,7 +8,7 @@ on:
       GCP_CREDENTIALS:
         required: true
       CALLER_GITHUB_TOKEN:
-        required: true
+        required: false
       SMTP_EMAIL:
         required: true
       SMTP_PASSWORD:
