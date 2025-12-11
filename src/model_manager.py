@@ -341,7 +341,7 @@ class ModelManager:
             display_name: Display name of the model in Vertex AI
         """
         try:
-            # First, get the parent model to use with ModelRegistry
+            # Get the parent model to use with ModelRegistry
             models = aiplatform.Model.list(
                 filter=f'display_name="{display_name}"',
                 location=self.vertex_region
@@ -354,32 +354,14 @@ class ModelManager:
             # Use ModelRegistry for alias management
             model_registry = aiplatform.models.ModelRegistry(model=parent_model)
 
-            # Get all versions of the model
-            all_versions = self.get_model_versions(display_name)
-
-            # ---------------------------------------------------------
-            # 1. Remove 'default' alias from any version that has it
-            # ---------------------------------------------------------
-            for vinfo in all_versions:
-                aliases = vinfo.version_aliases or []
-
-                if "default" in aliases:
-                    print(f"Removing 'default' alias from version {vinfo.version_id}")
-
-                    # Use ModelRegistry to remove alias from specific version
-                    model_registry.remove_version_aliases(
-                        target_aliases=["default"],
-                        version=vinfo.version_id
-                    )
-
-            # ---------------------------------------------------------
-            # 2. Add 'default' alias to the new target model version
-            # ---------------------------------------------------------
+            # Get target version ID
             version_id = getattr(model, "version_id", None)
 
             print(f"Setting version {version_id} as default")
 
-            # Use ModelRegistry to add alias to target version
+            # Add 'default' alias to the target version.
+            # Vertex AI automatically transfers the alias from the old version -
+            # you cannot explicitly remove the 'default' alias, only reassign it.
             model_registry.add_version_aliases(
                 target_aliases=["default"],
                 version=version_id
