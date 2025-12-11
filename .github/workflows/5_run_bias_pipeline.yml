@@ -71,7 +71,8 @@ jobs:
         
         echo "PR created: $PR_URL"
         
-        gh pr merge $PR_URL --merge --admin --delete-branch
+        gh pr merge $PR_URL --merge --auto --delete-branch
+        echo "Auto-merge enabled. PR will merge once test check passes."
 
     - name: Notify on success
       if: success()
