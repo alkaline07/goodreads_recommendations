@@ -8,34 +8,27 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    if: github.actor != 'github-actions[bot]'
     steps:
     - name: Skip for bot PRs
-      if: github.actor == 'github-actions[bot]'
       run: echo "Skipping tests for automated PR"
 
     - name: Checkout code
-      if: github.actor != 'github-actions[bot]'
       uses: actions/checkout@v4
 
     - name: Set up Python
-      if: github.actor != 'github-actions[bot]'
       uses: actions/setup-python@v5
       with:
         python-version: 3.11
 
     - name: Install dependencies
-      if: github.actor != 'github-actions[bot]'
       run: pip install -r model_requirements.txt
 
     - name: Install dev/test dependencies
-      if: github.actor != 'github-actions[bot]'
       run: pip install pytest pytest-cov seaborn
 
     - name: Install project as package
-      if: github.actor != 'github-actions[bot]'
       run: pip install -e .
 
     - name: Run Tests
-      if: github.actor != 'github-actions[bot]'
       run: pytest ./tests -vv --disable-warnings
